@@ -1,0 +1,380 @@
+{
+  "_meta": {
+    "researched": "2026-08-12",
+    "verification_policy": "Schema fields (params, enums, defaults) were read directly from the fal.ai API pages for each endpoint and are HIGH confidence. Prompt-craft rules for Veo come from Google's own DeepMind prompt guide and the Google Cloud 'Ultimate prompting guide for Veo 3.1'. Prompt-craft rules for Seedance come from ByteDance-derived third-party guides (BytePlus ModelArk hosts the official guide but its Seedance 1.0 page was not directly retrievable in this pass); those are marked MEDIUM confidence inline. Anything not verifiable is stated as unverified rather than invented.",
+    "critical_finding_seedance": "BOTH `fal-ai/bytedance/seedance/v1/lite/*` endpoints are marked DEPRECATED on fal and are redirected server-side to Seedance 1.0 Pro Fast, with pricing changed accordingly. The lite API pages still advertise a `resolution` enum of 480p/720p/1080p, but ByteDance's own positioning for the Lite tier is 480p/720p, and fal's own launch messaging for Lite was '720p 5 second videos'. There is NO 4K anywhere on any of these fal endpoints; the highest value in any schema is 1080p. Treat 720p as the safe practical ceiling for the lite ids and do not promise 1080p or 4K to a user.",
+    "fps_note": "Neither fal nor the retrieved Google/ByteDance pages state an output fps for these endpoints in the material read here. Veo is widely reported as 24fps and Seedance as 24fps, but this was NOT confirmed from a primary source in this pass. Do not surface an fps number to users as fact."
+  },
+
+  "fal-ai/veo3/fast": {
+    "family": "veo",
+    "modality": "text-to-video",
+    "strengths": [
+      "Native synchronized audio: dialogue, sound effects and ambience are generated with the picture, no separate audio pass",
+      "Best-in-class prompt adherence for cinematography language (shot size, lens, camera move, lighting) because Google documents that exact vocabulary",
+      "Handles multi-shot sequences inside one generation via timestamp prompting ([00:00-00:02] ... [00:02-00:04] ...)",
+      "Photoreal humans and lip-synced speech",
+      "Tolerates and rewards long, dense paragraph prompts; more detail equals more control per Google's guide"
+    ],
+    "weaknesses": [
+      "Only 16:9 and 9:16 on this endpoint, no square or 4:3",
+      "Max 8s per generation",
+      "Will burn on-screen subtitles/captions if dialogue is phrased ambiguously",
+      "Negative prompts work poorly when phrased as negations; Google explicitly says to describe the desired absence positively",
+      "Expensive relative to Seedance, so it is the wrong tool for bulk concepting"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [40, 120],
+    "structure_template": "[Cinematography: shot size + camera move + lens] , [Subject: specific physical description] , [Action: single continuous verb phrase] , [Context: location and background detail] . [Style and ambiance: film stock / genre / lighting / color] . [Audio block: dialogue, SFX:, Ambient noise:]",
+    "structure_source_note": "Google Cloud's official formula is [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]. DeepMind's guide lists seven components: shot framing and motion, style, lighting, character description, location, action, dialogue.",
+    "motion_vocabulary": [
+      "dolly shot",
+      "dolly in",
+      "dolly out",
+      "tracking shot",
+      "crane shot",
+      "aerial view",
+      "slow pan",
+      "POV shot",
+      "static shot",
+      "handheld",
+      "wide shot",
+      "medium shot",
+      "close-up",
+      "extreme close-up",
+      "low angle",
+      "high angle",
+      "two-shot",
+      "shallow depth of field",
+      "deep focus",
+      "wide-angle lens",
+      "macro lens",
+      "soft focus"
+    ],
+    "audio_prompting": "Veo 3 generates native audio. Documented syntax from Google Cloud's Veo 3.1 guide: dialogue as `A woman says, \"We have to leave now.\"` (attribute the line to a named subject, keep it short enough to speak inside the clip duration); sound effects on their own labeled clause as `SFX: thunder cracks in the distance`; ambience as `Ambient noise: the quiet hum of a starship bridge`. Google does NOT document a subtitle-avoidance mechanism. The widely reported community fix, NOT in Google docs, is to attribute speech with a colon and avoid bare quoted text floating without a speaker, and to put `subtitles, captions, on-screen text, watermark` in `negative_prompt`. Treat the negative_prompt route as the reliable one since it is a real API field. Set generate_audio=false when audio is not wanted; that also removes the subtitle risk entirely and is cheaper.",
+    "do": [
+      "Write ONE paragraph, present tense, describing one continuous unbroken action; the model gets 8 seconds",
+      "Open the paragraph with the camera (shot size + move), because the documented formula puts cinematography first",
+      "Describe people concretely: 'a woman in her twenties with wavy brown hair and light freckles', never 'a person'",
+      "Name the lighting and the film look explicitly (harsh fluorescents, green monitor glow, slightly grainy 1980s color film)",
+      "Put audio in its own trailing clauses using the SFX: and Ambient noise: labels",
+      "Use timestamp prompting ([00:00-00:02] ...) only when the user genuinely wants a cut sequence, not for a single shot",
+      "Keep total dialogue under roughly 12 to 15 spoken words for an 8s clip so the line finishes",
+      "Use negative_prompt for exclusions that must be guaranteed (text, watermark, subtitles, extra limbs)"
+    ],
+    "dont": [
+      "Do not phrase exclusions as negations inside the main prompt; Google says write 'a desolate landscape with no buildings or roads' rather than 'no man-made structures', and put hard exclusions in negative_prompt instead",
+      "Do not stack multiple unrelated camera moves in one 8s shot",
+      "Do not write bullet lists or key:value blocks; the model was documented and demoed on prose",
+      "Do not request 4:3, 1:1 or 21:9 on this endpoint; only 16:9 and 9:16 exist",
+      "Do not ask for on-screen titles or logos and then complain about text artifacts",
+      "Do not write dialogue longer than the clip can speak"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "fal schema: duration enum '4s' | '6s' | '8s', default '8s'. resolution enum '720p' | '1080p', default '720p'. aspect_ratio enum '16:9' | '9:16', default '16:9'. Output fps is not stated on the fal page and was not confirmed from a primary source.",
+    "key_params": {
+      "prompt": "The paragraph prompt. Required.",
+      "aspect_ratio": "'16:9' or '9:16' only, default '16:9'. Use 9:16 for shorts.",
+      "duration": "'4s' | '6s' | '8s', default '8s'. Use '4s' for cheap concepting; cost scales with duration.",
+      "resolution": "'720p' | '1080p', default '720p'. Keep 720p for concepting, 1080p only for the final pick.",
+      "generate_audio": "boolean, default true. Setting false is cheaper and eliminates burned-in subtitle risk. Turn it OFF for silent b-roll.",
+      "negative_prompt": "Free text exclusions. Best field for 'subtitles, captions, text overlay, watermark'.",
+      "seed": "integer. Fix it to make prompt edits comparable A/B instead of a new roll of the dice.",
+      "auto_fix": "boolean, default true. Rewrites prompts that fail validation. Leave true for user-facing casual input; set false when you need to know your exact prompt was used.",
+      "safety_tolerance": "'1' through '6', default '4'. Higher is more permissive."
+    },
+    "cheap_concepting_settings": {
+      "duration": "4s",
+      "resolution": "720p",
+      "generate_audio": false,
+      "aspect_ratio": "16:9",
+      "auto_fix": true
+    },
+    "worked_example": {
+      "user_idea": "a guy realizing his startup dashboard finally has users",
+      "optimized_prompt": "Slow dolly in on a medium shot, a founder in his early thirties with a three-day beard and a faded grey hoodie, leaning toward a laptop and slowly breaking into a disbelieving grin as a live user counter climbs on screen, in a small dark apartment office at 2am with takeout containers and a whiteboard behind him. Lit only by the cold blue laptop glow and a warm desk lamp, shallow depth of field, muted modern cinematic color, slight film grain. He says, \"They're actually using it.\" SFX: soft keyboard clicks, a single notification chime. Ambient noise: quiet street traffic through a closed window."
+    },
+    "sources": [
+      "https://fal.ai/models/fal-ai/veo3/fast/api",
+      "https://deepmind.google/models/veo/prompt-guide/",
+      "https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-veo-3-1"
+    ]
+  },
+
+  "fal-ai/veo3/fast/image-to-video": {
+    "family": "veo",
+    "modality": "image-to-video",
+    "strengths": [
+      "Preserves the supplied start frame's subject, product and branding when the prompt describes motion only",
+      "Native audio still available, so a product still can become a clip with ambience and a voice line in one call",
+      "Same documented cinematography vocabulary as the text-to-video endpoint",
+      "aspect_ratio 'auto' derives framing from the image, avoiding a forced crop"
+    ],
+    "weaknesses": [
+      "Non-conforming input images are cropped to fit the chosen aspect ratio, so an off-ratio product shot can lose edges",
+      "Only 16:9 and 9:16 (plus auto); no square, which hurts e-commerce assets",
+      "Re-describing the subject's appearance in the prompt causes drift away from the attached image",
+      "Max 8s"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [25, 70],
+    "structure_template": "[Camera move on the existing frame] . [What moves and how, in the scene already shown] . [Lighting or atmosphere change over the clip] . [Optional audio block: SFX: / Ambient noise: / dialogue]",
+    "motion_vocabulary": [
+      "slow dolly in",
+      "slow dolly out",
+      "slow push in",
+      "orbit around the subject",
+      "slow pan left",
+      "slow pan right",
+      "tilt up",
+      "tilt down",
+      "handheld drift",
+      "static shot, subject moves",
+      "rack focus",
+      "parallax as the camera moves"
+    ],
+    "audio_prompting": "Same as fal-ai/veo3/fast: native audio, `Character says, \"...\"` for dialogue, `SFX: ...` for effects, `Ambient noise: ...` for room tone. For product shots, set generate_audio=false unless a sound is wanted; it is cheaper and removes any subtitle-burn risk. Google documents no subtitle-suppression syntax; use negative_prompt with 'subtitles, captions, text overlay, watermark'.",
+    "do": [
+      "Describe MOTION and CAMERA only. The model already sees the image.",
+      "Refer to the subject generically ('the bottle', 'the woman', 'the product') so the attached image supplies the appearance",
+      "Name one continuous camera move plus at most one subject action",
+      "Describe changes over time (light shifting, steam rising, fabric settling) rather than static facts",
+      "Use aspect_ratio 'auto' unless the delivery format demands otherwise",
+      "Supply a 720p-or-better image in 16:9 or 9:16 to avoid an automatic crop",
+      "Put 'no text, no watermark, no subtitles' style exclusions in negative_prompt, not in the prompt body"
+    ],
+    "dont": [
+      "Do not re-describe colors, logos, labels, materials or the subject's face; every appearance adjective is an invitation to redraw and drift",
+      "Do not introduce new objects or a new location that is not in the frame",
+      "Do not ask for a hard cut or a scene change from a single start frame",
+      "Do not force a mismatched aspect_ratio on an off-ratio product image; it will be cropped",
+      "Do not ask for a camera move so large it must invent the back of the product"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "image_url is used as the first frame and the generation animates forward from it. fal notes the image should ideally be 720p or higher in 16:9 or 9:16; non-conforming images are cropped to fit the selected aspect ratio. aspect_ratio defaults to 'auto', which follows the image.",
+    "reference_image_prompt_rules": [
+      "Prompt = verbs, not adjectives. Motion, camera, time-based change.",
+      "Use definite articles for what is already visible ('the can', 'the model') instead of describing it",
+      "One camera move + one subject motion is the reliable ceiling for 8 seconds",
+      "If the product must stay pristine, add 'the product remains unchanged and in focus' and put 'deformation, morphing, label distortion, extra text' in negative_prompt",
+      "Prefer slow moves (slow push in, gentle orbit) over fast ones; fast moves force the model to hallucinate unseen geometry"
+    ],
+    "duration_and_fps": "fal schema: duration enum '4s' | '6s' | '8s', default '8s'. resolution enum '720p' | '1080p', default '720p'. aspect_ratio enum 'auto' | '16:9' | '9:16', default 'auto'. Output fps not stated on the fal page.",
+    "key_params": {
+      "prompt": "Motion-only description. Required.",
+      "image_url": "Start frame, URL or base64 data URI. Required. 720p+ in 16:9 or 9:16 recommended by fal.",
+      "aspect_ratio": "'auto' | '16:9' | '9:16', default 'auto'. Leave auto to avoid cropping the source.",
+      "duration": "'4s' | '6s' | '8s', default '8s'.",
+      "resolution": "'720p' | '1080p', default '720p'.",
+      "generate_audio": "boolean, default true. Set false for silent product b-roll; cheaper and no subtitle risk.",
+      "negative_prompt": "Exclusions. Use for label distortion, morphing, text and watermarks.",
+      "seed": "integer, fix for A/B comparisons.",
+      "auto_fix": "boolean, default true; rewrites failing prompts.",
+      "safety_tolerance": "'1'-'6', default '4'."
+    },
+    "cheap_concepting_settings": {
+      "duration": "4s",
+      "resolution": "720p",
+      "generate_audio": false,
+      "aspect_ratio": "auto"
+    },
+    "worked_example": {
+      "user_idea": "make my sneaker photo feel premium and cinematic",
+      "optimized_prompt": "Slow dolly in on the sneaker, holding it centered and in sharp focus while the background falls softly out of focus. Fine dust motes drift through the light. The key light slowly sweeps across the surface from left to right, revealing texture and a soft specular highlight. The shoe itself stays completely still and unchanged. Subtle handheld micro-movement, cinematic, shallow depth of field."
+    },
+    "sources": [
+      "https://fal.ai/models/fal-ai/veo3/fast/image-to-video/api",
+      "https://deepmind.google/models/veo/prompt-guide/",
+      "https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-veo-3-1"
+    ]
+  },
+
+  "fal-ai/bytedance/seedance/v1/lite/text-to-video": {
+    "family": "seedance",
+    "modality": "text-to-video",
+    "deprecated": true,
+    "deprecation_note": "fal marks this endpoint deprecated; requests are redirected to Seedance 1.0 Pro Fast and priced accordingly. The id still resolves, so it is safe to call, but do not build UI copy around 'lite' pricing or 'lite' quality.",
+    "strengths": [
+      "Cheapest fast concepting of the four; the reason to use it at all",
+      "Widest aspect ratio support of any endpoint here: 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, 9:21",
+      "Longest single clip: up to 12 seconds",
+      "Explicit camera_fixed boolean, a hard lock on camera motion that Veo has no equivalent for",
+      "Strong prompt adherence and stable camera control; handles stylized looks (photoreal, cyberpunk, illustration, felt texture)",
+      "Can cut between shots inside one generation using an explicit lens-switch construction"
+    ],
+    "weaknesses": [
+      "NO audio. Silent output. Any sound must be added downstream.",
+      "Practical resolution ceiling is 720p for the lite tier. The schema exposes 1080p and fal advertises 480p/720p/1080p, but ByteDance positions Lite at 480p/720p and fal's own launch messaging was 720p. There is no 4K on this endpoint under any setting.",
+      "Less reliable at photoreal human faces and hands than Veo",
+      "Prompt-craft guidance is not published by ByteDance in an easily retrievable English primary source, so the formula below is derived from ByteDance-based third-party guides (MEDIUM confidence)",
+      "Vague motion words like 'dynamic camera' or 'handheld' destabilize the shot"
+    ],
+    "prompt_style": "comma-clause",
+    "ideal_length_words": [25, 70],
+    "structure_template": "[Subject with concrete appearance, clothing, posture] , [Movement: one continuous action] , [Scene: location and environmental detail] , [Camera: one named move or 'static camera'] , [Style: medium, era, color, lighting]",
+    "structure_source_note": "The formula 'subject + movement + scene + camera, style' is the widely circulated ByteDance/Seedance formula. MEDIUM confidence: derived from ByteDance-based third-party prompt guides, not read from a primary ByteDance page in this pass.",
+    "motion_vocabulary": [
+      "static camera",
+      "the camera follows the subject",
+      "camera slowly pushes in",
+      "camera pulls back",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "tracking shot",
+      "orbit around the subject",
+      "aerial shot",
+      "low angle",
+      "close-up",
+      "wide shot",
+      "lens switch to (to force a cut to a second shot)"
+    ],
+    "audio_prompting": null,
+    "do": [
+      "Follow subject + movement + scene + camera, style, as comma-separated clauses",
+      "Be concrete about the subject: appearance, clothing, posture",
+      "Give the environment sensory detail (mountains, desert, cluttered studio, wet asphalt)",
+      "Name exactly one camera behavior, or say 'static camera' and set camera_fixed=true",
+      "Set camera_fixed=true whenever stability matters more than drama; it is the single highest-leverage param on this model",
+      "Use 4:3, 1:1 or 21:9 here when the format is needed, since Veo cannot do them",
+      "Use 480p and 5s for the first pass, then re-roll the winner at 720p with the same seed"
+    ],
+    "dont": [
+      "Do not write audio, dialogue, sound effects or music into the prompt; the model produces no audio and the words only waste conditioning",
+      "Do not use 'handheld', 'dynamic camera', 'chaotic camera' unless instability is the goal",
+      "Do not promise the user 1080p or 4K from this endpoint",
+      "Do not write a Veo-style long cinematic paragraph; keep it clause-based and tight",
+      "Do not stack more than one camera move unless deliberately using the lens-switch multi-shot construction",
+      "Do not rely on it for close-up photoreal faces or readable on-screen text"
+    ],
+    "negative_prompt_supported": false,
+    "negative_prompt_note": "No negative_prompt field exists in this endpoint's fal schema. Exclusions must be handled by positive description (describe the empty version of the scene) or by re-rolling with a different seed.",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "fal schema: duration enum 2 through 12 seconds (integers), default 5. resolution enum '480p' | '720p' | '1080p', default '720p' (see deprecation and resolution caveats above; 720p is the safe ceiling). aspect_ratio enum '21:9' | '16:9' | '4:3' | '1:1' | '3:4' | '9:16' | '9:21', default '16:9'. num_frames, when supplied, overrides duration. Output fps is not stated on the fal page.",
+    "key_params": {
+      "prompt": "Clause-structured prompt. Required.",
+      "resolution": "'480p' | '720p' | '1080p', default '720p'. Use 480p for concepting. Do not advertise 1080p as guaranteed on the lite id.",
+      "duration": "2 to 12 seconds, default 5. Cost scales with duration and resolution.",
+      "aspect_ratio": "Seven options including 21:9, 4:3, 1:1, 9:21. This is the endpoint to route to when a non-16:9/9:16 ratio is requested.",
+      "camera_fixed": "boolean. true locks the camera. Best single control for product, UI and talking-subject shots.",
+      "seed": "integer, -1 for random. Fix it to iterate on wording instead of luck.",
+      "num_frames": "integer. Overrides duration when provided. Leave unset unless you need exact frame counts for an edit.",
+      "enable_safety_checker": "boolean, default true. Cannot be disabled without authorization."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "camera_fixed": false,
+      "seed": -1
+    },
+    "worked_example": {
+      "user_idea": "a cool shot of a coffee shop in the rain",
+      "optimized_prompt": "A lone barista in a black apron wiping down a steel espresso machine, steam curling upward from the group head, inside a small warm-lit corner cafe at night with rain streaking down the front window and neon reflections on wet asphalt outside, camera slowly pushes in from the doorway, cinematic photorealistic, moody amber and teal, shallow depth of field"
+    },
+    "sources": [
+      "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/text-to-video/api",
+      "https://fal.ai/models/fal-ai/bytedance/seedance/v1/pro/fast/text-to-video/api",
+      "https://replicate.com/bytedance/seedance-1-lite",
+      "https://akool.com/blog-posts/seedance-1-0-video-prompt-guide"
+    ]
+  },
+
+  "fal-ai/bytedance/seedance/v1/lite/image-to-video": {
+    "family": "seedance",
+    "modality": "image-to-video",
+    "deprecated": true,
+    "deprecation_note": "fal marks this endpoint deprecated and redirects to Seedance 1.0 Pro Fast, with pricing changed accordingly. The id still resolves.",
+    "strengths": [
+      "Cheapest way to animate a still, which makes it the default for bulk product/asset motion",
+      "camera_fixed=true gives a genuinely locked-off shot, ideal for keeping a product still and undistorted",
+      "aspect_ratio 'auto' follows the source image",
+      "Up to 12 seconds from one frame, longer than Veo's 8s",
+      "Preserves the start frame well when the prompt is motion-only"
+    ],
+    "weaknesses": [
+      "No audio at all",
+      "No negative_prompt field, so unwanted artifacts can only be fixed by rewording or re-seeding",
+      "end_image_url exists in the schema but fal documents it as deprecated and ignored, so no first-frame-to-last-frame interpolation here",
+      "Practical 720p ceiling for the lite tier; no 4K",
+      "Describing the subject's appearance causes drift away from the attached image"
+    ],
+    "prompt_style": "comma-clause",
+    "ideal_length_words": [12, 45],
+    "structure_template": "[What moves and how] , [camera behavior or 'the camera stays still'] , [optional atmosphere change over time]",
+    "motion_vocabulary": [
+      "the camera follows the subject",
+      "the camera stays still",
+      "camera slowly pushes in",
+      "camera pulls back slowly",
+      "slow pan left",
+      "slow pan right",
+      "tilt up",
+      "orbit slowly around the subject",
+      "gentle parallax",
+      "subject turns toward camera",
+      "steam rises",
+      "light sweeps across the surface"
+    ],
+    "audio_prompting": null,
+    "do": [
+      "Describe only what MOVES; the model can see the image and does not need static description",
+      "Keep it short, one or two clauses; long prompts here fight the start frame",
+      "Set camera_fixed=true for product, packshot and UI animation so the frame stays locked and the product stays undistorted",
+      "Use 'auto' aspect_ratio so the source image is not cropped",
+      "Reference the subject with a definite article ('the bottle', 'the dog') rather than describing it",
+      "Iterate with a fixed seed and change one motion clause at a time"
+    ],
+    "dont": [
+      "Do not describe colors, logos, text, materials or faces present in the image; that is the main cause of a product being redrawn",
+      "Do not add objects, characters or locations that are not in the frame",
+      "Do not request audio or dialogue; there is none",
+      "Do not expect end_image_url to work; fal documents it as accepted but ignored",
+      "Do not use fast or complex camera moves on a product still; the model must invent unseen geometry"
+    ],
+    "negative_prompt_supported": false,
+    "negative_prompt_note": "No negative_prompt field in this endpoint's fal schema. Control artifacts via camera_fixed=true, shorter prompts, and seed re-rolls.",
+    "reference_image_behavior": "image_url (URL or base64 data URI) is the first frame; the video animates forward from it. aspect_ratio defaults to 'auto', following the image. end_image_url is present in the schema but deprecated and ignored, so last-frame targeting is not available.",
+    "reference_image_prompt_rules": [
+      "Motion verbs only, zero appearance adjectives, so an attached product image survives unchanged",
+      "Say what the camera does explicitly, or set camera_fixed=true and say 'the camera stays still'",
+      "One movement per clip; a still frame cannot support a choreographed sequence",
+      "Prefer environmental motion (steam, dust, light sweep, fabric settling, reflections) over subject deformation when the subject must stay pristine",
+      "Keep the prompt under about 45 words; longer prompts start overriding the frame"
+    ],
+    "duration_and_fps": "fal schema: duration enum 2 through 12 seconds, default 5. resolution enum '480p' | '720p' | '1080p', default '720p' (720p is the safe practical ceiling for the lite tier; no 4K). aspect_ratio enum '21:9' | '16:9' | '4:3' | '1:1' | '3:4' | '9:16' | 'auto', default 'auto'. num_frames overrides duration when provided. Output fps not stated on the fal page.",
+    "key_params": {
+      "prompt": "Motion-only description. Required.",
+      "image_url": "Start frame, URL or base64 data URI. Required.",
+      "resolution": "'480p' | '720p' | '1080p', default '720p'. 480p for concepting.",
+      "duration": "2 to 12 seconds, default 5.",
+      "aspect_ratio": "Includes 'auto' (default), which follows the source image. Use auto to avoid cropping a product shot.",
+      "camera_fixed": "boolean. true for a locked-off camera. The key control for preserving an attached product image.",
+      "seed": "integer, -1 for random. Fix it to iterate on motion wording.",
+      "num_frames": "integer, overrides duration.",
+      "enable_safety_checker": "boolean, default true.",
+      "end_image_url": "Deprecated per fal: accepted but ignored. Do not use."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": 5,
+      "aspect_ratio": "auto",
+      "camera_fixed": true,
+      "seed": -1
+    },
+    "worked_example": {
+      "user_idea": "animate this photo of my candle product so it looks alive",
+      "optimized_prompt": "The flame flickers gently and wax catches the light, a thin ribbon of smoke drifts upward, soft warm light slowly shifts across the surface, the camera stays still, subtle shallow depth of field"
+    },
+    "sources": [
+      "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/image-to-video/api",
+      "https://fal.ai/models/fal-ai/bytedance/seedance/v1/pro/fast/text-to-video/api",
+      "https://replicate.com/bytedance/seedance-1-lite",
+      "https://akool.com/blog-posts/seedance-1-0-video-prompt-guide"
+    ]
+  }
+}

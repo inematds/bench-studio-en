@@ -1,0 +1,249 @@
+{
+  "_meta": {
+    "provider": "agnes",
+    "why_this_file": "registry.json e REGENERADO por `npm run registry` a partir dos schemas OpenAPI do fal. Modelos que nao sao do fal nao tem OpenAPI e seriam apagados a cada rebuild, entao moram aqui e sao mesclados no load do server.",
+    "source": "params escritos a mao a partir de ~70 chamadas medidas: ~/projetos/videos-agnes/README.md e ~/projetos/agnes-nei/NOTAS-API.md",
+    "gateway": "https://apihub.agnes-ai.com (litellm sobre one-api)",
+    "cost": "US$ 0 — sem creditos, sem cobranca"
+  },
+  "models": [
+    {
+      "id": "agnes/agnes-image-2.1-flash",
+      "provider": "agnes",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Agnes Image 2.1 flash",
+      "vendor": "Agnes AI",
+      "tier": "free",
+      "pair": "agnes/agnes-image-2.1-flash/edit",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Tamanho em PIXELS EXPLICITOS. Medido: `ratio` e ignorado em img2img (pedir 1K+16:9 com referencia devolve 1024x1024), entao o pixel exato e o unico controle confiavel. 1K sai em ~32s; 4K leva ~150s, falha muito e nao serve como referencia depois (teto de 10 MB por imagem de entrada).",
+          "default": "1312x736",
+          "enum": [
+            "1312x736",
+            "736x1312",
+            "1024x1024",
+            "1456x816",
+            "816x1456",
+            "1248x832",
+            "832x1248"
+          ]
+        }
+      }
+    },
+    {
+      "id": "agnes/agnes-image-2.1-flash/edit",
+      "provider": "agnes",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Agnes Image 2.1 edit",
+      "vendor": "Agnes AI",
+      "tier": "free",
+      "category": "image-editing",
+      "thumbnail": null,
+      "image_input": {
+        "name": "image",
+        "arity": "multiple",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "array",
+          "title": "Referencias",
+          "description": "Ate 2 referencias (URL publica ou data URI base64). MEDIDO: 2 e o teto util — 5 destroem a saida (confete de pixels) e o prompt passa a ser ignorado. Preserva estilo e composicao; com 1 ref a identidade do personagem NAO trava (o rosto muda), com 2 melhora muito.",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "limits": {
+            "max_items": 2
+          }
+        }
+      ],
+      "accepts_image": "multiple",
+      "image_param": "image",
+      "required": [
+        "prompt",
+        "image"
+      ],
+      "params": {
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Pixels explicitos. Em img2img o `ratio` e ignorado — sem isto a saida volta 1024x1024 independente do que foi pedido.",
+          "default": "1312x736",
+          "enum": [
+            "1312x736",
+            "736x1312",
+            "1024x1024",
+            "1456x816",
+            "816x1456",
+            "1248x832",
+            "832x1248"
+          ]
+        }
+      }
+    },
+    {
+      "id": "agnes/agnes-video-v2.0",
+      "provider": "agnes",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Agnes Video 2.0",
+      "vendor": "Agnes AI",
+      "tier": "free",
+      "pair": "agnes/agnes-video-v2.0/i2v",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Duracoes que caem EXATAMENTE na regra 8n+1 @24fps, sem arredondamento silencioso: 3.375s=81f, 5.042s=121f, 7.042s=169f, 10.042s=241f, 13.375s=321f, 18.375s=441f (o teto). Ponto doce medido: ~3.4s — esticar para 18s e onde o morph desmorona.",
+          "default": "3.375",
+          "enum": [
+            "3.375",
+            "5.042",
+            "7.042",
+            "10.042",
+            "13.375",
+            "18.375"
+          ]
+        },
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Pixels explicitos. AVISO MEDIDO: o `size` da resposta mente — pede 1312x736 e entrega 1280x704. Medir com ffprobe se o enquadramento importar.",
+          "default": "1312x736",
+          "enum": [
+            "1312x736",
+            "736x1312",
+            "1024x1024"
+          ]
+        },
+        "seed": {
+          "name": "seed",
+          "type": "integer",
+          "title": "Seed",
+          "description": "Existe no video (na imagem NAO existe)."
+        },
+        "negative_prompt": {
+          "name": "negative_prompt",
+          "type": "string",
+          "title": "Negative prompt",
+          "description": "Existe no video (na imagem nao)."
+        }
+      }
+    },
+    {
+      "id": "agnes/agnes-video-v2.0/i2v",
+      "provider": "agnes",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Agnes Video 2.0 (keyframes)",
+      "vendor": "Agnes AI",
+      "tier": "free",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "image_input": {
+        "name": "image",
+        "arity": "multiple",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "array",
+          "title": "Keyframes",
+          "description": "1 imagem = video de imagem unica (o parametro `mode` e OMITIDO; medido contra a API viva em 2026-08-16 — a doc antiga falava em `ti2vid`, que hoje devolve 400). 2 imagens = modo `keyframes` A->B, que interpola de verdade e mantem o personagem consistente no movimento. Base64 funciona (a doc afirma exigir URL publica — medido como falso).",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "limits": {
+            "max_items": 2
+          }
+        }
+      ],
+      "accepts_image": "multiple",
+      "image_param": "image",
+      "required": [
+        "prompt",
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Duracoes que caem EXATAMENTE na regra 8n+1 @24fps, sem arredondamento silencioso: 3.375s=81f, 5.042s=121f, 7.042s=169f, 10.042s=241f, 13.375s=321f, 18.375s=441f (o teto). Ponto doce medido: ~3.4s — esticar para 18s e onde o morph desmorona.",
+          "default": "3.375",
+          "enum": [
+            "3.375",
+            "5.042",
+            "7.042",
+            "10.042",
+            "13.375",
+            "18.375"
+          ]
+        },
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Pixels explicitos. O `size` da resposta mente — medir com ffprobe.",
+          "default": "1312x736",
+          "enum": [
+            "1312x736",
+            "736x1312",
+            "1024x1024"
+          ]
+        },
+        "seed": {
+          "name": "seed",
+          "type": "integer",
+          "title": "Seed",
+          "description": "Existe no video."
+        },
+        "negative_prompt": {
+          "name": "negative_prompt",
+          "type": "string",
+          "title": "Negative prompt",
+          "description": "Existe no video."
+        }
+      }
+    }
+  ]
+}

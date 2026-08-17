@@ -1,0 +1,144 @@
+{
+  "_meta": {
+    "provider": "kie",
+    "gateway": "https://api.kie.ai — createTask + polling em recordInfo",
+    "auth": "Bearer KIE_API_KEY (~/projetos/wifi/.env)",
+    "cobranca": "PAGO, em CREDITOS. Nao ha API de preco por modelo, entao o orcamento sai de tabela offline (rotulada como estimada) e o consumo real e medido pelo delta de saldo em /api/v1/chat/credit.",
+    "verificado_2026_08_16": "GET /api/v1/jobs/recordInfo responde 200; GET /api/v1/jobs/getTask responde 404. O call site em ~/projetos/timesmkt/media/image-generator.js usa getTask e esta desatualizado.",
+    "referencias": "NAO aceita data URI nem caminho local — so URL publica. O upload do proprio Bench devolve URL publica do storage do fal, entao o caminho normal da UI funciona.",
+    "aspect_ratio": "usa aspect_ratio, nunca pixels",
+    "modelos_nao_registrados": "O kie.ai tem muito mais modelos (Veo 3.1, Sora 2, Kling, Wan, Flux, Suno). So entraram aqui os ja usados e com preco conhecido nos projetos do usuario. Adicionar outro = uma entrada aqui + preco em PRICE no kie.mjs."
+  },
+  "models": [
+    {
+      "id": "kie/z-image",
+      "provider": "kie",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Z-Image (kie)",
+      "vendor": "Alibaba",
+      "tier": "cheapest",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": ["prompt"],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect ratio",
+          "description": "O kie.ai trabalha com proporcao, nao com pixels.",
+          "default": "16:9",
+          "enum": ["1:1", "4:3", "3:4", "16:9", "9:16"]
+        }
+      }
+    },
+    {
+      "id": "kie/nano-banana-pro",
+      "provider": "kie",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Nano Banana Pro (kie)",
+      "vendor": "Google",
+      "pair": "kie/nano-banana-pro/edit",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": ["prompt"],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect ratio",
+          "description": "Proporcao, nao pixels.",
+          "default": "16:9",
+          "enum": ["1:1", "4:3", "3:4", "16:9", "9:16"]
+        }
+      }
+    },
+    {
+      "id": "kie/nano-banana-pro/edit",
+      "provider": "kie",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Nano Banana Pro edit (kie)",
+      "vendor": "Google",
+      "category": "image-editing",
+      "thumbnail": null,
+      "image_input": { "name": "image_urls", "arity": "multiple", "required": true },
+      "image_inputs": ["image_urls"],
+      "media_inputs": [
+        {
+          "name": "image_urls",
+          "type": "array",
+          "title": "Referencias",
+          "description": "Ate 2 referencias. PRECISA ser URL publica — o kie.ai nao aceita data URI nem caminho local (nota de campo medida). O anexo enviado pela UI do Bench vira URL publica no storage do fal, entao funciona.",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "limits": { "max_items": 2 }
+        }
+      ],
+      "accepts_image": "multiple",
+      "image_param": "image_urls",
+      "required": ["prompt", "image_urls"],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect ratio",
+          "description": "Proporcao, nao pixels.",
+          "default": "16:9",
+          "enum": ["1:1", "4:3", "3:4", "16:9", "9:16"]
+        }
+      }
+    },
+    {
+      "id": "kie/veo3_fast",
+      "provider": "kie",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Veo 3 fast (kie)",
+      "vendor": "Google",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "image_input": { "name": "image_urls", "arity": "single", "required": false },
+      "image_inputs": ["image_urls"],
+      "media_inputs": [
+        {
+          "name": "image_urls",
+          "type": "array",
+          "title": "Frame inicial",
+          "description": "Um frame de partida, como URL publica. Sem referencia, roda como text-to-video.",
+          "modality": "image",
+          "role": "start-frame",
+          "arity": "multiple",
+          "required": false,
+          "limits": { "max_items": 1 }
+        }
+      ],
+      "accepts_image": "multiple",
+      "image_param": "image_urls",
+      "required": ["prompt"],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect ratio",
+          "description": "Proporcao, nao pixels.",
+          "default": "16:9",
+          "enum": ["16:9", "9:16"]
+        }
+      }
+    }
+  ]
+}

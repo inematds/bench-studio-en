@@ -1,0 +1,343 @@
+{
+  "bytedance/seedream/v5/pro/text-to-image": {
+    "family": "seedream",
+    "modality": "text-to-image",
+    "strengths": [
+      "Deep-thinking / reasoning pass before generation: it evaluates spatial relations, physics plausibility and lighting consistency, so dense multi-object scenes hold together",
+      "Precise control over dense layouts and structured design (magazine covers, posters, packaging, UI-like compositions)",
+      "Native in-image text in 14 languages, reliable when the exact copy is quoted",
+      "Photoreal commercial and editorial imagery, strong studio lighting control",
+      "Native output up to 2048x2048 with aspect ratios from 1:16 to 16:1",
+      "Responds to layered, clause-separated prompts where each clause is treated as a directive"
+    ],
+    "weaknesses": [
+      "No dedicated negative_prompt field on the fal endpoint; exclusions must be written into the prompt text",
+      "Attention scatters on very long prompts. ByteDance guidance warns past ~600 English words clauses start dropping out",
+      "Long strings of in-image copy garble; only short quoted copy is dependable",
+      "Skin tends to over-smooth into a plastic look unless imperfections are requested explicitly",
+      "No seed parameter exposed on this fal endpoint, so exact reproducibility is not available",
+      "Prompt words cannot raise the 2048x2048 ceiling; resolution is a parameter, not a prompt instruction"
+    ],
+    "prompt_style": "Write a layered English paragraph of comma-separated directive clauses in a fixed order, not a keyword soup. Each clause is read as an instruction, so order and specificity decide the output. Lead with the artifact and format, then the subject with concrete physical detail, then composition and framing, then a single coherent lighting setup, then any in-image text as an exact quoted string with a stated placement, then the style and finish. Keep it under about 200 words for clean concepting and never past 600 English words; contradictions inside a long prompt hurt more than missing detail. Name colors with a HEX code plus its plain name (#FF006E hot pink) when brand accuracy matters. Use explicit directional language for placement (on the left, in the foreground, behind the subject) rather than vague spatial words. Ask for camera imperfections (sensor noise, slight handheld softness, natural skin texture) when you want photoreal rather than glossy. Put exclusions at the end as a short concrete list, phrased positively wherever you can.",
+    "ideal_length_words": [60, 180],
+    "structure_template": "[artifact + format + aspect, e.g. 'editorial magazine cover, 3:4 portrait'], [subject with concrete physical/wardrobe detail], [composition and framing], [one lighting setup: direction, quality, color temperature], text reads \"[EXACT COPY]\" [placement], [style / finish / material quality]. Avoid: [short concrete exclusion list].",
+    "do": [
+      "Order clauses format > subject > composition > lighting > in-image text > style",
+      "Quote every piece of in-image text exactly and state where it sits in the frame",
+      "Keep in-image copy short: a headline, a brand name, a couple of cover lines, not paragraphs",
+      "Give one lighting direction only; multi-directional lighting requests muddy the render",
+      "Pair HEX codes with color names for brand-accurate palettes",
+      "Request realism artifacts (grain, sensor noise, pore-level skin texture) for photoreal work",
+      "Set aspect ratio through image_size or width/height, matching the actual deliverable",
+      "Append exclusions as a short 'Avoid:' clause since there is no negative prompt field",
+      "One action per subject; describe the end state you want rather than a process"
+    ],
+    "dont": [
+      "Do not keyword-spam or stack generic quality adjectives (masterpiece, 8k, ultra detailed)",
+      "Do not exceed roughly 600 English words; hard input ceiling is about 3000 characters",
+      "Do not pass a negative_prompt field, it is not in the fal schema for this endpoint",
+      "Do not ask for a resolution in prose expecting it to beat the 2048x2048 cap",
+      "Do not specify contradictory lighting or two competing style anchors",
+      "Do not put long paragraphs of copy in-image and expect legibility",
+      "Do not ask for flawless perfect skin if you want it to read as a real photograph"
+    ],
+    "negative_prompt_supported": false,
+    "bilingual_notes": "fal's model card states native text rendering in 14 languages, so non-Latin in-image text including Chinese is a supported capability rather than an afterthought. Prompt instructions themselves are conventionally written in English on fal and the published examples are English. No primary source verifies that writing the instruction in Chinese improves Chinese glyph fidelity, so the safe pattern is an English instruction containing the exact target-language string in quotes, plus a stated script (for example: the sign reads \"开业大吉\" in simplified Chinese characters).",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Strong for short in-image text and a documented headline feature (native text in 14 languages, dense structured layouts). Reliability depends entirely on prompting form: put the exact string inside quotation marks, state its placement and role (masthead, sticker, neon sign, label), and keep it short. Garbled text is the known failure mode and the documented fixes are quoting the exact string, shortening the copy, and specifying placement. Do not request many separate text elements in one pass if legibility matters.",
+    "key_params": {
+      "prompt": "The whole instruction. Layered clauses, under ~200 words for concepting.",
+      "image_size": "Preset or {width,height}. Total pixels must sit between 1024x1024 and 2048x2048; aspect 1:16 to 16:1. Default auto_2K. Use auto_1K for cheap concepting since fal prices <=1536x1536 lower than 1536-2048.",
+      "width": "Only used with a custom size object; ignored when a preset is given.",
+      "height": "Only used with a custom size object; ignored when a preset is given.",
+      "num_images": "1 to 6 generations from the same prompt. 2 to 4 is a good concepting spread.",
+      "output_format": "jpeg or png. jpeg default and smaller, use png only when you need lossless text edges.",
+      "sync_mode": "true returns a data URI inline and skips request history. Leave false for batch work.",
+      "enable_safety_checker": "Content moderation on inputs and outputs. Leave true."
+    },
+    "cheap_concepting_settings": {
+      "image_size": "auto_1K",
+      "num_images": 4,
+      "output_format": "jpeg",
+      "sync_mode": false,
+      "enable_safety_checker": true
+    },
+    "worked_example": {
+      "user_idea": "a cool poster for my hot sauce brand called Ember",
+      "optimized_prompt": "Product poster, 4:5 portrait, printed-matte finish. A single glass hot sauce bottle with a deep red fill and a matte black cap stands centered on a raw concrete block, chili flakes and two whole dried chilies scattered at its base. Tight three-quarter product framing, bottle occupying the lower two thirds, generous negative space above. Single hard key light from the upper right throwing a long dramatic shadow to the left, warm 3200K, deep falloff into shadow. The label reads \"EMBER\" in bold condensed uppercase, and a smaller line beneath reads \"SMOKED HABANERO\". Palette #C1381F ember red against charcoal grey concrete, real photographic grain, slight lens vignette. Avoid: glossy 3D render look, floating text, extra bottles, watermark."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedream/v5/pro/text-to-image",
+      "https://fal.ai/models/bytedance/seedream/v5/pro/text-to-image",
+      "https://runware.ai/docs/models/bytedance-seedream-5-0-pro/guides/prompting",
+      "https://blog.fal.ai/seedream-5-0-lite-prompting-guide/",
+      "https://www.atlascloud.ai/blog/guides/seedream-5-pro-prompt-guide"
+    ]
+  },
+  "bytedance/seedream/v5/pro/edit": {
+    "family": "seedream",
+    "modality": "image-to-image",
+    "strengths": [
+      "Accepts up to 10 reference images, far more than most edit endpoints, so multi-product and multi-asset composites work in one pass",
+      "Multi-image fusion: compose separate assets into one still while holding each one's appearance from its own source",
+      "Reasoning pass makes relighting and re-staging physically coherent (shadow direction, contact shadows, reflections)",
+      "Identity and product-shape preservation is good when the unchanged elements are pinned explicitly",
+      "Same dense-layout and multilingual text strength as the text-to-image sibling, usable for label and packaging edits",
+      "image_size becomes optional when references are supplied; it can inherit the reference framing"
+    ],
+    "weaknesses": [
+      "No negative_prompt field; exclusions live in the prompt text",
+      "No seed parameter, so an edit cannot be reproduced exactly",
+      "Anything not explicitly pinned is fair game to drift, including label typography, backdrop and camera angle",
+      "Referring to images by index alone is unreliable; content-based reference is required",
+      "Lifestyle reference photos degrade product identity lock compared with clean packshots",
+      "Long copy on a product label can re-render garbled even when the source label was crisp"
+    ],
+    "prompt_style": "Write an instruction that names the end state, not a process, and splits cleanly into two halves. First half: the one change you want, stated concretely. Second half: an explicit preservation clause listing everything that must stay byte-identical. Address every reference image by its visible content (\"the tan leather-bound journal\", \"the matte black bottle with the red label\"), never by index number alone, because index addressing drifts. When the job is 'keep this product exactly and change the world around it', spend most of the prompt on the preservation clause: the exact label text, typography, logo, colors, materials, proportions, and camera angle. Keep the whole instruction tight, well under 200 words. Add a short 'Avoid:' list at the end in place of a negative prompt.",
+    "ideal_length_words": [40, 140],
+    "structure_template": "[the single change, stated as the finished result]. Use [reference described by its visible content] as the [role]. Keep the [product/subject] exactly as in the reference: identical label text \"[EXACT COPY]\", identical typography, logo, colors, materials and proportions, identical camera angle and product silhouette. [new environment / lighting / staging]. Avoid: [short concrete exclusion list].",
+    "do": [
+      "State the desired end state, never 'improve this' or 'make it better'",
+      "Always include an explicit preservation clause naming what must not change",
+      "Address references by their visible content, not 'the first image'",
+      "Supply clean white-background packshots for product identity lock rather than lifestyle shots",
+      "Restate the product's exact label text inside quotation marks so the model re-renders it rather than inventing it",
+      "Pin camera angle, silhouette and backdrop explicitly when only lighting should change",
+      "Do one change per request; chain requests instead of stacking three edits into one prompt",
+      "Feed at most the references you actually need, ordered most-important first"
+    ],
+    "dont": [
+      "Do not say 'the first reference' or 'Figure 2' as the only identifier",
+      "Do not assume unmentioned attributes are protected; unpinned means editable",
+      "Do not send more than 10 images; only the last 10 are used",
+      "Do not pass a negative_prompt field, it is not in the schema",
+      "Do not request a redesign of the label while also demanding the label be unchanged",
+      "Do not use a busy lifestyle photo as the identity reference for a product"
+    ],
+    "negative_prompt_supported": false,
+    "bilingual_notes": "Same 14-language native text capability as the text-to-image endpoint. For editing a product whose label carries Chinese characters, restate the exact characters in quotes and name the script, since an unquoted label is far more likely to be re-rendered as approximate glyph shapes. No primary source confirms that a Chinese-language instruction outperforms an English one here.",
+    "reference_image_behavior": "image_urls takes an array of reference image URLs. Up to 10 are supported; if more are sent only the last 10 are used. References supply subject identity, product appearance, style and scene material simultaneously, and fal's own example prompt is a swap phrased as 'Replace the product in Figure 1 with that in Figure 2', so positional phrasing is understood but content-based phrasing is more reliable. When references are provided, image_size is optional and framing can follow the reference.",
+    "reference_image_prompt_rules": [
+      "Name the product by its visible traits so the model binds to the right reference image",
+      "Write an explicit lock sentence: 'Keep the product exactly as in the reference: identical shape, identical label, identical colors, identical materials'",
+      "Restate the label copy verbatim inside quotation marks, including capitalization, so the text is reproduced rather than reinvented",
+      "Name the typography explicitly (for example: the same bold condensed uppercase wordmark, same small serif subline) so fonts do not drift",
+      "Name the exact brand colors, ideally with HEX plus color name, so the palette does not shift",
+      "Pin camera angle, product silhouette and scale when only the background or lighting should change",
+      "Say 'do not redesign, restyle, re-letter or re-typeset the label' outright",
+      "Prefer a clean white-background packshot as the identity reference",
+      "Limit the request to one change so the model has no reason to touch the product"
+    ],
+    "text_rendering_quality": "Good for short strings, and quoting is what makes it work. In edits the risk is different from generation: existing label copy can be silently re-lettered. Counter it by restating the exact string in quotes, naming the typographic style, and forbidding re-typesetting. Keep any newly added text short and give it a placement.",
+    "key_params": {
+      "prompt": "The edit instruction. Change clause plus preservation clause.",
+      "image_urls": "Array of reference image URLs, up to 10. Order most-important first; only the last 10 are used if more are sent.",
+      "image_size": "Optional when references are given. Presets or {width,height}, 1024x1024 to 2048x2048, aspect 1:16 to 16:1.",
+      "num_images": "1 to 6 variants. 2 to 4 for concepting.",
+      "output_format": "jpeg default, png when you need lossless label edges.",
+      "sync_mode": "true returns a data URI inline, skips request history.",
+      "enable_safety_checker": "Leave true."
+    },
+    "cheap_concepting_settings": {
+      "image_size": "auto_1K",
+      "num_images": 3,
+      "output_format": "jpeg",
+      "sync_mode": false,
+      "enable_safety_checker": true
+    },
+    "worked_example": {
+      "user_idea": "put my hot sauce bottle on a rustic kitchen counter, keep the bottle exactly the same",
+      "optimized_prompt": "Place the tall glass hot sauce bottle with the deep red fill and matte black cap on a worn butcher-block kitchen counter beside a wooden cutting board and two fresh chilies, soft morning window light from the left with a natural contact shadow under the bottle. Keep the bottle exactly as in the reference: identical silhouette, identical glass and cap materials, identical label artwork and colors, label text reads \"EMBER\" in the same bold condensed uppercase with \"SMOKED HABANERO\" in the same small serif beneath, same brand red. Do not redesign, re-letter or re-typeset the label, and do not change the bottle's proportions or the camera angle. Avoid: extra bottles, floating text, glossy 3D render look, watermark."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedream/v5/pro/edit",
+      "https://fal.ai/models/bytedance/seedream/v5/pro/text-to-image",
+      "https://runware.ai/docs/models/bytedance-seedream-5-0-pro/guides/prompting",
+      "https://blog.fal.ai/seedream-5-0-lite-prompting-guide/",
+      "https://www.atlascloud.ai/blog/guides/seedream-5-pro-prompt-guide"
+    ]
+  },
+  "alibaba/qwen-image-3/text-to-image": {
+    "family": "qwen",
+    "modality": "text-to-image",
+    "strengths": [
+      "Best-in-class in-image text rendering, and version 3 extends it: reported native rendering across 12 languages, 20+ font options, and text staying legible down to roughly 10 pixels",
+      "Very long instruction window, reported around 4,500 tokens (about 4.5x Qwen-Image 2.0's ~1,000), so layout, palette, exact copy and style constraints can coexist in one pass",
+      "Built for typography-heavy and layout-sensitive artifacts: posters, infographics, comparison grids, newspaper pages, UI mockups, packaging",
+      "Genuinely bilingual: the fal schema states the prompt supports Chinese and English",
+      "Real negative_prompt support, unlike the Seedream endpoints",
+      "Seed parameter exposed, so results can be locked and iterated deterministically"
+    ],
+    "weaknesses": [
+      "prompt_expansion is on by default and will silently rewrite a carefully engineered prompt; leave it on only for one-liners",
+      "Negative prompt capped at 500 characters, prompt at 5000 characters",
+      "Alibaba's own docs note the family works best in Simplified Chinese and English; other languages are rendered as glyphs more than understood as instructions",
+      "Photorealism and cinematic look are not its headline strength compared with its typography and layout control",
+      "Short one-line prompts underuse the architecture and give generic results",
+      "Max output 2048x2048"
+    ],
+    "prompt_style": "Treat it as a design brief, not an image caption. This model was built to reward long structured prompts, so a 150 to 300 word brief beats a one-liner. Work in four moves. First name the artifact concretely (bilingual product infographic, A2 concert poster, three-column newspaper front page). Second define the layout hierarchy explicitly: title zone, panels, sidebar, captions, logo placement, and where each sits in the frame. Third specify every piece of copy as an exact quoted string with its language, relative size and weight, and say what must stay legible at normal viewing size. Fourth add the visual constraints: composition, palette (HEX plus names), materials, lighting, font mood, and style. Then use negative_prompt for the actual exclusions rather than writing them into the prompt, since this endpoint has a real negative field. Set enable_prompt_expansion to false whenever you have written a detailed brief, and set a seed once you like a result.",
+    "ideal_length_words": [120, 320],
+    "structure_template": "[artifact type and format]. Layout: [zone-by-zone hierarchy with placements]. Copy: title reads \"[EXACT]\" in [language, size, weight]; subhead reads \"[EXACT]\"; [labels/captions] read \"[EXACT]\". Typography: [font mood and hierarchy]. Palette: [#HEX name, #HEX name]. Visual: [composition, materials, lighting, style]. All text must be crisp and legible at normal viewing size. || negative_prompt: [exclusions]",
+    "do": [
+      "Write a long structured brief, 150 to 300 words, and use the token budget",
+      "Name the artifact type first so the model picks the right layout grammar",
+      "Declare the layout zone by zone before describing style",
+      "Quote every string of in-image copy exactly, including capitalization and punctuation",
+      "State the language of each text block when the design is bilingual",
+      "Give explicit type hierarchy (largest title, medium subhead, small captions)",
+      "Say text must remain crisp and legible at normal viewing size",
+      "Set enable_prompt_expansion to false for any detailed brief",
+      "Put exclusions in negative_prompt, not in the prompt body",
+      "Lock a seed once a composition works, then vary one clause at a time"
+    ],
+    "dont": [
+      "Do not write a one-line prompt for a layout or typography job",
+      "Do not leave prompt expansion on when you have already engineered the prompt",
+      "Do not exceed 5000 prompt characters or 500 negative_prompt characters",
+      "Do not describe copy indirectly ('a title about coffee'); give the literal string",
+      "Do not mix more than two languages of in-image copy in one pass without declaring each",
+      "Do not rely on it as your photoreal-cinematic engine when typography is not the point",
+      "Do not restate negatives inside the prompt body, it competes with negative_prompt"
+    ],
+    "negative_prompt_supported": true,
+    "bilingual_notes": "The fal schema states outright that the prompt supports Chinese and English, and Alibaba Model Studio documents the Qwen-Image family as working best in Simplified Chinese and English. Chinese glyph rendering has been the family's standout since 1.0 and version 3 is reported to extend native rendering to 12 languages with 20+ fonts. Practical rule: write the instruction in whichever of Chinese or English you are more precise in, and always paste the in-image copy in its target script inside quotes rather than describing it or expecting translation. For bilingual layouts, declare each block's language and its relative size, since the two scripts have very different visual density. Reported multilingual coverage beyond Chinese/English (Japanese, Korean, Spanish) comes from launch coverage rather than a primary spec sheet, so treat those as likely rather than guaranteed.",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "The reason to pick this model. Version 3 is reported to render text natively in 12 languages with 20+ font options and to hold legibility down to about 10 pixels, generated as image pixels rather than composited afterward. It is the strongest text renderer of the four endpoints in this profile. To get it: quote exact strings, declare language per block, state a type hierarchy, name a font mood rather than a specific licensed typeface, place each text block in a named layout zone, and add an explicit legibility requirement. Verified as a capability claim from launch coverage and reflected in the model's positioning; the 10px and 12-language figures are reported, not from a primary Alibaba spec page.",
+    "key_params": {
+      "prompt": "Up to 5000 characters, Chinese or English. Long structured brief.",
+      "negative_prompt": "Up to 500 characters. Real exclusion field; use it instead of in-prompt negatives.",
+      "image_size": "Preset or {width,height}. 512x512 to 2048x2048 total pixels. Default square_hd. Use a ~1K size for cheap concepting since fal prices 1K at $0.04 vs 2K at $0.075.",
+      "enable_prompt_expansion": "LLM rewrites your prompt. Default true. Set false for engineered briefs, true only for one-liners.",
+      "seed": "0 to 2147483647. Lock it to iterate deterministically.",
+      "num_images": "1 to 4.",
+      "output_format": "png default (best for crisp text edges), jpeg or webp for cheaper transport.",
+      "sync_mode": "true returns a data URI inline, skips request history.",
+      "enable_safety_checker": "Moderation on input and output. Leave true."
+    },
+    "cheap_concepting_settings": {
+      "image_size": "square_hd",
+      "num_images": 4,
+      "enable_prompt_expansion": false,
+      "output_format": "jpeg",
+      "sync_mode": false,
+      "enable_safety_checker": true
+    },
+    "worked_example": {
+      "user_idea": "a poster for my hot sauce brand Ember, bilingual English and Chinese",
+      "optimized_prompt": "Bilingual product poster, 4:5 portrait, print-quality matte finish. Layout: top sixth is a title band on a charcoal field; the middle half is a centered hero product shot; a narrow right sidebar carries three stacked feature labels; the bottom eighth is a footer strip with the brand mark on the left and a web address on the right. Copy: the title reads \"EMBER\" in very large bold condensed uppercase Latin, with \"焰辣\" directly beneath it in large bold simplified Chinese at roughly half the title height; the subhead reads \"SMOKED HABANERO HOT SAUCE\"; the three sidebar labels read \"SLOW SMOKED\", \"NO FILLERS\", \"SMALL BATCH\" in small uppercase; the footer reads \"emberhotsauce.com\". Typography: one condensed grotesque family, three clear weights, tight tracking on the title, generous leading in the sidebar. Palette: #C1381F ember red, #1A1A18 charcoal, #F2EDE4 bone white. Visual: a single tall glass bottle of deep red sauce with a matte black cap, centered, single hard key light from the upper right, long dramatic shadow, real photographic grain, subtle paper texture over the whole poster. All text must be crisp and perfectly legible at normal viewing size, correctly spelled in both scripts."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=alibaba/qwen-image-3/text-to-image",
+      "https://fal.ai/models/alibaba/qwen-image-3/text-to-image",
+      "https://runware.ai/docs/models/alibaba-qwen-image-3-0/guides",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-image",
+      "https://www.alibabacloud.com/help/en/model-studio/image-model",
+      "https://huggingface.co/Qwen/Qwen-Image"
+    ]
+  },
+  "alibaba/qwen-image-3/edit": {
+    "family": "qwen",
+    "modality": "image-to-image",
+    "strengths": [
+      "Instruction-based editing that preserves key details including facial features and identity while applying the requested change",
+      "Documented edit categories: text modification (content, color, material, styling), object add/delete/reposition, pose and clothing changes, style transfer, detail enhancement",
+      "The strongest text editor of the four endpoints: it can change the words on an existing label or sign and keep them legible",
+      "Real negative_prompt field plus a seed, so edits are steerable and reproducible",
+      "Accepts 1 to 3 reference images, enough for product-into-scene and two-product staging",
+      "Long instruction window means the preservation clause can be exhaustive without crowding out the edit"
+    ],
+    "weaknesses": [
+      "Only 1 to 3 reference images, versus 10 on Seedream 5 edit, so large multi-asset composites are out of reach",
+      "Output pixel budget is lower than the text-to-image sibling: 512x512 to 1440x1440",
+      "prompt_expansion defaults on and can rewrite a precise edit instruction into something looser",
+      "Alibaba documents that the model numbers images by their order in the input array, so array order is load-bearing and reordering changes meaning",
+      "Best results limited to Simplified Chinese and English instructions",
+      "Input images must be 384 to 2048 px and under 10 MB"
+    ],
+    "prompt_style": "Write one instruction that names the finished result, then an exhaustive preservation clause. Because Alibaba documents that images are numbered by their order in the input array, reference them positionally (Image 1, Image 2) AND describe them by visible content, so the binding is unambiguous either way. Do exactly one edit per call and chain calls for compound changes. For a 'keep the product exactly, change the world' job, spend the majority of the instruction listing what is frozen: label text quoted verbatim, typography, logo, brand colors with HEX, materials, proportions, camera angle. Put exclusions in negative_prompt rather than the body. Turn enable_prompt_expansion off so your preservation language survives verbatim, and set a seed once an edit lands so you can iterate one clause at a time.",
+    "ideal_length_words": [50, 180],
+    "structure_template": "In Image 1, [the single change stated as the finished result], using [Image 2 described by visible content] as [role]. Keep everything else unchanged: identical [subject/product] shape, materials and proportions; the label text still reads exactly \"[EXACT COPY]\" in the same typeface, weight and spacing; identical logo and brand colors [#HEX name]; identical camera angle and framing. || negative_prompt: [exclusions]",
+    "do": [
+      "Reference images both by array position and by visible content",
+      "Keep the input array order stable across iterations; order is semantic here",
+      "State the end state, not 'enhance' or 'make it nicer'",
+      "Write an explicit freeze list for everything that must not change",
+      "Quote existing label or sign copy verbatim so it is preserved rather than re-lettered",
+      "Set enable_prompt_expansion to false so the instruction is not rewritten",
+      "Use negative_prompt for exclusions",
+      "Set a seed once an edit works, then change one clause at a time",
+      "Send clean, well-lit references at 384 to 2048 px, under 10 MB",
+      "Chain single edits rather than requesting three changes at once"
+    ],
+    "dont": [
+      "Do not send more than 3 reference images; the endpoint requires 1 to 3",
+      "Do not shuffle the image array between runs and expect the same meaning",
+      "Do not leave prompt expansion on for a precision edit",
+      "Do not exceed 500 characters of negative_prompt or 5000 of prompt",
+      "Do not assume unmentioned attributes are protected; unpinned means editable",
+      "Do not ask for a new label design and an unchanged label in the same prompt",
+      "Do not write the instruction in a language other than Simplified Chinese or English"
+    ],
+    "negative_prompt_supported": true,
+    "bilingual_notes": "Prompt supports Chinese and English per the fal schema, and Alibaba's Qwen-Image-Edit guide states the model works best with Simplified Chinese and English. This is the endpoint to use when a label or sign carries Chinese characters that must survive an edit, or when you need to change Chinese copy on an existing asset, since text modification is a first-class documented edit type. Always paste the target characters verbatim in quotes; describing them in English risks re-rendering approximate glyphs.",
+    "reference_image_behavior": "image_urls takes 1 to 3 reference images (required). Each must be 384 to 2048 px, under 10 MB, JPEG/JPG/PNG/WEBP. Alibaba's guide states the model numbers images by their order in the input array and that the prompt should reference them by that position, so array order carries meaning. References supply subject identity, product appearance and scene material; the model is documented to preserve key details such as facial features and identity while applying the requested change.",
+    "reference_image_prompt_rules": [
+      "Say 'In Image 1' plus a content description of that image, so position and content agree",
+      "Write an explicit freeze list: shape, proportions, materials, finish, logo, colors, camera angle",
+      "Quote the product's label copy verbatim, including capitalization and line breaks, so it is preserved not reinvented",
+      "Name the typography of the label (weight, case, condensed vs regular, serif vs sans) so lettering does not drift",
+      "Give brand colors as HEX plus color names so the palette holds",
+      "State plainly: do not redesign, re-letter, re-typeset or re-scale the label",
+      "Restrict the request to one change so the product has no reason to move",
+      "Add label-drift terms to negative_prompt (misspelled text, garbled text, altered logo, different font)",
+      "Keep the identity reference a clean packshot at adequate resolution rather than a low-res crop"
+    ],
+    "text_rendering_quality": "The best of the four for text that must survive or change inside an existing image. Text modification (content, color, material, styling) is a documented first-class edit type for this family, and version 3 is reported to hold legibility down to roughly 10 pixels across 12 languages. To preserve existing copy, quote it verbatim and forbid re-typesetting. To change copy, quote both the old string and the exact new string and say the typeface, weight, spacing and placement stay identical.",
+    "key_params": {
+      "prompt": "Up to 5000 characters, Chinese or English. Change clause plus freeze list.",
+      "image_urls": "Required array of 1 to 3 reference images. Order is semantic (Image 1, Image 2...). 384-2048 px, under 10 MB, jpeg/jpg/png/webp.",
+      "negative_prompt": "Up to 500 characters. Put drift terms here (garbled text, altered logo, different font).",
+      "image_size": "Preset or {width,height}. Total pixels 512x512 to 1440x1440. Defaults to auto.",
+      "enable_prompt_expansion": "Default true; set false for precision edits so the freeze list survives.",
+      "seed": "0 to 2147483647. Lock it to iterate one clause at a time.",
+      "num_images": "1 to 4 variants.",
+      "output_format": "png default, best for crisp label edges; jpeg for cheap batches.",
+      "sync_mode": "true returns a data URI inline, skips request history.",
+      "enable_safety_checker": "Leave true."
+    },
+    "cheap_concepting_settings": {
+      "image_size": "square_hd",
+      "num_images": 3,
+      "enable_prompt_expansion": false,
+      "output_format": "jpeg",
+      "sync_mode": false,
+      "enable_safety_checker": true
+    },
+    "worked_example": {
+      "user_idea": "take my product photo and put it on a rustic kitchen counter, don't change the bottle or the label at all",
+      "optimized_prompt": "In Image 1, the tall glass hot sauce bottle with deep red sauce and a matte black cap, place that exact bottle on a worn butcher-block kitchen counter beside a wooden cutting board and two fresh red chilies, with soft morning window light coming from the left and a natural contact shadow under the base. Keep the bottle completely unchanged: identical silhouette, proportions, glass clarity, sauce color and matte cap finish; the label still reads exactly \"EMBER\" in the same bold condensed uppercase with \"SMOKED HABANERO\" in the same small serif beneath; identical logo, identical brand red #C1381F; identical camera angle and product scale. Do not redesign, re-letter, re-typeset or re-scale the label. Change nothing about the product itself, only the surrounding scene and lighting."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=alibaba/qwen-image-3/edit",
+      "https://fal.ai/models/alibaba/qwen-image-3/text-to-image",
+      "https://www.alibabacloud.com/help/en/model-studio/qwen-image-edit-guide",
+      "https://www.alibabacloud.com/help/en/model-studio/qwen-image-edit-api",
+      "https://runware.ai/docs/models/alibaba-qwen-image-3-0/guides"
+    ]
+  },
+  "_meta": {
+    "compiled": "2026-08-12",
+    "verification_notes": [
+      "All parameters, ranges, defaults and reference-image counts are taken directly from the live fal OpenAPI schemas for the four endpoints, which is the authoritative source for what the API accepts.",
+      "Seedream 5.0 capability claims (deep-thinking prompt understanding, native text in 14 languages, dense structured layout control) come from fal's own model card.",
+      "Seedream 5.0 prompting mechanics (layered clause order, ~600 English word soft ceiling, quote in-image text, address references by content not index, prefer white-background packshots, pin what must not change, no negative-prompt field) come from Runware's Seedream 5.0 Pro docs, fal's own Seedream 5.0 prompting blog, and Atlas Cloud's guide. These are platform documentation rather than a ByteDance primary spec sheet; the underlying ByteDance guidance is cited by those pages but I could not reach a ByteDance-hosted English prompt spec directly.",
+      "Qwen-Image 3.0 headline numbers (roughly 4,500-token instruction window vs ~1,000 for 2.0, native rendering in 12 languages, 20+ fonts, text legible down to about 10 px) are consistently reported by launch coverage of the 21 July 2026 release. Alibaba Cloud Model Studio's public English docs still document the qwen-image-2.0 series, so these version-3 figures are REPORTED, not confirmed from a primary Alibaba spec page. Treat them as directionally reliable rather than exact.",
+      "The claim that Qwen-Image is unusually strong at in-image text rendering DOES still hold for version 3, and version 3 extends it (small-text legibility and multilingual coverage are the headline features of the release rather than an unchanged carryover).",
+      "Qwen edit behaviors (1-3 images, array order is semantic, text modification as a first-class edit type, best in Simplified Chinese and English, negative_prompt and prompt_extend semantics) come from Alibaba Cloud Model Studio's own Qwen-Image-Edit guide and text-to-image docs, which are primary but written against the 2.x model IDs; the fal schema for qwen-image-3/edit matches them on image count and language support.",
+      "No generation endpoint was called. No pricing, latency or quality benchmark in this file was measured firsthand; the fal per-image prices quoted in key_params come from the fal model pages."
+    ]
+  }
+}

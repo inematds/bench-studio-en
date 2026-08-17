@@ -1,0 +1,116 @@
+{
+  "_meta": {
+    "provider": "inemaimg",
+    "server": "~/projetos/inemaimg (FastAPI em Docker, DGX Spark GB10, 119 GB unificada)",
+    "endpoint": "http://127.0.0.1:8000 — override com INEMAIMG_URL",
+    "cost": "US$ 0. Sem cota e sem rate limit: o recurso escasso e a GPU, nao dinheiro.",
+    "por_que_so_flux2_klein": "O servidor mantem UM modelo carregado (~32 GB de VRAM) e faz hot-swap sob demanda. Registrar varios modelos faria o servidor descarregar/recarregar a cada geracao que alterna, o que inviabiliza uma sequencia. flux2-klein e o default do projeto, e o unico que aceita ate 4 referencias nativamente. Os outros (qwen-edit-2511, ernie, flux2-dev) continuam disponiveis via /models do proprio servidor.",
+    "throughput_medido": "flux2-klein ~4.500 img/h; ernie ~180/h; flux2-dev ~120-240/h",
+    "licenca": "FLUX.2-klein e FLUX Non-Commercial. Para uso comercial, o servidor tem qwen-edit-2511 (Apache 2.0) e ernie (aberta)."
+  },
+  "models": [
+    {
+      "id": "inemaimg/flux2-klein",
+      "provider": "inemaimg",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "FLUX.2 klein (local)",
+      "vendor": "INEMA / DGX",
+      "tier": "free",
+      "pair": "inemaimg/flux2-klein/edit",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": ["prompt"],
+      "params": {
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Largura x altura em pixels. O servidor aceita qualquer par; estes sao os usados no pipeline.",
+          "default": "1312x736",
+          "enum": ["1312x736", "736x1312", "1024x1024", "1456x816", "816x1456", "1248x832", "832x1248"]
+        },
+        "seed": {
+          "name": "seed",
+          "type": "integer",
+          "title": "Seed",
+          "description": "Se vazio, e DERIVADA DO PROMPT em vez de fixa. Com seed constante, apagar um resultado ruim e rodar de novo devolve a MESMA imagem — o retry vira ilusao de retry. Derivando do prompt, mesmo prompt continua dando mesma imagem e mexer numa palavra e o que re-sorteia."
+        },
+        "steps": {
+          "name": "steps",
+          "type": "integer",
+          "title": "Steps",
+          "description": "flux2-klein e um modelo de 4 passos: o default do servidor ja e o certo. Mexer aqui so faz sentido para experimentar."
+        },
+        "guidance_scale": {
+          "name": "guidance_scale",
+          "type": "number",
+          "title": "Guidance scale",
+          "description": "Deixe no default do servidor a menos que esteja calibrando."
+        },
+        "negative_prompt": {
+          "name": "negative_prompt",
+          "type": "string",
+          "title": "Negative prompt",
+          "description": "Suportado pelo servidor."
+        }
+      }
+    },
+    {
+      "id": "inemaimg/flux2-klein/edit",
+      "provider": "inemaimg",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "FLUX.2 klein edit (local)",
+      "vendor": "INEMA / DGX",
+      "tier": "free",
+      "category": "image-editing",
+      "thumbnail": null,
+      "image_input": { "name": "images", "arity": "multiple", "required": true },
+      "image_inputs": ["images"],
+      "media_inputs": [
+        {
+          "name": "images",
+          "type": "array",
+          "title": "Referencias",
+          "description": "Ate 4 referencias, aceitas NATIVAMENTE pelo flux2-klein (nao exige troca de modelo). O adapter converte URL ou data URI para base64 cru, que e o que o servidor espera.",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "limits": { "max_items": 4 }
+        }
+      ],
+      "accepts_image": "multiple",
+      "image_param": "images",
+      "required": ["prompt", "images"],
+      "params": {
+        "size": {
+          "name": "size",
+          "type": "string",
+          "title": "Size",
+          "description": "Largura x altura em pixels.",
+          "default": "1312x736",
+          "enum": ["1312x736", "736x1312", "1024x1024", "1456x816", "816x1456", "1248x832", "832x1248"]
+        },
+        "seed": {
+          "name": "seed",
+          "type": "integer",
+          "title": "Seed",
+          "description": "Vazio = derivada do prompt (ver o modelo t2i)."
+        },
+        "negative_prompt": {
+          "name": "negative_prompt",
+          "type": "string",
+          "title": "Negative prompt",
+          "description": "Suportado pelo servidor."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "fal-ai/flux/dev": {
+    "family": "flux",
+    "modality": "text-to-image",
+    "strengths": [
+      "Strong prompt adherence for natural-language, sentence-style prompts (BFL: 'FLUX responds best to structured descriptions', not keyword lists)",
+      "Photographic control: responds to real camera language (f-number, focal length in mm, ISO, shot type, named lighting setups like Rembrandt/split/chiaroscuro)",
+      "Readable in-image text when the exact string is wrapped in quotation marks and given a font style + placement",
+      "Composition control via named concepts (rule of thirds, leading lines, foreground/middle/background layering, low/high/dutch angle)",
+      "Deterministic re-rolls: same seed + same prompt + same model version yields the identical image (fal schema)",
+      "Largest LoRA ecosystem of the FLUX.1 line (most community LoRAs target dev)"
+    ],
+    "weaknesses": [
+      "No negative prompt support at all. BFL: 'FLUX models don't support negative prompts' and negation phrasing ('no X', 'without X') tends to summon X",
+      "Word-order sensitive: content mentioned late gets less weight, so buried subjects render weakly",
+      "Framing drifts wider than asked when environment is described before the subject (BFL's own documented failure: 'Person standing inside a forest fire ... close-up shot' pulls back)",
+      "Stacked generic quality tags ('ultra detailed, 8k, masterpiece') add tokens without changing the image; BFL explicitly warns against stacking realism cues",
+      "Long, complex text strings and stylized fonts degrade; keep rendered text short",
+      "Non-commercial license on the dev weights (fal hosts it; check licensing before commercial use)"
+    ],
+    "prompt_style": "Write one to three flowing natural-language sentences, not tag soup. BFL's documented core framework is Subject + Action + Style + Context, front-loaded: the main subject first, then what it is doing, then the artistic style/medium, then setting/lighting/mood, then secondary atmospheric details last. FLUX weights concepts mentioned earlier in the prompt more heavily, so whatever matters most goes in the first clause. It reads real photographic vocabulary as creative intent, so '85mm lens, f/2.8, shallow depth of field, golden hour side light' meaningfully changes the render, as do named lighting and composition terms. Text rendering works when the literal string is put in quotation marks, front-loaded, and paired with a font descriptor and a placement clause ('the text \"BELLA'S BAKERY\" in elegant gold serif lettering painted on the front window'). Never write what you do not want; convert every exclusion into its positive visual opposite ('deserted' instead of 'no people'). Token limit for FLUX.1 is 512 tokens, and BFL's guidance is to start short and add only words that change the image.",
+    "ideal_length_words": [30, 80],
+    "structure_template": "<subject with 2-4 concrete visual attributes> <action or pose>, <style or medium>, <setting/location>, <lighting>, <camera and lens>, <color palette>, <one or two atmospheric details>",
+    "do": [
+      "Lead with the subject and its action in the first six words; push environment and mood later",
+      "Use the Subject + Action + Style + Context framework as the skeleton of every rewrite",
+      "Give the subject 2-4 concrete attributes ('a young woman with curly red hair' beats 'a woman')",
+      "Name the style concretely and early when style matters ('fashion editorial photography', 'impressionist oil painting with visible brushstrokes')",
+      "Add one lighting clause and one camera clause for photographic looks (e.g. 'soft north-window light, 85mm lens, shallow depth of field')",
+      "Add an explicit color palette clause when visual cohesion matters ('warm amber and charcoal tones')",
+      "Wrap any literal on-image text in quotation marks, keep it short, state the font style and where it sits",
+      "Rewrite every negative into a positive: 'no cars' -> 'a quiet pedestrian walkway with cobblestones'",
+      "Cap at one or two effects (film grain, bokeh, motion blur) and at most one realism cue",
+      "Set an explicit seed when the user may want to iterate on the same composition",
+      "If framing keeps going wide, restate as '<subject with expression>, <environment> in the background, close-up shot'"
+    ],
+    "dont": [
+      "Do not emit comma-separated keyword lists in the Midjourney/SD style ('woman, red dress, beach, sunset, 8k, masterpiece')",
+      "Do not include a negative prompt, a 'no ...' clause, or an 'avoid ...' clause; the endpoint has no negative_prompt field and the model mishandles negation",
+      "Do not stack quality boilerplate ('highly detailed, ultra realistic, 8k, award winning') beyond one cue",
+      "Do not open the prompt with the environment or the mood",
+      "Do not use pronouns for the main subject; name it",
+      "Do not exceed ~512 tokens; beyond ~80-100 words returns diminishing control for a single-subject scene",
+      "Do not use Midjourney-style parameter flags (--ar, --v, ::weights); they render as literal text or noise"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "key_params": {
+      "prompt": "The only required field. Natural-language sentence(s), 512-token ceiling.",
+      "image_size": "Preset name (square_hd, square, portrait_4_3, portrait_16_9, landscape_4_3, landscape_16_9) or a custom {width,height}. Default landscape_4_3. For fast concepting use a preset, not oversized custom dimensions.",
+      "num_inference_steps": "1-50, default 28. Quality plateaus near the default; 20-28 is the practical band. Drop to 12-16 for cheap concepting, accept softer detail.",
+      "guidance_scale": "1-20, default 3.5. This is a distilled-guidance scale, not classic CFG: 3-4 is the usable band. Above ~6 images go contrasty and over-saturated; below 2 they go mushy. Raise to ~4.5 only when the model is ignoring an explicit instruction.",
+      "num_images": "1-4, default 1. Use 4 for concepting so one call yields a contact sheet.",
+      "seed": "Integer. Same seed + same prompt + same model version = identical image. Always capture the returned seed so a concept can be locked and varied.",
+      "acceleration": "none | regular | high (default none). Higher speed accelerates generation; fal does not publish an exact quality delta, so treat 'high' as a concepting-only setting and re-render finals at 'none' or 'regular'.",
+      "output_format": "jpeg (default) or png. jpeg for concepting, png only when transparency-free lossless matters.",
+      "enable_safety_checker": "Boolean, default true.",
+      "sync_mode": "Boolean, default false. When true the image is returned as a data URI and is NOT retrievable from request history later."
+    },
+    "cheap_concepting_settings": {
+      "num_inference_steps": 14,
+      "guidance_scale": 3.5,
+      "num_images": 4,
+      "image_size": "landscape_4_3",
+      "acceleration": "high",
+      "output_format": "jpeg"
+    },
+    "worked_example": {
+      "user_idea": "a cool coffee shop photo for my landing page",
+      "optimized_prompt": "A barista in a charcoal apron pulling an espresso shot on a brushed-steel machine, minimalist commercial photography, in a small concrete-and-oak specialty coffee bar, soft morning window light from camera left with warm highlights on the steam, 50mm lens at f/2.0, shallow depth of field, muted oatmeal and deep espresso-brown palette, faint steam rising and a clean marble counter in the foreground"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux/dev",
+      "https://fal.ai/models/fal-ai/flux/dev",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_fundamentals",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_essentials",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_advanced",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_negative",
+      "https://docs.bfl.ml/guides/prompting_unified_building.md",
+      "https://fal.ai/learn/tools/how-to-use-flux"
+    ]
+  },
+
+  "fal-ai/flux/schnell": {
+    "family": "flux",
+    "modality": "text-to-image",
+    "strengths": [
+      "Fastest FLUX.1 tier: usable output in 1-4 steps, built for iteration and real-time concepting",
+      "Cheapest of the three for exploring many premises in parallel (fal lists $0.003/megapixel vs $0.025 for dev)",
+      "Same prompt grammar as dev, so a prompt drafted here transfers to dev unchanged",
+      "Apache-2.0 open weights (permissive licensing relative to dev)",
+      "Good at simple, single-subject, boldly-lit compositions and graphic/illustration looks"
+    ],
+    "weaknesses": [
+      "Timestep-distilled, so fine detail, hands, small faces, and long text strings are weaker than dev",
+      "Guidance is effectively baked in: the endpoint exposes guidance_scale but the model was distilled without classifier-free guidance, so moving the value has little to no effect. Treat it as a no-op and leave it at the default (behaviour asserted by fal's own guide: 'Schnell doesn't expose guidance scale parameters'; the fal OpenAPI schema does list the field, so this is a documented inconsistency rather than a verified silent parameter)",
+      "No negative prompt support",
+      "Long, heavily-layered prompts pay off less than on dev; extra clauses are often ignored at 4 steps",
+      "Complex multi-subject scenes and precise typography degrade noticeably"
+    ],
+    "prompt_style": "Identical grammar to FLUX.1 dev, but shorter. Natural language sentences, Subject + Action + Style + Context, front-loaded with the subject. Because it renders in 1-4 steps, the model resolves the first two or three clauses well and progressively ignores fine trailing detail, so put the one thing that must be right in the opening clause and cut ornamental detail. Keep it in the 15-45 word range, one lighting clause and one style clause, and avoid heavy typography or crowd scenes. Same 512-token ceiling and same hard rule against negative phrasing.",
+    "ideal_length_words": [15, 45],
+    "structure_template": "<subject with 1-3 concrete attributes> <action>, <style or medium>, <setting>, <one lighting clause>, <optional palette>",
+    "do": [
+      "Front-load the subject and action; the opening clause carries most of the render",
+      "Keep to one style clause and one lighting clause",
+      "Use it as the draft tier: settle premise, composition and palette here, then re-render the winner on dev with the same seed-free prompt",
+      "Request num_images 4 to get a spread per call",
+      "Leave guidance_scale at the 3.5 default and change num_inference_steps instead",
+      "Prefer bold, high-contrast, graphic subjects that survive a 4-step render"
+    ],
+    "dont": [
+      "Do not write 80+ word prompts; the trailing detail is largely wasted",
+      "Do not ask for paragraphs of rendered text, dense crowds, or intricate hands",
+      "Do not tune guidance_scale hoping for prompt adherence; rewrite the prompt or move to dev",
+      "Do not include negative phrasing or a negative prompt field",
+      "Do not push num_inference_steps above 8 expecting dev-level quality; the schema caps it at 12 and the model saturates around 4"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "key_params": {
+      "prompt": "Required, natural language, 512-token ceiling.",
+      "num_inference_steps": "1-12, default 4. 4 is the designed operating point. 1-2 for throwaway thumbnails, 6-8 buys marginal cleanup only.",
+      "guidance_scale": "1-20, default 3.5. Present in the schema but effectively inert on this distilled model. Leave at default.",
+      "image_size": "Preset name or custom {width,height}; default landscape_4_3.",
+      "num_images": "1-4, default 1. Use 4 for concepting.",
+      "seed": "Integer; same seed + prompt + model version reproduces the image.",
+      "acceleration": "none | regular | high, default none.",
+      "output_format": "jpeg (default) or png.",
+      "enable_safety_checker": "Boolean, default true.",
+      "sync_mode": "Boolean, default false; true returns a data URI not persisted in request history."
+    },
+    "cheap_concepting_settings": {
+      "num_inference_steps": 4,
+      "guidance_scale": 3.5,
+      "num_images": 4,
+      "image_size": "landscape_4_3",
+      "acceleration": "high",
+      "output_format": "jpeg"
+    },
+    "worked_example": {
+      "user_idea": "a cool coffee shop photo for my landing page",
+      "optimized_prompt": "A barista pulling an espresso shot on a brushed-steel machine, minimalist commercial photography, small concrete-and-oak coffee bar, soft morning window light, muted oatmeal and espresso-brown palette"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux/schnell",
+      "https://fal.ai/models/fal-ai/flux/schnell",
+      "https://fal.ai/learn/tools/how-to-use-flux",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_fundamentals",
+      "https://docs.bfl.ai/guides/prompting_guide_t2i_negative"
+    ]
+  },
+
+  "fal-ai/flux-pro/kontext": {
+    "family": "flux",
+    "modality": "image-editing (single reference image + text instruction)",
+    "strengths": [
+      "In-context editing: it reads the attached image and applies a described change without a mask, workflow, or fine-tune",
+      "Best-in-FLUX.1 character and object identity retention across repeated edits (BFL's documented multi-turn sequences)",
+      "Direct text editing inside an image via the Replace '<old>' with '<new>' pattern, preserving surrounding layout",
+      "Product/logo consistency: keeps branding, labels, shapes and materials while the surrounding scene is regenerated",
+      "Understands bright-colored annotation boxes drawn on the input as targeted-edit markers, and removes the boxes in the output",
+      "Matches the input image's dimensions by default (rounded to multiples of 32) unless aspect_ratio overrides it"
+    ],
+    "weaknesses": [
+      "Vague instructions silently redraw things you wanted kept: 'put him on a beach' changes camera angle, framing, scale and pose",
+      "The verb 'transform' signals a full replacement; used loosely it destroys identity and label text",
+      "Small label text, fine print, and stylized/complex fonts are the most common casualty; the model re-renders them as plausible-looking but wrong glyphs",
+      "Pronoun references ('her', 'it') are a documented failure mode; the model re-anchors to the wrong element",
+      "512-token prompt ceiling, and too many simultaneous instructions per edit degrade all of them",
+      "Output is ~1MP total regardless of aspect ratio; aspect ratios limited to 3:7 through 7:3",
+      "Previous-generation model; BFL now steers new projects to FLUX.2 editing"
+    ],
+    "prompt_style": "Write an imperative edit instruction, not a scene description. The shape that works is: name the single change, name the target by its literal visual description (never a pronoun), then append an explicit preservation clause listing everything that must not change. BFL's stated rule of thumb is that being more explicit never hurts as long as the number of instructions per edit stays small. Choose verbs deliberately: 'change the background', 'replace the shop sign', 'add a hat' are surgical, whereas 'transform' or 'make it ...' license a full redraw. For text, quote both strings: Replace 'joy' with 'BFL'. For multi-part changes, do them as sequential edits, feeding each output back in, rather than as one crowded prompt. Prompts are short by design, typically 15-60 words, of which roughly a third is the preservation clause.",
+    "ideal_length_words": [15, 60],
+    "structure_template": "<imperative verb> <the one thing that changes, described concretely>, while keeping <named subject/product> in the exact same position, scale, and pose. Maintain identical <camera angle, framing, perspective, lighting, colors, and all text>. Change nothing else.",
+    "do": [
+      "State exactly one edit per call; iterate for complex transformations",
+      "Name the target literally: 'the woman with short black hair', 'the red car', 'the amber bottle with the black label' instead of 'her' or 'it'",
+      "Always append an explicit preservation clause; BFL's own troubleshooting line is 'maintain all other aspects of the original image'",
+      "For background swaps use the documented long form: 'Change the background to <X> while keeping the <subject> in the exact same position, scale, and pose. Maintain identical subject placement, camera angle, framing, and perspective. Only replace the environment around them'",
+      "For text edits use quotation marks on both strings: Replace 'joy' with 'BFL', and add 'while maintaining the same font style, size, and color'",
+      "Keep replacement text about the same length as the original so layout survives",
+      "Prefer narrow verbs ('change the clothes', 'replace the background', 'recolor the wall') over 'transform'",
+      "For style changes, name the medium and its concrete characteristics ('Convert to pencil sketch with natural graphite lines, cross-hatching, and visible paper texture') plus 'while maintaining the original composition and object placement'",
+      "Use bright-colored annotation boxes drawn on the input image to point at a specific region, then reference 'the boxes' in the prompt",
+      "Set aspect_ratio only when you deliberately want to reframe; otherwise let it inherit the input dimensions",
+      "Set a seed so an almost-right edit can be nudged instead of re-rolled from scratch"
+    ],
+    "dont": [
+      "Do not write a full scene description as if generating from scratch; it invites a redraw of the product",
+      "Do not use the verb 'transform' (or 'reimagine', 'make it better') when the subject or label must survive",
+      "Do not use pronouns for the edited subject",
+      "Do not stack five instructions into one prompt",
+      "Do not describe the product's label content loosely ('a bottle with a nice label'); either quote the exact text or forbid touching it entirely",
+      "Do not rely on a negative prompt field; there is none on this endpoint (only safety_tolerance and standard params)",
+      "Do not leave enhance_prompt on for product-fidelity work; a rewritten prompt can silently drop the preservation clause"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "image_url is the base image being edited, passed as a URL or base64 data URI (BFL's own limit for the underlying endpoint is 20MB / 20 megapixels). The model reads the whole image as context and regenerates it with the described change applied; everything not mentioned is meant to be preserved but is re-synthesized, which is why unmentioned fine detail (small type, logos, textures) can drift. Output resolution matches the input aspect ratio, rounded to multiples of 32, unless aspect_ratio is set; total output is about 1MP, supported ratios 3:7 to 7:3.",
+    "reference_image_prompt_rules": [
+      "Anchor the product by literal description before saying anything else: 'the matte black 500ml bottle with the white wordmark label'.",
+      "Add an explicit do-not-touch clause naming the exact attributes at risk. Working phrasing, composed from BFL's documented patterns: 'Keep the bottle exactly as shown: identical label text, typography, logo, colors, proportions, materials, and surface finish. Do not redraw, re-letter, or restyle the label.'",
+      "Say what may change, and scope it: 'Only replace the environment around it.' BFL's background formula generalizes to products as: 'Change the background to <X> while keeping the <product> in the exact same position, scale, and pose. Maintain identical placement, camera angle, framing, and perspective. Only replace the environment around it.'",
+      "Close with the blunt limiter BFL uses in its own examples: 'Change nothing else.' (documented verbatim in the FLUX editing examples, e.g. 'Replace the cherries in the right-most jar with multi-colored sprinkles. Change nothing else').",
+      "If the label carries text you must keep, quote it and pin it: \"The label must still read 'ACME COLD BREW' in the same font, weight, and color.\" Quoted strings are the one mechanism the model reliably honors for glyph-level fidelity.",
+      "Never say 'transform', 'restyle', 'reimagine', 'improve', or 'make it look premium' about the product itself; apply those words only to the scene around it.",
+      "Prefer the demonstrative-plus-description form BFL uses in its product examples ('a professional high end product shot of this bottle in ...'), because 'this bottle' plus a description binds the output to the attached image rather than to a generic bottle.",
+      "Do not describe the product's shape or color in new words that conflict with the photo; any re-description is treated as an instruction to change it.",
+      "Do lighting and reflection language about the SCENE, not the product surface, unless relighting is the intended edit ('studio lighting on a black shiny surface' is safe; 'glossier bottle' is not).",
+      "If the label still drifts, split into two passes: pass 1 changes the environment only, pass 2 (on the pass-1 output) repairs text with Replace '<wrong>' with '<correct>' while maintaining the same font style, size, and color.",
+      "Keep the whole instruction short. Every extra descriptive sentence about the product raises the chance the model treats it as an edit request."
+    ],
+    "key_params": {
+      "prompt": "Required. The imperative edit instruction plus preservation clause. 512-token ceiling.",
+      "image_url": "Required. URL or base64 data URI of the image to edit.",
+      "guidance_scale": "1-20, default 3.5. Higher values tighten adherence to the instruction; for product fidelity 3.5-4.5 is the working band. Very high values amplify contrast and can distort the preserved subject.",
+      "aspect_ratio": "Optional, one of 21:9, 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, 9:16, 9:21. Omit to inherit the input image's framing; set it only when reframing is intended.",
+      "num_images": "1-4, default 1. Use 2-4 for edits because identity preservation varies per sample; pick the one whose label survived.",
+      "seed": "Integer, reproducible. Capture it so a good edit can be re-run with a tweaked clause.",
+      "enhance_prompt": "Boolean, default false. Rewrites the prompt server-side. Leave FALSE for product/label fidelity work: an enhanced prompt can drop or dilute the preservation clause.",
+      "safety_tolerance": "String '1' to '6', default '2' (1 strictest, 6 most permissive).",
+      "output_format": "jpeg (default) or png. Use png when the edit will be re-fed into another edit pass, to avoid stacking JPEG artifacts on label text.",
+      "sync_mode": "Boolean, default false; true returns a data URI not persisted in request history."
+    },
+    "cheap_concepting_settings": {
+      "num_images": 2,
+      "guidance_scale": 3.5,
+      "enhance_prompt": false,
+      "output_format": "jpeg"
+    },
+    "worked_example": {
+      "user_idea": "put my cold brew can on a nice kitchen counter",
+      "optimized_prompt": "Place this cold brew can on a sunlit white marble kitchen counter with a soft blurred kitchen interior behind it, morning window light from the left with a soft reflection on the counter. Keep the can exactly as shown: identical label text, typography, logo, colors, proportions, and metal finish, in the exact same position, scale, and angle. Maintain identical camera angle, framing, and perspective. Only replace the environment around it. Change nothing else."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux-pro/kontext",
+      "https://fal.ai/models/fal-ai/flux-pro/kontext",
+      "https://docs.bfl.ai/guides/prompting_guide_kontext_i2i",
+      "https://docs.bfl.ml/kontext/kontext_image_editing.md",
+      "https://docs.bfl.ml/guides/usecases_editing_product_consistency.md",
+      "https://docs.bfl.ml/guides/prompting_editing_single_reference.md"
+    ]
+  }
+}

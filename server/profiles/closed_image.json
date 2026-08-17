@@ -1,0 +1,316 @@
+{
+  "_meta": {
+    "researched_on": "2026-08-12",
+    "purpose": "Operational prompt-rewriting rules for closed-source image models served on fal.ai. Consumed by the studio backend prompt optimizer.",
+    "verification_notes": [
+      "All param names, defaults, enums and limits are taken directly from the live fal OpenAPI queue schemas for each endpoint id (fetched 2026-08-12).",
+      "Prompting rules for nano-banana come from Google's official Gemini image generation docs (ai.google.dev/gemini-api/docs/image-generation), which supply verbatim template sentences reproduced below.",
+      "fal's model page calls fal-ai/nano-banana 'Google's famous original image generation and editing model' and does NOT name the exact Gemini version. It is the Flash-tier image model, NOT the Pro-tier 'Nano Banana Pro' (Gemini 3 Pro Image), which fal exposes under a separate endpoint. Treat any claim about the precise version string as UNVERIFIED.",
+      "Google's docs state reference-image caps per Gemini model (Gemini 3.1 Flash Image: up to 14 total, 10 object + 4 character + 3 style). fal's nano-banana/edit schema itself does NOT publish a max array length for image_urls, so the effective cap on fal is UNVERIFIED; keep to 2-3 references in production.",
+      "The claim that Recraft V3 tops the Artificial Analysis text-to-image benchmark appears on fal's own model page and is marketing copy, not independently verified here.",
+      "gpt-image-1 text-rendering weakness is stated in OpenAI's own docs ('can still struggle with precise text placement and clarity')."
+    ],
+    "text_rendering_ranking_answer": "For Instagram-ready ads with a legible marketing headline: nano-banana (Gemini) is the strongest of these four, and Recraft V3 is a close second and the better pick when the headline must sit inside a flat vector/poster layout with brand-locked colors. gpt-image-1 is the weakest of the three at text and should not be the default for headline work. If the deliverable is text-critical and budget allows, the Pro-tier Gemini image endpoint (a separate fal endpoint, not covered here) is documented by Google as the best-in-class text renderer."
+  },
+
+  "fal-ai/nano-banana": {
+    "family": "gemini",
+    "modality": "text-to-image",
+    "strengths": [
+      "Best legible in-image text of the four endpoints here; Google's docs state plainly that 'Gemini excels at rendering text'",
+      "Follows long, narrative, multi-clause scene descriptions rather than needing keyword soup; prompt field accepts up to 50000 characters",
+      "Strong at photoreal product/studio shots when given explicit shot type, lens, lighting and camera angle",
+      "Strong at composed marketing layouts (poster, sticker, ad frame) where text and subject must coexist",
+      "Wide native aspect ratio set including 9:16, 4:5 and 16:9, so social crops need no post-processing",
+      "Returns a 'description' field alongside images, usable as a caption or as a self-check on what it thought it drew"
+    ],
+    "weaknesses": [
+      "No negative_prompt parameter; anything you want excluded must be phrased as a positive statement about what IS in frame",
+      "No guidance/CFG, steps, or strength controls, so you cannot dial prompt adherence, only rewrite the prompt",
+      "Very small text and dense paragraph text degrade; it is a headline renderer, not a body-copy renderer",
+      "Deterministic reruns are only approximate even with a fixed seed",
+      "Tends to beautify: it will quietly restyle a plainly described product unless preservation is stated explicitly (see the edit endpoint)"
+    ],
+    "prompt_style": "Write one to three complete English sentences describing a photograph or artwork that already exists, not a shopping list of tags. Google's own guidance is explicitly narrative: 'describe the scene, don't just list keywords', and its templates read as prose ('A photorealistic close-up portrait of an elderly ceramicist..., lit by soft golden hour light..., captured with an 85mm lens'). Front-load the subject and the shot type, then setting, then lighting, then mood, then the technical camera note, then the aspect/format note. Describe artistic style with descriptive language rather than leaning on an artist's name. Exclusions must be positively phrased: instead of 'no people', write 'the street is completely empty'. When on-image text is needed, quote the exact string and describe the typeface in words rather than naming a font file.",
+    "ideal_length_words": [40, 90],
+    "structure_template": "[SHOT TYPE / MEDIUM] of [SUBJECT with 2-3 concrete visual attributes], [ACTION or POSE], set in [ENVIRONMENT with 1-2 specific details]. The scene is lit by [LIGHT SOURCE + QUALITY + DIRECTION], creating [MOOD/ATMOSPHERE]. [OPTIONAL TEXT CLAUSE: The words \"EXACT HEADLINE\" appear in [POSITION], set in a [DESCRIPTIVE TYPEFACE] in [COLOR], with clear space around them.] Captured with [LENS / CAMERA NOTE], [DEPTH OF FIELD], in a [COLOR PALETTE] palette. [ASPECT/FORMAT NOTE].",
+    "do": [
+      "Write in full sentences and present tense, describing an image that exists",
+      "Name the shot type first (macro, close-up portrait, wide establishing shot, flat-lay, three-quarter product shot)",
+      "Give exactly one light source description with quality and direction ('soft diffused window light from the left')",
+      "Specify lens and depth of field for photoreal work ('85mm lens, shallow depth of field, background softly blurred')",
+      "Quote on-image copy verbatim inside double quotes and keep it under about 6 words for reliability",
+      "Describe the typeface descriptively ('a heavy geometric sans-serif, tightly tracked, all caps') instead of naming a font",
+      "State where text sits and that it does not overlap the subject ('in the upper third, on clean negative space, clear of the product')",
+      "Set aspect_ratio via the parameter, and also state the intended format in words ('composed for a vertical 9:16 social frame') for layout awareness",
+      "State the color palette explicitly when brand colors matter, using named colors plus hex in words",
+      "For cheap concepting, ask for num_images 4 with one prompt rather than four sequential single calls"
+    ],
+    "dont": [
+      "Don't send comma-separated keyword tags ('product, studio, 4k, trending on artstation') - this is a Midjourney/SD habit and wastes the model's instruction-following",
+      "Don't write negative instructions ('no text', 'without people'); the model has no negative prompt and reads the noun anyway. Phrase the desired state positively",
+      "Don't stack more than one headline plus one short subline of on-image text; more strings multiply misspelling risk",
+      "Don't request paragraph-length body copy inside the image",
+      "Don't name a real living artist as the entire style instruction; describe the style's visual properties",
+      "Don't append resolution or quality boilerplate ('8k, ultra HD, masterpiece'); it is noise here and output size is governed by aspect_ratio",
+      "Don't rely on seed for reproducibility across prompt edits"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "This endpoint is text-to-image only and accepts no images. Use fal-ai/nano-banana/edit for any reference or product image.",
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Best of the four endpoints profiled. Google's docs state Gemini excels at rendering text and provide a dedicated text-heavy design template. Reliable for a short headline, a logo wordmark, a badge, or a price tag; degrades on small type, long paragraphs, and dense multi-block layouts. To prompt for it: quote the exact string, keep it short, describe the typeface and weight in words, name the color, and explicitly reserve a region for it ('the headline sits in the upper third against flat negative space').",
+    "key_params": {
+      "prompt": "string, 3 to 50000 chars. The only creative control. Narrative sentences.",
+      "num_images": "1-4. Set 4 for concepting; it is the cheapest way to see variation since there is no CFG knob.",
+      "aspect_ratio": "auto | 21:9 | 16:9 | 3:2 | 4:3 | 5:4 | 1:1 | 4:5 | 3:4 | 2:3 | 9:16. Default 1:1. Use 4:5 for Instagram feed, 9:16 for Stories/Reels, 16:9 for YouTube.",
+      "output_format": "jpeg | png | webp. Default png. Use jpeg for cheap fast concepting (smaller payloads); png only when a hard edge or later compositing matters.",
+      "seed": "integer or null. Only loosely reproducible; useful for A/B-ing a prompt tweak, not for guarantees.",
+      "safety_tolerance": "'1' to '6' as a string, 1 strictest, default '4'. Leave at default; raising it is not a quality lever.",
+      "sync_mode": "boolean, default false. true returns a data URI and skips history retention. Leave false for a queue-based backend.",
+      "limit_generations": "boolean, default true. Limits generations per prompt round to 1. Leave at default."
+    },
+    "cheap_concepting_settings": {
+      "num_images": 4,
+      "output_format": "jpeg",
+      "aspect_ratio": "1:1",
+      "sync_mode": false
+    },
+    "worked_example": {
+      "user_idea": "make an instagram ad for my cold brew coffee can that says SLOW BREWED",
+      "optimized_prompt": "A photorealistic three-quarter product shot of a matte black cold brew coffee can standing on a wet slate slab, condensation beading down its side. The scene is lit by soft diffused daylight from the upper left with a single crisp specular highlight along the can's edge, creating a calm premium morning mood. The words \"SLOW BREWED\" appear across the upper third on flat empty background space, well clear of the can, set in a heavy geometric sans-serif, all caps, tightly tracked, in warm cream. Captured with an 85mm lens at shallow depth of field so the background falls into soft charcoal blur, in a palette of deep charcoal, cream, and a single amber accent. Composed for a vertical 4:5 social frame with generous margins."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/nano-banana",
+      "https://fal.ai/models/fal-ai/nano-banana",
+      "https://ai.google.dev/gemini-api/docs/image-generation"
+    ]
+  },
+
+  "fal-ai/nano-banana/edit": {
+    "family": "gemini",
+    "modality": "image-to-image / multi-reference editing",
+    "strengths": [
+      "Semantic editing without a mask: you name the region in words and it edits only that region",
+      "Multi-image compositing: hand it a product shot plus a scene and it places one into the other",
+      "Google publishes an explicit 'high-fidelity detail preservation' template for exactly the keep-the-product-unchanged case",
+      "Best in-class legible text among these endpoints, so it can add a headline to a real product photo in one pass",
+      "Same wide aspect-ratio set as the T2I endpoint, plus aspect_ratio 'auto' to inherit the source framing"
+    ],
+    "weaknesses": [
+      "THE top failure mode: without an explicit preservation clause it silently regenerates the product, redrawing the label, changing the wordmark, shifting the hue and inventing packaging detail",
+      "Label text on a supplied product is re-rendered, not copy-pasted; small legal text and dense ingredient panels will not survive",
+      "No mask input, no denoise/strength parameter, so you cannot mechanically clamp how much it changes; the only clamp is language",
+      "No negative prompt",
+      "Changing aspect_ratio away from the source's native ratio forces recomposition and increases drift; 'auto' is the safest for preservation"
+    ],
+    "prompt_style": "Two-part prompt, always in this order: first the EDIT instruction (what changes), then the PRESERVATION instruction (what must stay identical). Google's own templates are literally shaped this way, e.g. inpainting: 'Using the provided image, change only the [element] to [new element]. Keep everything else in the image exactly the same, preserving the original style, lighting, and composition.' And for compositing: 'Using the provided images, place [element from image 2] onto [element from image 1]. Ensure that the features of [element from image 1] remain completely unchanged.' Refer to inputs positionally ('the first image', 'the second image') because the model sees them in array order. Keep it concrete and short; long flowery description invites reinvention.",
+    "ideal_length_words": [35, 80],
+    "structure_template": "Using the provided image(s): [EDIT INSTRUCTION - exactly one change, naming the region in words]. The [PRODUCT/SUBJECT] from the first image must be reproduced exactly as supplied: identical shape, proportions, materials, colors, and identical label artwork with the exact same text, spelling, fonts, and logo placement. Do not redraw, restyle, relight beyond [ALLOWED LIGHTING CHANGE], or reinterpret it. Keep everything else in the image exactly the same, preserving the original style, lighting, and composition. [OPTIONAL: integration clause - how the added element sits in the scene, shadow/reflection/contact.]",
+    "do": [
+      "Always append an explicit preservation sentence. Never assume 'edit the background' implies the product is safe",
+      "Use the phrase pattern from Google's docs verbatim as the backbone: 'change only X ... Keep everything else in the image exactly the same, preserving the original style, lighting, and composition'",
+      "For product placement use the high-fidelity template: 'Ensure that the features of [the product from the first image] remain completely unchanged'",
+      "Enumerate what 'unchanged' covers, because the model honors specifics: shape, proportions, material finish, exact colors, label artwork, label text and spelling, logo lockup and its position",
+      "Add 'Do not re-render, redraw, or restyle the label. Reproduce the existing label pixel-faithfully.' when a label with copy is on the product",
+      "Reference images positionally in prompt order ('the first image is the product, the second image is the background scene')",
+      "Make exactly ONE change per call. Chain calls for multiple edits rather than stacking instructions",
+      "Set aspect_ratio to 'auto' when preservation matters; only crop after the fact",
+      "Ask for the integration explicitly so it looks composited rather than pasted: 'add a soft contact shadow beneath it consistent with the scene's existing light direction'",
+      "Give the highest resolution, tightly cropped, well-lit source image you have; a small or noisy source is the single biggest driver of drift",
+      "When adding marketing text, state that the text is a NEW overlay and must not touch or alter the product's own label"
+    ],
+    "dont": [
+      "Don't write a full aesthetic re-description of the product ('a sleek modern matte bottle with elegant typography') - every adjective is permission to redesign it",
+      "Don't ask for a change to the product and preservation of the product in the same call; they cancel out",
+      "Don't rely on 'keep it the same' alone; enumerate the dimensions of sameness",
+      "Don't change aspect_ratio and expect the subject to survive untouched",
+      "Don't stack more than about 3 reference images; the fal schema publishes no cap, but per-image fidelity falls off and Google's own caps are model-tier dependent",
+      "Don't ask it to fix or clean up the label ('make the text crisper'); that is an invitation to rewrite it",
+      "Don't use negative phrasing for exclusion; there is no negative prompt"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Takes image_urls, an array of image URLs, treated in array order and referable in the prompt as 'the first image', 'the second image', and so on. The fal OpenAPI schema for this endpoint does NOT publish a maximum array length, so the hard cap on fal is UNVERIFIED. Google's docs cap references per Gemini tier (Gemini 3.1 Flash Image: up to 14 total, 10 object + 4 character + 3 style). Operationally, use 1 reference for an edit and 2 to 3 for compositing; quality degrades and instruction ambiguity rises beyond that.",
+    "reference_image_prompt_rules": [
+      "State the role of each image up front: 'The first image is the product. The second image is the background scene.'",
+      "Use the exact preservation backbone: 'Ensure that the features of the product in the first image remain completely unchanged.'",
+      "Enumerate preserved attributes: 'identical shape, proportions, material finish, and colors; the label artwork, its exact text and spelling, its fonts, and its logo placement must be reproduced exactly as supplied.'",
+      "Add the anti-redraw clause: 'Do not redraw, restyle, re-typeset, or reinterpret the label in any way.'",
+      "Scope the edit tightly: 'Change only the background and the lighting on the surrounding scene.'",
+      "Close with Google's preservation sentence: 'Keep everything else in the image exactly the same, preserving the original style, lighting, and composition.'",
+      "If new marketing text is required, isolate it: 'Add the headline \"...\" as a new overlay on empty background space in the upper third. It must not overlap, touch, or alter the product or its label.'",
+      "Allow only the lighting change you actually want: 'You may add a soft contact shadow and a subtle rim light consistent with the new scene, but the product's own colors must not shift.'",
+      "Verify by reading back the returned 'description' field; if it describes the product differently from the source, the run drifted - reject and retry with a stronger preservation clause rather than a longer creative one.",
+      "For strict brand-safety pipelines, treat any label with legally required or fine-print copy as non-preservable by this model and composite that layer outside the model."
+    ],
+    "text_rendering_quality": "Same strong Gemini text engine as the T2I endpoint for NEW text added as an overlay. Critically different for EXISTING text on a supplied product: that text is re-synthesized rather than preserved, which is why an explicit 'reproduce the label exactly, same spelling and fonts, do not re-typeset' clause is mandatory. Short new headlines are reliable; small existing print is not.",
+    "key_params": {
+      "prompt": "string, 3 to 50000 chars. Edit instruction plus preservation clause.",
+      "image_urls": "array of image URLs, required. Order is semantically meaningful; the prompt should reference them positionally. No published max length.",
+      "num_images": "1-4. Use 4 when preservation is risky, then pick the run that kept the label intact.",
+      "aspect_ratio": "auto | 21:9 | 16:9 | 3:2 | 4:3 | 5:4 | 1:1 | 4:5 | 3:4 | 2:3 | 9:16. Default auto. Keep 'auto' for maximum fidelity to the source.",
+      "output_format": "jpeg | png | webp. Default png. png when the result will be composited further.",
+      "seed": "integer or null. Loosely reproducible.",
+      "safety_tolerance": "'1' to '6' as string, default '4'.",
+      "sync_mode": "boolean, default false.",
+      "limit_generations": "boolean, default true."
+    },
+    "cheap_concepting_settings": {
+      "num_images": 4,
+      "aspect_ratio": "auto",
+      "output_format": "jpeg",
+      "sync_mode": false
+    },
+    "worked_example": {
+      "user_idea": "put my skincare bottle on a marble bathroom counter, keep the bottle exactly as it is",
+      "optimized_prompt": "Using the provided images: the first image is the product, the second image is the background scene. Place the skincare bottle from the first image standing upright on the marble bathroom counter from the second image, positioned slightly left of center in the mid-ground. Ensure that the features of the bottle from the first image remain completely unchanged: identical shape, proportions, cap, material finish, and colors, and identical label artwork reproduced exactly as supplied with the exact same text, spelling, fonts, and logo placement. Do not redraw, re-typeset, restyle, or reinterpret the label in any way. Change only the surrounding scene. Add a soft contact shadow and a faint reflection on the marble consistent with the scene's existing light direction, without shifting the bottle's own colors. Keep everything else in the image exactly the same, preserving the original style, lighting, and composition."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/nano-banana/edit",
+      "https://fal.ai/models/fal-ai/nano-banana/edit",
+      "https://ai.google.dev/gemini-api/docs/image-generation"
+    ]
+  },
+
+  "fal-ai/gpt-image-1/text-to-image": {
+    "family": "openai",
+    "modality": "text-to-image",
+    "strengths": [
+      "Strong world knowledge and literal instruction following for object counts, relationships and named real-world concepts",
+      "Native transparent background via background: 'transparent', which none of the other three endpoints here expose - the cleanest path to a cutout asset or a sticker",
+      "A real quality tier (low/medium/high) so drafts are genuinely cheap and finals are genuinely better, with no prompt change needed",
+      "Sensible defaults; short plain-English prompts work without a style vocabulary",
+      "Good at diagrammatic, infographic and instructional imagery where correctness of content beats photographic beauty"
+    ],
+    "weaknesses": [
+      "OpenAI's own docs say the model 'can still struggle with precise text placement and clarity' - the weakest text renderer of these four for marketing headlines",
+      "OpenAI's docs also flag difficulty 'placing elements precisely in structured or layout-sensitive compositions', so pixel-exact ad layouts are unreliable",
+      "Only three sizes: 1024x1024, 1536x1024, 1024x1536. No 4:5 and no 9:16, so social crops require post-processing",
+      "Latency: complex prompts can take up to about 2 minutes per OpenAI's docs",
+      "No seed, no negative prompt, no guidance parameter - zero determinism and zero adherence tuning",
+      "Character/subject consistency across calls is poor",
+      "Content filtering is comparatively strict and returns hard failures rather than softened outputs"
+    ],
+    "prompt_style": "Write plain, unadorned, declarative instructions, closer to a brief for a designer than to a poetic scene description. Lead with the deliverable type and format ('A flat vector infographic, square'), then the required content as an explicit ordered list of elements, then the style, then the palette. It responds to instruction language ('include', 'place', 'centered', 'on a white background') better than to atmospheric prose. Because there is no negative prompt, state exclusions as positive constraints ('the background is a plain solid white with nothing else on it'). Keep it under about 120 words; extra prose lengthens latency without improving adherence.",
+    "ideal_length_words": [25, 70],
+    "structure_template": "[DELIVERABLE TYPE + FORMAT] showing [PRIMARY SUBJECT stated plainly]. Include: [element 1], [element 2], [element 3]. Style: [style in 3-6 words]. Background: [explicit background statement]. Color palette: [2-4 named colors]. [OPTIONAL brief text clause: The word \"HEADLINE\" appears [position], large and bold.]",
+    "do": [
+      "State the deliverable type first (icon, product photo, flat illustration, infographic, poster)",
+      "List required elements explicitly as an 'Include:' list rather than burying them in prose",
+      "Use background: 'transparent' plus output_format 'png' whenever the asset will be composited - this is this endpoint's real edge",
+      "Use quality 'low' for every draft and concepting pass, then re-run the winner at 'high'",
+      "Pick image_size explicitly (1024x1536 for portrait, 1536x1024 for landscape) rather than leaving 'auto'",
+      "State the background explicitly in words too, since the parameter and the prompt reinforce each other",
+      "Keep any on-image text to one to three large words and expect to fix or replace it in post",
+      "Prefer this model when the brief is content-correctness-heavy (a labeled diagram, a specific arrangement of specific objects) and text is minimal"
+    ],
+    "dont": [
+      "Don't route Instagram headline ads here by default; the docs themselves flag text clarity and layout-sensitive placement as weak spots",
+      "Don't ask for 4:5 or 9:16 - it does not exist; generate 1024x1536 and crop",
+      "Don't pass a seed or negative prompt; the schema has neither and silently ignoring them will confuse your backend logs",
+      "Don't run 'high' quality during concepting; the cost delta is roughly an order of magnitude",
+      "Don't write long atmospheric prose; it adds latency, not adherence",
+      "Don't expect the same character or product to recur consistently across separate calls"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "This endpoint id is text-to-image only and accepts no image input. gpt-image-1 does support editing and reference images through a separate fal edit endpoint; the edit path is prompt-based masking and OpenAI's docs note the model 'uses the mask as guidance, but may not follow its exact shape with complete precision'. For an unchanged-product requirement, do not use this family; use nano-banana/edit.",
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Weakest of the four for marketing headlines. OpenAI's docs state the model 'can still struggle with precise text placement and clarity', and separately that it struggles 'placing elements precisely in structured or layout-sensitive compositions'. It can usually produce one to three large bold words legibly; multi-line copy, small type, and precise text positioning are unreliable. Operational rule: if the brief has a headline, either route to nano-banana or Recraft V3, or generate the artwork here with a deliberately empty text region ('the upper third is a plain solid band of color with nothing on it') and set the type in post.",
+    "key_params": {
+      "prompt": "string, min 2 chars. Plain instructional English.",
+      "image_size": "auto | 1024x1024 | 1536x1024 | 1024x1536. Default auto. Set it explicitly.",
+      "background": "auto | transparent | opaque. Default auto. 'transparent' with png output is this endpoint's differentiator.",
+      "quality": "auto | low | medium | high. Default auto. 'low' for concepting, 'high' only for the chosen final.",
+      "num_images": "1-4. Set 4 at low quality for concepting.",
+      "output_format": "jpeg | png | webp. Default png. png is required for a usable transparent background.",
+      "sync_mode": "boolean, default false. Leave false; this model can take up to ~2 minutes on complex prompts."
+    },
+    "cheap_concepting_settings": {
+      "quality": "low",
+      "num_images": 4,
+      "image_size": "1024x1024",
+      "output_format": "jpeg",
+      "sync_mode": false
+    },
+    "worked_example": {
+      "user_idea": "an icon of a coffee bean for my app, no background",
+      "optimized_prompt": "A single app icon showing one coffee bean, viewed straight on and centered in frame. Include: the bean's central seam groove, a soft highlight on the upper left, and a subtle drop shadow beneath. Style: clean flat vector with minimal shading, thick consistent edges, no outline stroke. Background: fully transparent with nothing behind the bean. Color palette: deep espresso brown, warm caramel, and cream."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/gpt-image-1/text-to-image",
+      "https://developers.openai.com/api/docs/guides/image-generation"
+    ]
+  },
+
+  "fal-ai/recraft/v3/text-to-image": {
+    "family": "recraft",
+    "modality": "text-to-image",
+    "strengths": [
+      "Purpose-built for design output: flat vector illustration, brand assets, logos, posters, icon sets",
+      "True vector output when a vector_illustration style is selected, so assets stay scalable (billed at 2x)",
+      "Hard brand-color control via the colors parameter (explicit RGB triplets), which none of the other three endpoints expose",
+      "style_id lets you register and reuse a custom style, giving repeatable brand consistency across many generations",
+      "Strong long-text rendering for a design model; Recraft's own docs position accurate in-image text as a core capability",
+      "Arbitrary custom width/height up to 14142 px per side, plus the usual named presets"
+    ],
+    "weaknesses": [
+      "Prompt is capped at 1000 characters, far shorter than the Gemini endpoints - long narrative briefs must be compressed",
+      "Recraft's docs state V3 'does not handle very small text reliably'; distortion and typos appear at small sizes",
+      "Restricted character set: only Latin, Greek and Cyrillic variants plus listed symbols render; anything outside it will not render at all",
+      "Case-insensitive glyph handling: per Recraft's docs, characters in different cases are treated as the same symbol, so mixed-case typography is not dependable",
+      "Weaker than the Gemini endpoints for photoreal scenes with complex lighting; realistic_image styles are competent but not its edge",
+      "No seed parameter, so no reproducibility",
+      "No negative prompt",
+      "enable_safety_checker defaults to false on fal; set it deliberately for a public product"
+    ],
+    "prompt_style": "Compact art-direction, not narrative. You are choosing a style with the style enum and then describing content within it, so do not spend prompt characters re-describing the medium the style already encodes. Lead with the subject and composition, then the layout, then any literal text in double quotes, then the mood. Keep to a tight 20 to 50 words because the field caps at 1000 characters and Recraft rewards specificity over volume. Put brand colors in the colors array rather than in the prompt text.",
+    "ideal_length_words": [20, 55],
+    "structure_template": "[SUBJECT/SCENE in one clause], [COMPOSITION and layout note], [LITERAL TEXT: the words \"HEADLINE\" set large across the [position]], [MOOD or era], [simple background note]. (Medium and rendering style come from the style enum, not from this sentence.)",
+    "do": [
+      "Choose the style enum first and let it carry the medium; realistic_image* for photo, digital_illustration* for raster art, vector_illustration* for scalable brand assets",
+      "Put every literal on-image string in double quotes - Recraft's docs state this makes the model treat it as literal text rather than as a description of text",
+      "Ask for text to be LARGE and state the size relationship ('set large across the top third, occupying about a quarter of the frame height'), because small text is the documented failure mode",
+      "Pass brand colors through the colors array as RGB objects rather than describing them in words",
+      "Restrict all on-image copy to Latin/Greek/Cyrillic characters and listed symbols; strip emoji, curly typographic quotes, ellipsis glyphs and unusual dashes before sending",
+      "Treat mixed-case wordmarks as unreliable and prefer all-caps headlines",
+      "Use vector_illustration styles when the client will need an SVG or infinite scaling, and accept the 2x cost",
+      "Register a style_id once for a brand, then reuse it across every asset for that brand",
+      "Set enable_safety_checker true for any user-facing product, since fal defaults it to false"
+    ],
+    "dont": [
+      "Don't write a 150-word narrative brief; it will be truncated at 1000 characters and dilutes adherence",
+      "Don't re-specify the medium in prose when the style enum already sets it ('a vector illustration of...' when style is already vector_illustration)",
+      "Don't request small captions, fine print, legal lines or dense body copy inside the image",
+      "Don't rely on precise mixed-case or unusual glyphs; the character set is limited and case is collapsed",
+      "Don't expect reproducible reruns; there is no seed",
+      "Don't use negative phrasing for exclusions; there is no negative prompt",
+      "Don't route photoreal hero product photography here by default when nano-banana is available"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "This endpoint is text-to-image only and accepts no reference image. The nearest equivalent to a reference is style_id, a UUID for a custom style previously registered with Recraft, which transfers look and feel but not a specific object. For an unchanged-product requirement, use nano-banana/edit instead.",
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Strong, and the best choice of these four when the headline must live inside a flat poster, vector layout, or brand asset with locked colors. Recraft's own docs give two operational levers: wrap the literal string in double quotes so it is read as text, and make the text large because small text renders unreliably and produces typos. Constraints to enforce in the backend: Latin/Greek/Cyrillic plus listed symbols only, unlisted characters will not render at all, and case differences are collapsed so prefer all caps. For photographic ad frames with a headline, nano-banana is the better renderer; for a designed poster or vector ad, Recraft V3 is.",
+    "key_params": {
+      "prompt": "string, 1 to 1000 chars. Compact art direction. The 1000-char cap is a hard constraint on any rewriter.",
+      "style": "enum, default realistic_image. Families: any, realistic_image (+~20 substyles incl. b_and_w, hard_flash, hdr, studio_portrait), digital_illustration (+~30 substyles incl. pixel_art, hand_drawn, grain), vector_illustration (+~20 substyles incl. bold_stroke, cutout). Vector styles cost 2x.",
+      "image_size": "square_hd | square | portrait_4_3 | portrait_16_9 | landscape_4_3 | landscape_16_9, or a custom {width,height} object with each dimension in (0, 14142]. Default square_hd. Use a custom object for exact social crops such as 1080x1350.",
+      "colors": "array of {r,g,b} 0-255 objects, default []. The hard brand-palette lever; use it instead of naming colors in the prompt.",
+      "style_id": "UUID4 or null. A registered custom style. Overrides style; the durable way to lock a brand look.",
+      "enable_safety_checker": "boolean, default false on fal. Set true for anything user-facing."
+    },
+    "cheap_concepting_settings": {
+      "style": "digital_illustration",
+      "image_size": "square_hd",
+      "enable_safety_checker": true
+    },
+    "worked_example": {
+      "user_idea": "a poster ad for our running shoe sale that says 50% OFF",
+      "optimized_prompt": "A single running shoe angled dynamically in the lower half of the frame with a bold diagonal speed stripe behind it. The words \"50% OFF\" set very large across the top third in heavy all-caps type, occupying about a quarter of the frame height, with the words \"RUNNING SALE\" smaller directly beneath. Flat two-tone background, generous margins, high-energy sports poster composition."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/recraft/v3/text-to-image",
+      "https://fal.ai/models/fal-ai/recraft/v3/text-to-image",
+      "https://www.recraft.ai/docs/recraft-studio/image-generation/working-with-text-and-prompts/adding-text-to-an-image",
+      "https://www.recraft.ai/blog/how-to-craft-prompts-for-accurate-ai-generated-images"
+    ]
+  }
+}

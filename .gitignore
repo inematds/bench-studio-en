@@ -1,0 +1,11 @@
+node_modules/
+data/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+playwright-report/
+test-results/
+handoff/

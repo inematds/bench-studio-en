@@ -1,0 +1,320 @@
+{
+  "fal-ai/flux-2-pro": {
+    "family": "flux2",
+    "modality": "text-to-image",
+    "strengths": [
+      "Flagship FLUX.2 text-to-image. Couples a Mistral-3 24B vision-language encoder to a rectified flow transformer, so it follows long natural-language instructions and spatial relationships far better than FLUX.1",
+      "Legible in-image text is now production-grade: complex typography, infographics, memes, UI mockups (BFL's headline claim for FLUX.2)",
+      "Strong real-world grounding: plausible lighting, material response, physically sensible scene logic",
+      "Reliable hex-code color control when the hex is bound to a named object",
+      "Handles photographic vocabulary (camera bodies, lens, aperture, film stock) as real style levers"
+    ],
+    "weaknesses": [
+      "No negative prompt anywhere in the FLUX family. Any 'no X' phrasing tends to summon X",
+      "No guidance_scale, steps, or CFG exposed on this fal endpoint, so you cannot dial prompt adherence; the prompt text is the only control surface",
+      "Long text strings still degrade. 1 to 4 words per text element is the safe zone; paragraphs of body copy will garble",
+      "Keyword-soup prompts (comma-separated tags, '8k, masterpiece, detailed') underperform prose",
+      "Detail buried late in a long prompt gets deprioritized: the model weights earlier tokens more heavily"
+    ],
+    "prompt_style": "Write flowing descriptive prose, not tag lists. One to three sentences, roughly 30 to 80 words for most jobs. Front-load whatever matters most, because FLUX.2 prioritizes tokens that appear early. Follow BFL's ordering: subject, then action or pose, then style or medium, then environment or context, then lighting, then technical camera detail. State everything positively, always describing what should be present instead of what should be absent (BFL's official position is that FLUX supports no negative prompts and that negation makes the model attend to the unwanted thing). Lighting is the single highest-leverage clause per BFL's own core-principles skill, so never omit it. Bind every color to the object it belongs to, using hex codes when precision matters ('the jacket in #0047AB', never 'use #0047AB somewhere'). Put any on-image copy in double quotes early in the prompt and describe its typeface, size hierarchy, and placement. For production or programmatic runs, BFL also documents a JSON prompt object (keys: scene, subjects[], style, color_palette[], lighting, mood, background, composition, camera{}) which trades expressiveness for element-by-element repeatability; use it when the same layout must be re-rendered with one field changed.",
+    "ideal_length_words": [30, 80],
+    "structure_template": "[Main subject with 2-3 concrete attributes] + [action or pose] + [any quoted on-image text with typeface, size, placement] + [style or medium] + [environment or setting] + [lighting: source, quality, direction] + [composition and framing] + [technical: camera body, lens, aperture, film stock] + [hex colors bound to specific objects]",
+    "do": [
+      "Lead with the subject and its most important attribute; word order is a real priority signal",
+      "Write prose sentences; separate distinct concepts with commas inside those sentences",
+      "Always specify a lighting setup (golden hour, softbox, rim light, volumetric fog, Rembrandt, chiaroscuro)",
+      "Name a camera and lens for photorealism ('shot on Hasselblad X2D, 100mm at f/2.8') or a medium for illustration ('classical oil painting, visible brushstrokes')",
+      "Quote exact on-image text and front-load it: 'A sign reading \"FRESH BREAD\" in a bakery window...'",
+      "Attach hex codes directly to objects, and give start and end hex for gradients",
+      "Rewrite every unwanted element as its positive replacement (no people -> 'deserted, solitary'; no blur -> 'tack-sharp, crisp detail'; no text -> 'clean unmarked surfaces')",
+      "Set image_size to a real aspect the composition needs; custom sizes must be multiples of 16 and between 256 and 2560 px",
+      "Pin the seed once a composition is close, then change one clause at a time"
+    ],
+    "dont": [
+      "Don't write negative prompts or 'without X' clauses; there is no negative_prompt field and negation backfires",
+      "Don't use keyword-tag style ('woman, portrait, 8k, ultra detailed, masterpiece')",
+      "Don't bury the hero subject behind a long environment preamble",
+      "Don't ask for sentences or paragraphs of legible in-image copy; keep each text element short",
+      "Don't reference guidance_scale, num_inference_steps, or a negative prompt on this endpoint; fal's schema does not expose them (guidance_scale exists only on flux-2/flash)",
+      "Don't float a hex code without naming the object it colors",
+      "Don't change five things at once when iterating"
+    ],
+    "motion_vocabulary": [],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Best-in-class for the FLUX line and one of the two headline upgrades over FLUX.1. BFL states legible fine text in typography, infographics, memes and UI mockups now works reliably in production. To get it: put the exact string in double quotes, place that clause early in the prompt, name the typeface class ('bold condensed grotesque', 'high-contrast Didone serif', 'LCD-style digital monospace'), state size hierarchy when there is more than one string ('large headline \"SUMMER FEST\" above smaller \"JULY 15-17\"'), state placement ('centered in the storefront window'), and ensure high contrast against the background. Short strings are far more reliable than long ones. If a word keeps misspelling, shorten it, prefer a common word, and reduce the rest of the prompt's complexity. Note: BFL's own typography guide recommends FLUX.2 [flex] for the very best typography because it exposes steps and guidance (steps 50 / guidance 7 for clean type); that control is not available on fal's flux-2-pro endpoint, so on fal the lever is prompt phrasing and re-rolling seeds.",
+    "key_params": {
+      "prompt": "The only real control surface. Required string.",
+      "image_size": "Enum square_hd | square | portrait_4_3 | portrait_16_9 | landscape_4_3 | landscape_16_9, or a custom {width,height} object between 256 and 2560 px, multiples of 16. Default landscape_4_3. Smaller custom sizes render faster and cheaper for concepting.",
+      "seed": "Integer or null (default null = random). Pin it to hold a composition while you edit one clause.",
+      "output_format": "jpeg (default) or png. jpeg for concepting, png only when you need lossless flats or crisp type edges.",
+      "safety_tolerance": "String \"1\" to \"5\", default \"2\". 1 strictest, 5 most permissive.",
+      "enable_safety_checker": "Boolean, default true. Disabling requires account authorization.",
+      "sync_mode": "Boolean, default false. true returns a data URI inline instead of a hosted URL and drops the request from history."
+    },
+    "cheap_concepting_settings": {
+      "image_size": {"width": 1024, "height": 768},
+      "output_format": "jpeg",
+      "seed": "null on the first pass, then pin the winning seed",
+      "note": "flux-2-pro has no steps/guidance to trade away, so the only cost lever here is smaller pixel dimensions and fewer re-rolls. For true cheap concepting, run fal-ai/flux-2/flash first and only promote the winning prompt to flux-2-pro."
+    },
+    "worked_example": {
+      "user_idea": "a cool poster for my coffee brand called Ember",
+      "optimized_prompt": "A matte black coffee bag standing on a scorched oak plank, the wordmark \"EMBER\" printed large across the front in a bold condensed sans-serif in #E8603C, with smaller \"SINGLE ORIGIN · DARK ROAST\" set beneath it in thin white uppercase letterspacing. Hard low side light rakes across the bag, catching the paper grain and throwing a long shadow to the right, faint smoke drifting through the beam. Studio product photography, shot on Hasselblad X2D with a 100mm lens at f/4, deep charcoal seamless backdrop, centered composition with generous negative space above."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux-2-pro",
+      "https://fal.ai/models/fal-ai/flux-2-pro",
+      "https://bfl.ai/blog/flux-2",
+      "https://docs.bfl.ml/guides/prompting_guide_flux2",
+      "https://github.com/black-forest-labs/skills (flux-image-best-practices: core-principles, t2i-prompting, typography-text, negative-prompt-alternatives, hex-color-prompting, json-structured-prompting)"
+    ]
+  },
+
+  "fal-ai/flux-2/flash": {
+    "family": "flux2",
+    "modality": "text-to-image",
+    "strengths": [
+      "Cheap and fast FLUX.2 variant; the right place to burn 10 to 40 concepting renders before promoting a prompt to flux-2-pro",
+      "Exposes guidance_scale, which flux-2-pro does not, so prompt adherence is actually tunable",
+      "num_images up to 4 in a single call, so you get a contact sheet per request",
+      "enable_prompt_expansion can auto-elaborate a thin prompt, useful when the user's idea is one line",
+      "Inherits FLUX.2 prompt understanding: prose, hex binding, quoted text all behave the same way"
+    ],
+    "weaknesses": [
+      "A distilled/fast tier: fine detail, small typography, and complex multi-element compositions are weaker than flux-2-pro. Treat legible small text as unreliable here",
+      "Resolution capped lower than pro (512 to 2048 px per side)",
+      "No negative prompt, same as the whole family",
+      "No reference-image input on this endpoint; it is text-to-image only",
+      "enable_prompt_expansion rewrites your prompt, which breaks A/B comparisons and seed-locked iteration"
+    ],
+    "prompt_style": "Identical grammar to flux-2-pro: prose, subject first, positive-only, lighting always named. Keep it a little tighter (roughly 25 to 60 words) because the fast tier rewards clear composition over dense detail. Use it for premise exploration, not for final craft: settle subject, framing, palette and lighting here, then re-run the exact same prompt on flux-2-pro for the deliverable. Leave enable_prompt_expansion false whenever you are comparing prompt variants, since it mutates the prompt behind your back.",
+    "ideal_length_words": [25, 60],
+    "structure_template": "[Main subject with 2-3 attributes] + [action or pose] + [style or medium] + [environment] + [lighting] + [composition and framing] + [hex colors bound to objects]",
+    "do": [
+      "Use num_images 3 or 4 to get a variation sheet per call",
+      "Start guidance_scale at the 2.5 default; raise toward 4 to 6 when the model is ignoring a specific instruction, lower toward 1.5 to 2 for looser, more photographic results",
+      "Keep composition simple: one subject, one clear light source",
+      "Record the seed of the winner so the same framing can be reproduced on the pro tier",
+      "Use jpeg or webp output during concepting; the default here is png, which is heavier"
+    ],
+    "dont": [
+      "Don't rely on it for legible small text, dense infographics, or fine product labels",
+      "Don't leave enable_prompt_expansion on during prompt A/B tests",
+      "Don't push guidance_scale high (above about 8); prompt adherence rises but images go stiff and oversaturated",
+      "Don't request sizes above 2048 px per side; the schema rejects them",
+      "Don't write negative prompts"
+    ],
+    "motion_vocabulary": [],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Meaningfully weaker than flux-2-pro. Short punchy words in large display type usually survive; small copy, multi-line layouts, and precise brand lockups usually do not. Prompt it the same way (quoted string, front-loaded, typeface named, high contrast), but treat any text result here as a layout sketch and re-render on flux-2-pro or an edit pass for the real thing.",
+    "key_params": {
+      "prompt": "Required string.",
+      "guidance_scale": "Number 0 to 20, default 2.5. Prompt adherence. Unique to flash among these endpoints.",
+      "num_images": "Integer 1 to 4, default 1. Use 4 for concepting sheets.",
+      "image_size": "Enum or custom {width,height}, 512 to 2048 px per side. Default landscape_4_3.",
+      "seed": "Integer or null, default null.",
+      "enable_prompt_expansion": "Boolean, default false. Auto-expands a thin prompt. Helpful for one-line user ideas, harmful for controlled iteration.",
+      "output_format": "jpeg | png | webp, default png.",
+      "enable_safety_checker": "Boolean, default true. Unsafe images return as black frames.",
+      "sync_mode": "Boolean, default false."
+    },
+    "cheap_concepting_settings": {
+      "image_size": {"width": 1024, "height": 576},
+      "num_images": 4,
+      "guidance_scale": 2.5,
+      "output_format": "jpeg",
+      "enable_prompt_expansion": false
+    },
+    "worked_example": {
+      "user_idea": "moody shot of a mechanical keyboard on a desk at night",
+      "optimized_prompt": "A dark grey mechanical keyboard with cream keycaps sits at a slight angle on a walnut desk, one key half-pressed. A single warm desk lamp rakes light from the left, catching the edge of each keycap and leaving the far side in deep shadow, a faint amber glow bleeding under the board. Night interior, city window blur far behind, shot on a 50mm lens at f/1.8, close three-quarter framing, shallow depth of field."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux-2/flash",
+      "https://fal.ai/models/fal-ai/flux-2/flash",
+      "https://docs.bfl.ml/guides/prompting_guide_flux2",
+      "https://github.com/black-forest-labs/skills"
+    ]
+  },
+
+  "fal-ai/flux-2-pro/edit": {
+    "family": "flux2",
+    "modality": "image-to-image",
+    "strengths": [
+      "Multi-reference editing is the other headline FLUX.2 upgrade over FLUX.1. BFL advertises up to 10 referenced images and claims best-in-class character, product and style consistency; on the API the practical ceiling for [pro] is around 8 references",
+      "Understands per-image roles: 'face from image 1, outfit from image 2, background from image 3' actually routes attributes",
+      "Preserves untouched regions well, so single-element edits (color change, background swap, object add/remove) are reliable",
+      "Can edit existing in-image text and keep the surrounding design (BFL: 'Change the store sign to read \"BAKER'S DOZEN\" in the same style')",
+      "image_size auto keeps the source's dimensions, so the edit does not silently reframe"
+    ],
+    "weaknesses": [
+      "No negative prompt and no strength / denoise parameter on this fal endpoint, so edit intensity is controlled only by how narrowly the prompt is scoped",
+      "Identity and label drift is the main failure mode: small logos, serial numbers, and dense package copy can be resynthesized rather than copied",
+      "Total input plus output pixel budget is finite (BFL documents roughly 9MP combined for [pro], so about 8 references at 1MP output, about 7 at 2MP). More references at higher output resolution get squeezed",
+      "Large multi-part transformations in one call blend badly; sequential single edits work better",
+      "Vague instructions ('make it better') produce arbitrary restyling"
+    ],
+    "prompt_style": "Write an instruction, not a scene description. State exactly what changes AND exactly what must stay identical, in the same sentence, because unstated elements are the ones that drift. Index the references explicitly ('image 1', 'image 2') and give each one a declared role. Keep it to one consequential change per call and chain calls for complex work. When the job is preserving a real product, invert the emphasis: most of the prompt should be the preservation contract (exact label text quoted, exact typeface, exact hex colors, exact geometry, exact finish) and only a short clause should describe what is new. Positive-only phrasing still applies, so 'keep the label exactly as in image 1' beats 'do not change the label'.",
+    "ideal_length_words": [20, 70],
+    "structure_template": "[Action verb + the one thing that changes] + [where it goes / how it integrates] + [explicit preservation contract: which elements stay pixel-identical, quoted text, hex colors, pose, lighting direction, style] + [reference role assignments: 'product from image 1, environment from image 2, lighting style from image 3']",
+    "do": [
+      "Name the role of every image you attach; never assume the model infers it",
+      "State the preservation contract explicitly: 'keeping the subject's pose, clothing and expression exactly the same'",
+      "Match lighting across combined elements: 'match the lighting direction of image 1, key light from the upper left'",
+      "Break a big transformation into a chain of small edits, one attribute per call",
+      "Leave image_size on auto when you want the original framing preserved",
+      "Pin a seed once an edit is close so subsequent wording tweaks are comparable",
+      "For text edits, quote both the old and the new string and say 'in the same typeface, size and position'"
+    ],
+    "dont": [
+      "Don't write 'do not change X'; write 'keep X exactly as in image 1'",
+      "Don't stack a background swap, a wardrobe change, a pose change and a style transfer into one prompt",
+      "Don't attach 8 references at 2MP output and expect all of them to be honored; stay inside the pixel budget",
+      "Don't describe the whole scene from scratch; that invites full regeneration instead of an edit",
+      "Don't expect a strength or denoise slider; fal's schema does not expose one",
+      "Don't feed heavily filtered, low-resolution, or motion-blurred references for identity-critical work"
+    ],
+    "motion_vocabulary": [],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Takes image_urls, an array of one or more image URLs. All attached images act as references, not as a single init image with a denoise strength; the prompt decides which reference contributes what. BFL documents up to 8 reference images via the [pro] API (10 in their playground for [max], 4 for [klein]), bounded by a combined input-plus-output pixel budget of roughly 9MP for [pro]. Order matters only because you refer to them by index in the prompt, so keep 'image 1' as the primary subject or product. fal's image_size defaults to auto, meaning output dimensions follow the model's read of the input.",
+    "reference_image_prompt_rules": [
+      "Declare image 1 as the authoritative product and say so: 'The product in image 1 is the exact reference; reproduce it unchanged.'",
+      "Quote every string on the packaging verbatim in the prompt, exactly as it appears: 'the label reads \"EMBER SINGLE ORIGIN\" above \"250g\"'. Un-quoted text gets rewritten.",
+      "Name the typeface class and case for each string ('bold condensed sans-serif, all caps'), so a resynthesized glyph lands in the right family.",
+      "Bind every product color to a hex code and to the specific part it belongs to ('cap in #1A1A1A, body in #F4F3EE, logo mark in #E8603C'). BFL's own guidance is to decompose a product into components (body, panels, trims, logo, patches) and assign a hex per component.",
+      "State the geometry contract: 'same proportions, same label placement, same cap height, same angle of the seam, same surface finish'.",
+      "Say the untouched scope out loud: 'do not restyle, relight, or re-letter the product; only the surrounding scene changes'. Phrase it positively as 'the product stays identical in shape, label text, typography and color while the background becomes ...'.",
+      "Confine the edit to the environment: describe the new background, surface, and lighting, and add 'match the new lighting onto the product without altering its printed artwork'.",
+      "In BFL's structured-JSON form, set \"color_match\": \"exact\" and \"detail_preservation\": \"high\" on the product subject. This is documented BFL guidance rather than a validated fal API field, so it functions as prompt text, not as a parameter.",
+      "Run one edit per call and inspect the label at 100% between calls; drift compounds silently across chained edits.",
+      "If the label still drifts, shrink the ask: composite the product back in post rather than asking the model to re-render identity-critical artwork."
+    ],
+    "text_rendering_quality": "Same FLUX.2 engine, so newly generated text is good and in-place text edits usually keep the original design. The failure case is text you did NOT ask about: existing small print near an edited region can be silently resynthesized into plausible gibberish. Defend against it by quoting the strings that must survive and adding an explicit 'all existing printed text stays exactly as in image 1' clause. For guaranteed brand copy, treat the model output as a plate and composite the real artwork in post.",
+    "key_params": {
+      "prompt": "Required. Write it as an edit instruction plus a preservation contract.",
+      "image_urls": "Required array of reference image URLs. One for a simple edit, up to ~8 for multi-reference composition.",
+      "image_size": "Default auto (model matches the input). Can be forced to an enum or custom {width,height} up to 14142 px per side. Keep auto for edits.",
+      "seed": "Integer or null. Pin it to isolate the effect of a wording change.",
+      "output_format": "jpeg (default) or png. Use png when the edit involves crisp type or flat graphics.",
+      "safety_tolerance": "\"1\" to \"5\", default \"2\".",
+      "enable_safety_checker": "Boolean, default true.",
+      "sync_mode": "Boolean, default false."
+    },
+    "cheap_concepting_settings": {
+      "image_size": "auto",
+      "output_format": "jpeg",
+      "seed": "pin after the first acceptable result",
+      "note": "There is no cheap tier of the edit endpoint in this set (flux-2/flash is text-to-image only), so the cost lever is fewer, better-scoped calls: one change per call, smallest reference set that carries the job."
+    },
+    "worked_example": {
+      "user_idea": "put my coffee bag photo on a marble counter in morning light, don't change the bag",
+      "optimized_prompt": "Place the coffee bag from image 1 upright on a honed white marble counter in a bright morning kitchen, soft daylight entering from a window on the left, a soft shadow falling to the right and a shallow out-of-focus kitchen behind. The bag stays identical to image 1 in shape, proportions, seam placement and surface finish, and all printed artwork is reproduced exactly: the wordmark reads \"EMBER\" in bold condensed all-caps sans-serif in #E8603C, with \"SINGLE ORIGIN · DARK ROAST\" beneath it in thin white uppercase, on the same matte black body in #1A1A1A. Only the environment and lighting change; relight the bag naturally for the new scene while keeping every letterform, color and label position as in image 1."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/flux-2-pro/edit",
+      "https://fal.ai/models/fal-ai/flux-2-pro/edit",
+      "https://docs.bfl.ml/guides/prompting_guide_flux2",
+      "https://bfl.ai/blog/flux-2",
+      "https://github.com/black-forest-labs/skills (flux-image-best-practices: i2i-prompting, multi-reference-editing, hex-color-prompting, json-structured-prompting)"
+    ]
+  },
+
+  "blackforestlabs/flux-3/text-to-video": {
+    "family": "flux3",
+    "modality": "text-to-video",
+    "strengths": [
+      "Native synchronized audio generated as part of the clip, not bolted on: dialogue, ambience, effects and music, with lip sync across English, Chinese, Spanish, French, German, Japanese, Portuguese, Russian, Italian, Indonesian, Turkish, Hindi, Punjabi and more",
+      "Long clips for a single generation: up to 20 seconds at 720p or 1080p",
+      "Strong instruction following on physical events, material behavior and scene logic; BFL reports an internal text-to-video ELO of 1135",
+      "Reliable at single-event cinematic inserts: atmospheric light through a medium, wet reflections, viscous liquid macro, tactile contact and ignition, restrained noir",
+      "Can hold multiple shots and camera angles inside one coherent video when asked"
+    ],
+    "weaknesses": [
+      "No negative prompt and no seed input on the fal endpoint (a seed comes back in the output but cannot be supplied), so runs are not reproducible from the API",
+      "Audio is texture, not sync. BFL's own field guide warns that ignition or impact sound can pre-lap or miss the visible moment; frame-accurate sync belongs in post",
+      "Legible on-screen typography, sequential character animation (typewriter, stamping), graphic sans-serif overlays, and CJK featured copy are documented failure lanes",
+      "Close human performance, action-at-a-distance force transfer, and long multi-step narratives with exact timing are parked lanes",
+      "Long single takes of simple events can still stutter or jump scene",
+      "Identity-critical products without an image reference will drift; that job belongs on the image-to-video or keyframe path, not text-to-video"
+    ],
+    "prompt_style": "Direct one shot around exactly one motivated physical or atmospheric event, and write it as a beat sequence rather than a mood board. BFL's own shot order is: opening frame (composition, subject, setting, light), then the visible cause with its source and contact point in frame, then the physical response with direction and material behavior, then a payoff that works as an edit point or a still, then a continuity contract, then audio intent. Camera is one physical contract, so pick framing, angle, movement and focus that are mutually possible (a locked-off camera cannot track; an extreme close-up cannot establish) and default to locked and deliberate, moving only when the movement serves the event. Make style visible rather than adjectival: 'tense' becomes rigid posture, shallow breathing and a slow push-in; 'vintage' becomes a named capture format, grain structure and practical light. Always add a continuity contract ('same set and geometry throughout, one continuous take, no cuts, transitions, frozen frames or resets'), because unstated continuity is where scene jumps come from. Name each audio layer separately (speech, voiceover, ambience, effects, music, or deliberate silence) and give every sound a physical source; quote dialogue verbatim, name the visible speaker or label the line as voiceover, and add 'no on-screen text, no subtitles' when text is unwanted. Write dialogue for the clip's real duration: short sentences, one thought per line, room before and after the payoff.",
+    "ideal_length_words": [60, 140],
+    "structure_template": "[Opening frame: composition, subject, setting, light] + [visible cause: the source and its contact point, in frame] + [physical response: direction, material behavior, restraint] + [payoff: one final state that reads as an edit point] + [camera contract: framing, angle, movement, focus] + [continuity contract: same set and geometry, one continuous take, no cuts or resets] + [audio intent, layer by layer: speech (quoted, speaker named) / effects tied to their cause / ambience / music / silence, and what leads the mix]",
+    "do": [
+      "Commit to one visible cause, one physical response, one payoff, all legible in the same frame",
+      "Run BFL's six-question concept test first: is it one standalone insert; is there one cause, response and payoff; are cause and effect close enough to read in one frame; does light, material, weather or reflection make it cinematic; is it interesting without exact text or sync; would an editor know where to use it",
+      "Prefer the proven lanes: light through fog, rain, steam or glass; disturbed and settling reflections; viscous macro (honey coiling, crema folding, caramel threading, butter browning); contact and ignition; restrained noir with a motivated event",
+      "Give the reflection or the medium something specific to do ('the puddle reflection shatters into ribbons, then reassembles')",
+      "Use draft mode / low-cost preview while the concept is unproven and judge the draft only on event legibility, composition, camera and continuity; softness is the draft trade-off",
+      "Iterate as a ladder, one consequential change per variant: event geometry, then material or light, then composition, then duration",
+      "Set generate_audio false when you want a silent plate to score in post",
+      "Match duration to the event: 5 seconds for a single macro beat, 10 to 20 only when the event genuinely develops"
+    ],
+    "dont": [
+      "Don't write a negative prompt; the endpoint has no such field",
+      "Don't ask for legible on-screen graphic text, subtitles, typewriter or stamping effects, or CJK featured copy",
+      "Don't promise frame-accurate audio sync, exact wording, or speaker identity across separate generations; route those to post",
+      "Don't stack unmotivated sparks, bells, alarms or effects with no visible cause",
+      "Don't cram a multi-step mechanism or a narrative with beats into one text-to-video shot",
+      "Don't fix a structural miss with more adjectives; after two structurally similar misses, change the concept or the production method",
+      "Don't rely on an identity-critical product looking right without conditioning imagery"
+    ],
+    "motion_vocabulary": [
+      "locked-off static shot",
+      "slow push-in",
+      "slow pull-back",
+      "dolly in / dolly out",
+      "tracking shot following the subject",
+      "slow pan left / right",
+      "tilt up / tilt down",
+      "orbit around the subject",
+      "crane up",
+      "handheld with subtle drift",
+      "rack focus from foreground to background",
+      "shallow depth of field, focus holding on the contact point",
+      "macro close-up",
+      "extreme close-up",
+      "medium shot",
+      "wide establishing shot",
+      "low angle / high angle / eye level",
+      "one continuous take, no cuts",
+      "slow motion",
+      "beam sweep across the frame",
+      "practical lights waking sequentially toward camera"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Not on this endpoint. blackforestlabs/flux-3/text-to-video on fal takes prompt only, with no image or video input field in the schema. FLUX 3 the model does support image-to-video, keyframe-controlled transitions, and video continuation from up to four seconds of supplied video plus audio, but those run through different endpoints; do not send reference images here.",
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Weak and explicitly not recommended. BFL's FLUX 3 field guide parks CJK featured copy, graphic sans-serif overlays, late-shot text and sequential character creation (typewriter, stamping) as reroute cases; only a single handwritten or inked phrase is listed as an experimental lane that can sometimes work. Treat any titles, captions, lower thirds or subtitles as post-production. When speech is in the clip, add 'no on-screen text, no subtitles' so the model does not invent burned-in captions.",
+    "key_params": {
+      "prompt": "Required. The full shot direction including camera, continuity and audio intent.",
+      "duration": "\"auto\" (default) or 5 to 20 seconds. Longer costs more and raises the risk of scene jumps; pick the shortest duration the event needs.",
+      "resolution": "\"720p\" (default) or \"1080p\". 720p for concepting, 1080p only for the take you are keeping.",
+      "aspect_ratio": "\"auto\" (default), 21:9, 2:1, 16:9, 4:3, 1:1, 3:4, 9:16.",
+      "generate_audio": "Boolean, default true. Set false for a deliberately silent plate, which is also the safer choice when post owns the sound design.",
+      "safety_tolerance": "Integer 0 to 4, default 2. 0 strictest, 4 most permissive."
+    },
+    "cheap_concepting_settings": {
+      "duration": 5,
+      "resolution": "720p",
+      "generate_audio": false,
+      "aspect_ratio": "16:9",
+      "note": "fal's schema exposes no draft flag; BFL's own API has a Draft Mode for cheap previews that replays the chosen draft at full quality, but that is not verifiable as a parameter on this fal endpoint. On fal, cheap concepting means short duration at 720p with audio off, then one final pass at the real duration and 1080p."
+    },
+    "worked_example": {
+      "user_idea": "something moody with a coffee pour for my brand intro",
+      "optimized_prompt": "Extreme macro on a white ceramic cup already half filled with espresso, set on dark slate, hard raking side light from the left picking out the crema's texture while the background falls to near-black. A thin stream of steamed milk enters from the top of frame, aligned to the center of the cup, and strikes the surface. The crema folds inward in concentric rings, the milk blooming a pale ring that widens and slows, steam drifting up through the light beam. The pour stops clean and a single drop falls, sending one ripple to the cup's rim, the surface settling into a still pale-and-brown swirl. Locked-off macro camera, shallow depth of field holding focus on the contact point, one continuous take on the same set and geometry, no cuts, transitions or resets. Audio: the low hiss of the pour and a soft ceramic-close ambience only, no music, no dialogue, no on-screen text, no subtitles."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=blackforestlabs/flux-3/text-to-video",
+      "https://fal.ai/models/blackforestlabs/flux-3/text-to-video",
+      "https://bfl.ai/blog/flux-3-video",
+      "https://bfl.ai/blog/flux-3",
+      "https://github.com/black-forest-labs/skills (flux-3-video, flux-3-cinematic-inserts + field-guide, flux-3-audio-dialogue, flux-3-generate)"
+    ]
+  }
+}

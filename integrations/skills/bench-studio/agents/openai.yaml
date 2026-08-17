@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bench Studio"
+  short_description: "Create media, websites, and PDFs through local Bench."
+  default_prompt: "Use $bench-studio to choose the right creative pipeline, create the requested artifact, and return its verified local result."

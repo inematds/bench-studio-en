@@ -1,0 +1,2305 @@
+{
+  "_meta": {
+    "provider": "kling",
+    "generated_at": "2026-08-17T00:48:13.541Z",
+    "source": "kling who_am_i (CLI oficial @klingai/cli-global)",
+    "account": "userId 3422648",
+    "regenerate": "node server/providers/kling_sync.mjs",
+    "revendidos": "gemini-* e gpt-image-* aparecem TAMBEM aqui, alem da rota fal: e a escolha de rota (dolar no fal x credito do plano no Kling) que o estudio existe para tornar visivel. O label traz `via Kling`.",
+    "note": "Defaults de resolucao forcados para 720p/1k conforme ~/projetos/klingai-nei/README.md — resolucao alta multiplica creditos."
+  },
+  "models": [
+    {
+      "id": "kling/kling-video-v2_5",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling v2.5 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "可灵2.5, Video2.5, v2.5Turbo",
+      "description": "This model is a great value and generate videos quickly",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support only 5s or 10s.",
+          "enum": [
+            "5",
+            "10"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Output resolution tier. 720p = std, 1080p = pro (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "true"
+        },
+        "enable_asmr": {
+          "name": "enable_asmr",
+          "type": "string",
+          "title": "Enable Asmr",
+          "description": "Whether to enable ASMR mode for enhanced detail sound effects; suited to highly immersive content. Takes effect when enable_audio is 'true'.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "audio_prompt": {
+          "name": "audio_prompt",
+          "type": "string",
+          "title": "Audio Prompt",
+          "description": "Sound-effect description, e.g. 木船吱呀声 (a creaking wooden boat). Takes effect when enable_audio is 'true'."
+        },
+        "music_prompt": {
+          "name": "music_prompt",
+          "type": "string",
+          "title": "Music Prompt",
+          "description": "Background-music description, e.g. 悠远长笛旋律 (a distant flute melody). Takes effect when enable_audio is 'true'."
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v2_6",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling v2.6 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "可灵2.6, Video2.6, v2.6",
+      "description": "Video and sound generation model",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds.",
+          "enum": [
+            "5",
+            "10"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier. 720p=std, 1080p=pro. Tail image requires 1080p. (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "true"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-o1",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling o1 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "omni1, 可灵o1, o1-omni, video-o1",
+      "description": "Unified video model with all-in-one multimodal instructions and exceptional consistency.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds. only support 5s or 10s",
+          "enum": [
+            "5",
+            "10"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output video aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier (member: up to 1080p). (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0_omni",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling v3.0.omni · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0-omni, 可灵o3, v3-omni, omni3, video-o3",
+      "description": "All-in-one multimodal input, voice-driven characters, and native audio output. Default model for text prompt to video generation.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output video aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier. 720p=std, 1080p=pro. 4k for members. (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request. max to 4",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "prefer_multi_shots": {
+          "name": "prefer_multi_shots",
+          "type": "string",
+          "title": "Prefer Multi Shots",
+          "description": "Whether to enable smart multi-shot splitting (intelligent shot composition).",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling v3.0 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0, 可灵3.0, 视频3.0",
+      "description": "Enhanced native audio, improved element consistency, and support for multi-shot storytelling.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s.",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier (member: up to 4k). (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Quality tier (member: up to 4).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "prefer_multi_shots": {
+          "name": "prefer_multi_shots",
+          "type": "string",
+          "title": "Prefer Multi Shots",
+          "description": "Whether to enable smart multi-shot splitting (intelligent shot composition).",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0_turbo",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "t2v",
+      "label": "Kling v3.0.turbo · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0-turbo, video-3.0-turbo, v3-turbo, v3-fast, 3.0-fast",
+      "description": "Consistently excellent results, with even better value.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s.",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Output resolution tier. 720p, 1080p (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output video aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v2_5/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling v2.5 i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "可灵2.5, Video2.5, v2.5Turbo",
+      "description": "This model is a great value and generate videos quickly",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support only 5s or 10s.",
+          "enum": [
+            "5",
+            "10"
+          ],
+          "default": "5"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Output resolution tier. 720p = std, 1080p = pro (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "true"
+        },
+        "enable_asmr": {
+          "name": "enable_asmr",
+          "type": "string",
+          "title": "Enable Asmr",
+          "description": "Whether to enable ASMR mode for enhanced detail sound effects; suited to highly immersive content. Takes effect when enable_audio is 'true'.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "audio_prompt": {
+          "name": "audio_prompt",
+          "type": "string",
+          "title": "Audio Prompt",
+          "description": "Sound-effect description, e.g. 木船吱呀声 (a creaking wooden boat). Takes effect when enable_audio is 'true'."
+        },
+        "music_prompt": {
+          "name": "music_prompt",
+          "type": "string",
+          "title": "Music Prompt",
+          "description": "Background-music description, e.g. 悠远长笛旋律 (a distant flute melody). Takes effect when enable_audio is 'true'."
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v2_6/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling v2.6 i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "可灵2.6, Video2.6, v2.6",
+      "description": "Video and sound generation model",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds. only support 5s or 10s",
+          "enum": [
+            "5",
+            "10"
+          ],
+          "default": "5"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier. 720p=std, 1080p=pro. Tail image requires 1080p. (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Produce a work that includes audio. Only at resolution=1080p; not supported with a tail image.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "true"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-o1/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling o1 i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "omni1, 可灵o1, o1-omni, video-o1",
+      "description": "Unified video model with all-in-one multimodal instructions and exceptional consistency.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 10s.",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output video aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier (member: up to 1080p). (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0_omni/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling v3.0.omni i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0-omni, 可灵o3, v3-omni, omni3, video-o3",
+      "description": "All-in-one multimodal input, voice-driven characters, and native audio output. Default model for multi-image to video generation (first-tail and multi image ref). For single-image to video generation, use kling3.0-turbo instead.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output video aspect ratio.",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "default": "16:9"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier. 720p=std, 1080p=pro. 4k for members. (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request. max to 4",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "prefer_multi_shots": {
+          "name": "prefer_multi_shots",
+          "type": "string",
+          "title": "Prefer Multi Shots",
+          "description": "Whether to enable smart multi-shot splitting (intelligent shot composition).",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling v3.0 i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0, 可灵3.0, 视频3.0",
+      "description": "Enhanced native audio, improved element consistency, and support for multi-shot storytelling.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s. Longer durations may require prefer_multi_shots.",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Quality tier (member: up to 4k). (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Quality tier (member: up to 4).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        },
+        "prefer_multi_shots": {
+          "name": "prefer_multi_shots",
+          "type": "string",
+          "title": "Prefer Multi Shots",
+          "description": "Whether to enable smart multi-shot splitting (intelligent shot composition).",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "true"
+        },
+        "enable_audio": {
+          "name": "enable_audio",
+          "type": "string",
+          "title": "Enable Audio",
+          "description": "Whether to enable audio-video sync. When 'true', the model directly produces a work that includes audio.",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-video-v3_0_turbo/i2v",
+      "provider": "kling",
+      "kind": "video",
+      "lane": "i2v",
+      "label": "Kling v3.0.turbo i2v · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-to-video",
+      "thumbnail": null,
+      "alias": "kling3.0-turbo, video-3.0-turbo, v3-turbo, v3-fast, 3.0-fast",
+      "description": "Consistently excellent results, with even better value. First choice for single-image to video generation. For multi-image to video generation, use kling3.0-omni instead.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "duration": {
+          "name": "duration",
+          "type": "string",
+          "title": "Duration",
+          "description": "Video duration in seconds, support 3s to 15s.",
+          "enum": [
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "5"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "string",
+          "title": "Resolution",
+          "description": "Output resolution tier. 720p, 1080p (default do Bench forçado para 720p: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "default": "720p"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of videos to generate per request, max to 4.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gemini-3.1-flash-image",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "gemini-3.1-flash-image · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "Nano Banana 2",
+      "description": "Nano Banana 2 Flash (Gemini 3.1 Flash) text-to-image generation.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "0.5k",
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio. Omit to keep the reference image ratio (auto).",
+          "enum": [
+            "1:1",
+            "1:4",
+            "1:8",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:1",
+            "4:3",
+            "4:5",
+            "5:4",
+            "8:1",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "16:9"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images per request (max 9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gpt-image-2",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "gpt-image-2 · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "GPT-Image-2",
+      "description": "GPT-Image-2 text-to-image generation.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "quality": {
+          "name": "quality",
+          "type": "string",
+          "title": "Quality",
+          "description": "Image quality tier; affects pricing.",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "default": "medium"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "1:1"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images per request (max 9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gemini-3-pro-image",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "gemini-3-pro-image · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "Nano Banana Pro, Gemini 3 Pro Image",
+      "description": "Google Gemini 3 Pro image model (Nano Banana Pro). Higher fidelity and complex-scene/text rendering. Supports up to 4K.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio.",
+          "enum": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "1:1"
+        },
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution tier (up to 4K). (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "image_count": {
+          "name": "image_count",
+          "type": "string",
+          "title": "Image Count",
+          "description": "Number of images to generate (1-9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v3_0_omni",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Kling v3.0.omni · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "kling3.0-omni, 可灵o3, v3-omni, omni3, image-o3",
+      "description": "Enhanced narrative expression, native 2K/4K ultra-high definition output, and image series generation. Default model for text prompt to image generation.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution (member: up to 4k). (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio. Set to 'auto' to let the model infer the aspect ratio from the prompt.",
+          "enum": [
+            "auto",
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request. max to 9",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-o1",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Kling o1 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "omni1, 可灵o1, o1-omni, image-o1",
+      "description": "High feature consistency with precise detail editing and accurate style transfer.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output image resolution tier, e.g. 1k / 2k. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio.",
+          "enum": [
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v3_0",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Kling v3.0 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "kling3.0, 可灵3.0, image3.0",
+      "description": "Strengthen consistency, free multi-reference images, comprehensive effect upgrade.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output image resolution, e.g. 1k / 2k (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio, e.g. 1:1 / 3:4 / 16:9",
+          "enum": [
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate, max to 9",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v2_1",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "t2i",
+      "label": "Kling v2.1 · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "text-to-image",
+      "thumbnail": null,
+      "alias": "kling2.1, 可灵2.1, image2.1",
+      "description": "Superb prompt adherence & reliable output.",
+      "image_input": null,
+      "image_inputs": [],
+      "media_inputs": [],
+      "accepts_image": null,
+      "image_param": null,
+      "required": [
+        "prompt"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output image resolution tier. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio.",
+          "enum": [
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate, max 9.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gemini-3.1-flash-image/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "gemini-3.1-flash-image edit · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "Nano Banana 2",
+      "description": "Nano Banana 2 Flash (Gemini 3.1 Flash) image-to-image; single or multi-image reference (up to 10 via URL).",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution. max to 4k (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "0.5k",
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio. Omit to keep the reference image ratio (auto).",
+          "enum": [
+            "1:1",
+            "1:4",
+            "1:8",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:1",
+            "4:3",
+            "4:5",
+            "5:4",
+            "8:1",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "1:1"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images per request (max 9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gpt-image2/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "gpt-image2 edit · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "GPT-Image2",
+      "description": "GPT-Image2 image-to-image; single or multi-image reference (up to 10, total ≤ 50 MB).",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "quality": {
+          "name": "quality",
+          "type": "string",
+          "title": "Quality",
+          "description": "Image quality tier; affects pricing.",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "default": "medium"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "1:1"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images per request (max 9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/gemini-3-pro-image/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "gemini-3-pro-image edit · via Kling",
+      "resold": true,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "Nano Banana Pro, Gemini 3 Pro Image",
+      "description": "Higher-fidelity edit / blend / restyle from reference images with Gemini 3 Pro (Nano Banana Pro). Supports up to 4K.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio. Omit to keep the reference image ratio (auto).",
+          "enum": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "default": "16:9"
+        },
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution tier (up to 4K). (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "image_count": {
+          "name": "image_count",
+          "type": "string",
+          "title": "Image Count",
+          "description": "Number of images to generate (1-9).",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v3_0_omni/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Kling v3.0.omni edit · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "kling3.0-omni, 可灵o3, v3-omni, omni3, image-o3",
+      "description": "Enhanced narrative expression, native 2K/4K ultra-high definition output, and image series generation. Default model for image to image generation (single or multi image ref).",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output resolution (member: up to 4k). (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k",
+            "4k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio. Set to 'auto' to let the model infer the aspect ratio from the input image.",
+          "enum": [
+            "auto",
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request (max 9). Default set to `-1` when `story_mode` is `true` and to let the model infer the count from the prompt.",
+          "enum": [
+            "-1",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        },
+        "story_mode": {
+          "name": "story_mode",
+          "type": "string",
+          "title": "Story Mode",
+          "description": "Story / group-image mode. Generate multiple image series which may be different depends on the prompt. (Different from imageCount, which will generate same contents.) When 'true', the model infers the number of output images from the prompt and imageCount is ignored; defaults to 'false' (single composition).",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-o1/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Kling o1 edit · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "omni1, 可灵o1, o1-omni, image-o1",
+      "description": "High feature consistency with precise detail editing and accurate style transfer.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output image resolution tier. (default do Bench forçado para 1k: resolução alta multiplica o consumo de créditos; subir é decisão explícita)",
+          "enum": [
+            "1k",
+            "2k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio.",
+          "enum": [
+            "auto",
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v3_0/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Kling v3.0 edit · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "kling3.0, 可灵3.0, image3.0",
+      "description": "Strengthen consistency, free multi-reference images, comprehensive effect upgrade.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "img_resolution": {
+          "name": "img_resolution",
+          "type": "string",
+          "title": "Img Resolution",
+          "description": "Output image resolution tier.",
+          "enum": [
+            "1k",
+            "2k"
+          ],
+          "default": "1k"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output aspect ratio.",
+          "enum": [
+            "auto",
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "3:4"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    },
+    {
+      "id": "kling/kling-image-v2_1/edit",
+      "provider": "kling",
+      "kind": "image",
+      "lane": "i2i",
+      "label": "Kling v2.1 edit · via Kling",
+      "resold": null,
+      "vendor": "Kuaishou",
+      "category": "image-editing",
+      "thumbnail": null,
+      "alias": "kling2.1, 可灵2.1, image2.1",
+      "description": "Superb prompt adherence & reliable output.",
+      "image_input": {
+        "name": "image",
+        "arity": "single",
+        "required": true
+      },
+      "image_inputs": [
+        "image"
+      ],
+      "media_inputs": [
+        {
+          "name": "image",
+          "type": "string",
+          "title": "Imagem",
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true
+        }
+      ],
+      "accepts_image": "single",
+      "image_param": "image",
+      "required": [
+        "image"
+      ],
+      "params": {
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "string",
+          "title": "Aspect Ratio",
+          "description": "Output image aspect ratio.",
+          "enum": [
+            "9:16",
+            "2:3",
+            "3:4",
+            "1:1",
+            "4:3",
+            "3:2",
+            "16:9",
+            "21:9"
+          ],
+          "default": "1:1"
+        },
+        "imageCount": {
+          "name": "imageCount",
+          "type": "string",
+          "title": "ImageCount",
+          "description": "Number of images to generate per request.",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "default": "1"
+        }
+      }
+    }
+  ]
+}

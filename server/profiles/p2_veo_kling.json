@@ -1,0 +1,622 @@
+{
+  "_meta": {
+    "researched": "2026-08-12",
+    "sources_of_truth": "fal OpenAPI schemas (fetched live 2026-08-12) for params; Google Gemini API Veo docs for prompt anatomy and audio syntax; fal.ai Kling 3.0 prompting guide for Kling craft.",
+    "unverified_notes": [
+      "Google's Veo doc states 'No subtitles or captions appear in generated videos'. In practice creators widely report burned-in captions when dialogue is written into the prompt. The negative_prompt mitigation listed in these profiles is a practical workaround, NOT vendor-documented.",
+      "fal's veo3.1 schemas expose a '4k' resolution enum. Google's own doc lists 4K as 8s-only. fal does not document a 4k price or caveat on the schema, so treat 4k as untested.",
+      "Kling v3 exact output resolutions per tier are not stated in the fal schemas beyond 'turbo standard = 720p'. Kling v3 pro resolution is not declared in the schema; do not assert a number.",
+      "Veo 3.1 reference-to-video on fal takes an image_urls array with no documented max in the schema; Google's docs cap asset references at 3. Assume 3."
+    ]
+  },
+
+  "fal-ai/veo3.1": {
+    "family": "veo",
+    "modality": "text-to-video",
+    "strengths": [
+      "Native synchronized audio: dialogue, sound effects and ambience generated with the video, no separate audio pass",
+      "Best-in-class prompt adherence for cinematic language (shot size, lens, camera move, lighting)",
+      "Physically plausible motion and lighting; strong on real-world materials, liquids, fabric, skin",
+      "Handles a full paragraph of directorial detail without collapsing to a generic look",
+      "1080p and 4k enum available on this fal endpoint; 24fps native"
+    ],
+    "weaknesses": [
+      "Hard 8s ceiling, so no long continuous narrative in one call",
+      "Only 16:9 and 9:16, no square",
+      "Writing dialogue tends to trigger burned-in on-screen captions in some generations",
+      "Strict safety filter; brand logos, celebrities and real trademarks frequently get blocked or auto-rewritten",
+      "Most expensive of the four families on a per-second basis; not a bulk concepting model at default settings",
+      "Text rendering inside the frame (product labels, UI copy) is unreliable"
+    ],
+    "prompt_style": "Write one dense cinematic paragraph, not a bullet list and not a shot script. Follow Google's documented anatomy in order: subject, then context/scene, then action, then style, then camera positioning and motion, then composition, then focus/lens, then ambiance (color palette and lighting), then audio. Use adjective-rich, concrete, visually checkable language ('brushed aluminium bottle beaded with condensation') over abstract mood words ('premium feel'). One continuous action beat only, because 8 seconds cannot hold two. State the camera move explicitly or the model picks a slow generic push-in. Put audio at the end as its own sentence or two so the audio direction does not contaminate the visual description. Never phrase a constraint as a negation inside the prompt; Google explicitly says 'no' instructions do not work, so put exclusions in negative_prompt as a plain comma-separated noun list.",
+    "ideal_length_words": [60, 140],
+    "structure_template": "[Subject: specific noun phrase with material, color, condition] in [Context: setting, time of day, surrounding detail]. [Action: one continuous verb beat over ~8 seconds]. [Style: film-style keywords, e.g. documentary, film noir, glossy commercial, 16mm]. [Camera: e.g. slow dolly-in, orbiting tracking shot, static locked-off, aerial descent] , [Composition: wide shot / medium / extreme close-up]. [Lens & focus: shallow focus, macro lens, anamorphic wide-angle]. [Ambiance: color palette + lighting, e.g. warm tungsten key with cool blue rim, golden hour]. Audio: [ambient bed], [specific sound effects]. [Optional dialogue: Speaker: \"line of dialogue.\"]",
+    "motion_vocabulary": [
+      "aerial view",
+      "drone shot descending",
+      "eye-level shot",
+      "low-angle shot",
+      "worm's eye view",
+      "top-down shot",
+      "over-the-shoulder shot",
+      "dolly in",
+      "dolly out",
+      "slow push-in",
+      "tracking shot",
+      "orbit / arc shot around the subject",
+      "pan left, pan right",
+      "tilt up, tilt down",
+      "crane shot",
+      "handheld",
+      "static locked-off shot",
+      "rack focus",
+      "wide shot, medium shot, close-up, extreme close-up",
+      "two-shot, single-shot",
+      "shallow focus, deep focus, soft focus, macro lens, wide-angle lens"
+    ],
+    "audio_prompting": "Veo 3.1 generates audio natively; generate_audio defaults to true. Three documented devices. Dialogue: put the spoken line in quotes and attribute it, e.g. Narrator: \"This is where it starts.\" or 'This must be the key,' he murmured. Sound effects: describe them explicitly as sounds, e.g. 'tires screeching loudly, engine roaring'. Ambient noise: describe the soundscape, e.g. 'a faint eerie hum resonates in the background'. Keep spoken lines short, roughly 12 to 15 words per 8-second clip, or delivery gets rushed. Google's docs state no subtitles or captions appear in output; in practice dialogue prompts often produce burned-in captions, so the practical mitigation is to add 'subtitles, captions, closed captions, on-screen text, watermark, logo overlay' to negative_prompt and to avoid the literal words 'says', 'caption' or 'text on screen' in the prompt. If you need no speech at all, write only ambience and sound effects, or set generate_audio false to save cost.",
+    "do": [
+      "Write one paragraph following subject > context > action > style > camera > composition > lens > ambiance > audio",
+      "Name the camera move explicitly, once",
+      "Give one action beat, since the clip is at most 8 seconds",
+      "Use concrete physical adjectives the model can render (material, color, wetness, wear, weight)",
+      "Put exclusions in negative_prompt as a bare noun list, not in the prompt",
+      "Add 'portrait' when a human face needs detail, per Google's guidance",
+      "Set a seed when iterating so a prompt tweak is the only variable",
+      "Set generate_audio false when the clip will be scored to music anyway"
+    ],
+    "dont": [
+      "Don't write negations in the prompt ('no people', 'without text'); Veo does not honor them",
+      "Don't stack two or more scene changes into one 8s prompt",
+      "Don't name real brands, trademarks, or public figures; safety filters block or auto_fix rewrites them",
+      "Don't ask for readable on-screen text or a specific logo; add it in post instead",
+      "Don't write long monologues; the clip cannot hold them",
+      "Don't leave auto_fix on when you need the exact prompt honored, it silently rewrites your wording"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "None. This endpoint is pure text-to-video with no image input.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration enum '4s' | '6s' | '8s' (default 8s). 24fps. resolution enum '720p' (default) | '1080p' | '4k'. Google documents 1080p and 4K as 8s-only. aspect_ratio '16:9' (default) or '9:16'. Prompt field max 20000 characters.",
+    "key_params": {
+      "prompt": "The full cinematic paragraph. Max 20000 chars, but 60-140 words is the working range.",
+      "duration": "'4s' | '6s' | '8s'. Use '4s' for cheap concepting, '8s' for the final and for 1080p/4k.",
+      "resolution": "'720p' | '1080p' | '4k'. '720p' for concepting, '1080p' for delivery.",
+      "aspect_ratio": "'16:9' | '9:16'. No square option.",
+      "generate_audio": "Bool, default true. Set false to drop audio and reduce cost when the clip is scored in post.",
+      "negative_prompt": "Comma-separated nouns to suppress. The only place exclusions work.",
+      "seed": "Int. Fix it to isolate prompt changes across iterations.",
+      "auto_fix": "Bool, default true here. Rewrites prompts that fail policy checks. Set false when you need your exact wording.",
+      "safety_tolerance": "'1' strictest to '6' loosest, default '4'. Leave at default."
+    },
+    "cheap_concepting_settings": {
+      "duration": "4s",
+      "resolution": "720p",
+      "generate_audio": false,
+      "auto_fix": true
+    },
+    "worked_example": {
+      "user_idea": "a cool shot of my matte black water bottle on a rock by a river",
+      "optimized_prompt": "A matte black insulated water bottle, beaded with cold condensation, resting on a wet granite boulder at the edge of a fast mountain river. Fine mist drifts across the frame and a single droplet slides down the bottle's side. Glossy outdoor commercial style, photoreal. Slow dolly-in with a subtle arc to the right, medium close-up, shallow focus with the rushing water blurred behind. Cool blue-grey palette, low golden-hour sun raking from camera left, soft rim light along the bottle's edge. Audio: steady rush of river water, distant birdsong, a faint breeze through pines."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1",
+      "https://fal.ai/models/fal-ai/veo3.1",
+      "https://ai.google.dev/gemini-api/docs/veo",
+      "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/video/video-gen-prompt-guide"
+    ]
+  },
+
+  "fal-ai/veo3.1/fast": {
+    "family": "veo",
+    "modality": "text-to-video",
+    "strengths": [
+      "Same prompt grammar and same native-audio capability as full Veo 3.1, at a lower cost and faster turnaround",
+      "The correct default for concepting and for picking a direction before spending on the full model",
+      "Same 720p/1080p/4k and 4s/6s/8s controls as the full endpoint, so a winning fast prompt ports over unchanged"
+    ],
+    "weaknesses": [
+      "Lower fidelity than full Veo 3.1 on fine detail, complex motion, hands and crowds",
+      "Same 8s ceiling and same 16:9 / 9:16 only limits",
+      "Same safety filtering and same caption-bleed risk on dialogue prompts",
+      "More prone to soft or mushy texture at 720p, which can misread as a bad prompt when it is just the tier"
+    ],
+    "prompt_style": "Identical grammar to fal-ai/veo3.1: one cinematic paragraph in subject > context > action > style > camera > composition > lens > ambiance > audio order. Because the fast tier loses fine detail, spend the word budget on silhouette, motion and lighting rather than micro-texture. Keep the scene simpler: one subject, one camera move, an uncluttered background. If the concept survives here it will look better on the full model with the exact same prompt.",
+    "ideal_length_words": [50, 110],
+    "structure_template": "[Subject: specific noun phrase with material and color] in [Context: setting and time of day]. [Action: one continuous verb beat]. [Style keywords]. [Camera move], [Composition]. [Lens & focus]. [Ambiance: palette + lighting]. Audio: [ambience], [sound effects]. [Optional Speaker: \"short line.\"]",
+    "motion_vocabulary": [
+      "slow push-in",
+      "dolly in",
+      "dolly out",
+      "tracking shot",
+      "orbit / arc shot",
+      "pan left, pan right",
+      "tilt up, tilt down",
+      "aerial view",
+      "static locked-off shot",
+      "handheld",
+      "low-angle shot",
+      "top-down shot",
+      "wide shot, medium shot, close-up, extreme close-up",
+      "shallow focus, deep focus, macro lens, wide-angle lens"
+    ],
+    "audio_prompting": "Same as fal-ai/veo3.1. Quotes with an attributed speaker for dialogue, explicit sound-effect nouns, and a described ambient bed. generate_audio defaults true. Keep spoken lines to about 12 words for an 8s clip. For the caption-bleed workaround, add 'subtitles, captions, on-screen text' to negative_prompt. Prefer ambience-only audio at this tier, since fast-tier lip sync is weaker than the full model's.",
+    "do": [
+      "Use this tier for every first pass and only promote the winner to fal-ai/veo3.1",
+      "Keep one subject and one camera move",
+      "Favor strong silhouette, contrast and lighting over fine texture description",
+      "Fix a seed so the promoted prompt lands close to the version you approved",
+      "Turn generate_audio off for silent b-roll to cut cost"
+    ],
+    "dont": [
+      "Don't judge fine detail at 720p fast and rewrite the prompt over it; re-render on the full tier instead",
+      "Don't write negations in the prompt",
+      "Don't stage crowds, complex hand action, or readable text at this tier",
+      "Don't rely on this tier for a dialogue hero shot"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "None. Text-only input on this endpoint.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration '4s' | '6s' | '8s' (default 8s). 24fps. resolution '720p' (default) | '1080p' | '4k'. aspect_ratio '16:9' (default) | '9:16'. Prompt max 20000 characters.",
+    "key_params": {
+      "prompt": "Cinematic paragraph, 50-110 words at this tier.",
+      "duration": "'4s' for concepting, '8s' for a final read.",
+      "resolution": "'720p' for concepting, '1080p' when the concept is locked.",
+      "aspect_ratio": "'16:9' | '9:16'.",
+      "generate_audio": "Default true. Set false for silent b-roll and cheaper runs.",
+      "negative_prompt": "Comma-separated exclusion nouns.",
+      "seed": "Fix when iterating and when promoting to the full tier.",
+      "auto_fix": "Default true; set false to force your exact wording.",
+      "safety_tolerance": "Default '4'."
+    },
+    "cheap_concepting_settings": {
+      "duration": "4s",
+      "resolution": "720p",
+      "generate_audio": false
+    },
+    "worked_example": {
+      "user_idea": "quick test: someone opening a laptop in a dark room and the screen lights up their face",
+      "optimized_prompt": "A young woman in a grey hoodie sits at a bare wooden desk in an otherwise dark room. She lifts the laptop lid in one smooth motion and the screen's cold light floods across her face. Moody tech-documentary style, photoreal, portrait. Slow push-in, medium close-up, shallow focus with the dark room falling off behind her. Near-black palette lit only by pale blue screen light and a faint warm streetlamp glow through the blinds. Audio: a soft hinge creak, the low hum of a room tone, a distant car passing outside."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1/fast",
+      "https://fal.ai/models/fal-ai/veo3.1/fast",
+      "https://ai.google.dev/gemini-api/docs/veo"
+    ]
+  },
+
+  "fal-ai/veo3.1/fast/image-to-video": {
+    "family": "veo",
+    "modality": "image-to-video",
+    "strengths": [
+      "Preserves the exact composition, framing, palette and product geometry of the supplied start frame, so a designed hero still becomes a moving shot without redesign",
+      "Native audio still available on an image-driven clip",
+      "The cheapest reliable way to put motion on an approved still, which sidesteps Veo's weak in-frame text rendering because the text lives in the input image",
+      "Handles subtle life-giving motion well: breath, blink, steam, dust, fabric drift, light shifts"
+    ],
+    "weaknesses": [
+      "The start frame is the first frame only; the model drifts away from it over 8 seconds, especially on faces and small logo detail",
+      "Aspect ratio is dictated by the image; non 16:9 / 9:16 inputs get cropped",
+      "Large camera moves invent off-frame content that will not match your product or set",
+      "auto_fix defaults to FALSE on this endpoint, unlike the text-to-video endpoints, so a policy-failing prompt errors instead of being rewritten",
+      "Input image capped at 8MB and should be 720p or higher"
+    ],
+    "prompt_style": "Describe MOTION and TIME, not appearance. The image already carries the subject, so re-describing what the thing looks like wastes budget and invites the model to re-imagine it. Open with the action that begins from the frame as shown, name the camera move, then the ambiance change over the 8 seconds (light shifting, steam rising, focus racking), then audio. Refer to the subject with a short generic handle ('the bottle', 'the woman in the grey hoodie') rather than a full description. Keep the camera move small: push-in, slight orbit, rack focus, gentle handheld. Anything bigger reveals space the model has to invent.",
+    "ideal_length_words": [35, 90],
+    "structure_template": "[Short handle for the subject as shown] [Action: what begins to move, one continuous beat]. [Camera: small move, e.g. slow push-in / subtle orbit right / gentle handheld drift / rack focus from foreground to subject]. [Ambiance change over the shot: light, weather, particles, focus]. Audio: [ambience], [sound effects]. [Optional Speaker: \"short line.\"]",
+    "motion_vocabulary": [
+      "slow push-in",
+      "subtle dolly in",
+      "gentle handheld drift",
+      "slight orbit right / left",
+      "rack focus to the subject",
+      "slow tilt up",
+      "slow pan right",
+      "static locked-off shot with the subject moving",
+      "parallax push past a foreground element"
+    ],
+    "audio_prompting": "Same Veo audio grammar: quoted attributed dialogue, explicit sound-effect nouns, described ambient bed. generate_audio defaults true. For a product shot, ambience plus one or two foley hits usually beats speech. If the input image contains on-screen text or a label, avoid writing dialogue at all, since caption bleed can print duplicate text over your artwork; add 'subtitles, captions, on-screen text' to negative_prompt as a precaution.",
+    "do": [
+      "Describe only motion, camera and light change; let the image carry appearance",
+      "Feed a 16:9 or 9:16 image at 720p or higher to avoid an automatic crop",
+      "Keep the camera move small so the model does not invent off-frame set",
+      "Use aspect_ratio 'auto' to inherit the image's framing",
+      "Set auto_fix explicitly if you want policy rescue, since it defaults to false here",
+      "Cap the input image at 8MB"
+    ],
+    "dont": [
+      "Don't re-describe the product's color, logo, or shape; that invites re-invention",
+      "Don't request a cut, a scene change, or a second location",
+      "Don't request a large sweeping crane or 180-degree orbit",
+      "Don't write negations in the prompt",
+      "Don't expect the last frame to still match the input pixel-for-pixel"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "Exactly one image via image_url, used as the animated START frame. It sets the first frame, the composition and the aspect ratio. Should be 720p or higher in 16:9 or 9:16; other ratios are cropped to fit. Max 8MB. It is a starting point, not a per-frame lock, so identity and fine detail drift as the clip progresses.",
+    "reference_image_prompt_rules": [
+      "Write the prompt as motion direction only: what moves, how the camera moves, how the light changes",
+      "Name the subject with a two or three word handle, never a full appearance description",
+      "Never restate color, finish, logo, typography or shape that is already visible in the image",
+      "Prefer ambient motion (steam, dust, breath, fabric, reflections) over the subject changing pose",
+      "Keep camera motion under a small push, orbit or rack focus so no unseen geometry has to be invented",
+      "Add 'text change, logo change, extra text, warped label, morphing product' to negative_prompt when a branded product is in frame"
+    ],
+    "duration_and_fps": "duration '4s' | '6s' | '8s' (default 8s). 24fps. resolution '720p' (default) | '1080p' | '4k'. aspect_ratio 'auto' (default) | '16:9' | '9:16'. Input image up to 8MB.",
+    "key_params": {
+      "image_url": "The start frame. Required. 720p+ in 16:9 or 9:16, under 8MB.",
+      "prompt": "Motion direction only. Required.",
+      "aspect_ratio": "'auto' inherits from the image, which is the safe default.",
+      "duration": "'4s' | '6s' | '8s'. '4s' for concepting.",
+      "resolution": "'720p' concepting, '1080p' delivery.",
+      "generate_audio": "Default true; set false for silent product b-roll.",
+      "negative_prompt": "Use it to protect branding: 'extra text, warped label, morphing product, subtitles, captions'.",
+      "seed": "Fix when iterating on the same start frame.",
+      "auto_fix": "Defaults to FALSE on this endpoint. Set true only if you accept prompt rewrites.",
+      "safety_tolerance": "Default '4'."
+    },
+    "cheap_concepting_settings": {
+      "duration": "4s",
+      "resolution": "720p",
+      "aspect_ratio": "auto",
+      "generate_audio": false
+    },
+    "worked_example": {
+      "user_idea": "make my product photo of a coffee bag move a bit, feels too static",
+      "optimized_prompt": "The coffee bag stays exactly where it sits as a thin ribbon of steam rises from the cup beside it and drifts left across the frame. A few coffee grounds settle on the counter. Slow push-in with a very slight orbit to the right, ending in a tighter medium shot. Warm morning light strengthens across the shot and the highlight on the bag's edge sharpens. Audio: a quiet kitchen room tone, the soft hiss of steam, a distant spoon against ceramic."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1/fast/image-to-video",
+      "https://fal.ai/models/fal-ai/veo3.1/fast/image-to-video",
+      "https://ai.google.dev/gemini-api/docs/veo"
+    ]
+  },
+
+  "fal-ai/veo3.1/reference-to-video": {
+    "family": "veo",
+    "modality": "reference-to-video",
+    "strengths": [
+      "THE product-ad lane. Up to three asset reference images of one person, character or product, and Veo preserves that subject's appearance while generating a wholly new scene around it",
+      "Unlike image-to-video, the reference images do NOT lock the composition, so you can place a real product into any set, lighting and camera move you write",
+      "Character and product consistency across multiple separate generations, which makes a multi-shot ad sequence possible",
+      "Native audio still available, so a spot can carry VO, foley and ambience in one call"
+    ],
+    "weaknesses": [
+      "Fixed 8s duration on this endpoint, no 4s cheap mode",
+      "Google documents asset references only; style references are NOT supported on Veo 3.1",
+      "Fine brand detail (small type on a label, an exact logo lockup) still degrades; the silhouette, color and material survive better than the typography",
+      "NO negative_prompt field on this endpoint, so exclusions cannot be expressed anywhere",
+      "Only one subject identity per set of references; it is not a way to combine two different products",
+      "Safety filters still apply to the reference images themselves"
+    ],
+    "prompt_style": "Treat the references as the casting and the prompt as the direction. Refer to the subject by a short generic handle that matches what the references show ('the bottle', 'the sneaker', 'the woman with short dark hair') and then spend every remaining word on scene, action, camera, composition, lighting and audio. Do NOT re-describe the subject's appearance; the references already define it and a competing description is the main cause of a product going off-model. Write it as one cinematic paragraph in Veo's normal order with the subject slot reduced to the handle: handle > context > action > style > camera > composition > lens > ambiance > audio. Because there is no negative_prompt on this endpoint, everything you want excluded has to be handled by writing a scene that simply does not contain it.",
+    "ideal_length_words": [50, 120],
+    "structure_template": "[Short handle matching the reference subject] in [Context: the new setting you want, with surface, background and time of day]. [Action: one continuous beat over 8 seconds]. [Style keywords]. [Camera move], [Composition]. [Lens & focus]. [Ambiance: palette + lighting]. Audio: [ambience], [sound effects]. [Optional Speaker: \"short line.\"]",
+    "motion_vocabulary": [
+      "slow dolly in",
+      "orbit / arc around the subject",
+      "tracking shot following the subject",
+      "crane down to the subject",
+      "aerial view",
+      "static locked-off product shot",
+      "rack focus onto the subject",
+      "pan right, tilt up",
+      "wide shot, medium shot, close-up, extreme close-up",
+      "shallow focus, macro lens, wide-angle lens"
+    ],
+    "audio_prompting": "Same Veo grammar and generate_audio defaults true. Quoted attributed dialogue, explicit sound-effect nouns, described ambience. For product spots, ambience plus one or two foley hits ('the cap twists open with a crisp click') reads more premium than VO, and it avoids the caption-bleed risk. Critically, this endpoint has NO negative_prompt, so the usual 'subtitles, captions' suppression is unavailable. If burned-in captions are unacceptable, write no dialogue at all, or set generate_audio false and score the clip in post.",
+    "do": [
+      "Supply 1 to 3 reference images of ONE subject from different angles, all clean and well lit",
+      "Name the subject with a short handle only and let the references carry appearance",
+      "Spend the prompt on the new scene, the camera move and the lighting",
+      "Reuse the same reference set and the same handle across shots to keep an ad sequence consistent",
+      "Keep the subject a meaningful size in frame; tiny-in-frame products lose their identity",
+      "Plan for 8s, because that is the only duration here",
+      "Score audio in post for brand spots rather than risking caption bleed"
+    ],
+    "dont": [
+      "Don't re-describe the product's color, logo, typography or proportions; that is what knocks it off-model",
+      "Don't mix two different products or two different people into one reference set",
+      "Don't send style or mood-board images; Veo 3.1 supports asset references only, not style references",
+      "Don't expect small label text to survive; shoot the pack-shot separately or fix it in post",
+      "Don't write negations, and don't expect a negative_prompt, this endpoint has none",
+      "Don't send low-resolution, cluttered, or heavily shadowed references"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "image_urls is an array of asset reference images of a SINGLE person, character or product. Google documents up to three, with referenceType 'asset'; style references are not supported on Veo 3.1. The model preserves the subject's appearance while generating an entirely new scene, so unlike image-to-video these images do NOT set the first frame, the composition or the aspect ratio. Best results come from 1 to 3 clean, well-lit views of the same subject from different angles on a plain background, with the subject filling most of the frame and no other objects competing for identity. Duration is fixed at 8s here, consistent with Google's note that reference images require the 8s mode.",
+    "reference_image_prompt_rules": [
+      "Describe MOTION, SCENE and CAMERA, never appearance, so the attached product image is preserved unchanged",
+      "Use a two or three word generic handle for the subject ('the bottle', 'the sneaker') that matches the references without adding new attributes",
+      "Never state a color, finish, material, logo, or label text that the references already show; a conflicting description overrides the reference and re-invents the product",
+      "Supply 2 to 3 angles of the same single subject rather than one, since extra angles stabilize the geometry as the camera moves",
+      "Use plain-background, evenly lit, high-resolution references with no other products, no people's hands and no burned-in marketing text",
+      "Keep the requested camera move moderate; a full orbit forces the model to invent the back of the product, so include a rear reference image if you need one",
+      "Frame the subject at a usable size in the written composition (medium or close-up), because a distant product loses its identity",
+      "Reuse the exact same handle wording and the exact same reference set across every shot of a campaign"
+    ],
+    "duration_and_fps": "duration is fixed at '8s' (const). 24fps. resolution '720p' (default) | '1080p' | '4k'. aspect_ratio '16:9' (default) | '9:16'. Reference images up to 8MB each.",
+    "key_params": {
+      "image_urls": "Array of asset reference images of one subject. 1 to 3 per Google's docs. Required.",
+      "prompt": "Scene, action, camera and lighting direction. Required. Do not describe the subject's appearance.",
+      "duration": "Fixed '8s'. Not adjustable, so there is no cheap short mode here.",
+      "resolution": "'720p' for concepting, '1080p' for delivery.",
+      "aspect_ratio": "'16:9' | '9:16'.",
+      "generate_audio": "Default true. Set false for silent product b-roll and to avoid caption bleed.",
+      "auto_fix": "Defaults to FALSE here. Set true only if you accept prompt rewrites.",
+      "safety_tolerance": "Default '4'. No negative_prompt exists on this endpoint."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "generate_audio": false,
+      "duration": "8s"
+    },
+    "worked_example": {
+      "user_idea": "here are 3 photos of my sneaker, I want an ad where it looks heroic on a city rooftop at sunset",
+      "optimized_prompt": "The sneaker rests on the raw concrete ledge of a city rooftop at sunset, the skyline hazy and out of focus far behind it. A light wind lifts a few grains of dust past it and the long shadow it casts creeps slowly across the concrete. Glossy premium sportswear commercial, photoreal. Slow arc from the left around to a three-quarter front view, ending in a low-angle medium close-up. Anamorphic wide-angle, shallow focus with the skyline soft. Warm amber and deep magenta sunset palette, hard low sun raking from camera right with a strong rim highlight along the upper edge. Audio: distant city traffic far below, wind across the rooftop, a low sustained synth swell."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1/reference-to-video",
+      "https://fal.ai/models/fal-ai/veo3.1/reference-to-video",
+      "https://ai.google.dev/gemini-api/docs/veo",
+      "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/video/use-reference-images-to-guide-video-generation",
+      "https://developers.googleblog.com/introducing-veo-3-1-and-new-creative-capabilities-in-the-gemini-api/"
+    ]
+  },
+
+  "fal-ai/kling-video/v3/pro/text-to-video": {
+    "family": "kling",
+    "modality": "text-to-video",
+    "strengths": [
+      "Up to 15 seconds in a single call, more than triple Veo's ceiling, so a real narrative beat fits in one generation",
+      "Native multi-shot: multi_prompt takes up to six shots with per-shot durations, giving a cut sequence from one request",
+      "Native audio including dialogue, with Chinese and English voice output and per-character speaker attribution",
+      "Strong subject and character consistency across shots within a generation",
+      "1:1 aspect ratio available, which Veo does not offer",
+      "Responds well to explicit filmmaking language: tracking, POV, shot-reverse-shot, long takes",
+      "negative_prompt and cfg_scale give real steering control"
+    ],
+    "weaknesses": [
+      "Weaker physical realism and lighting coherence than Veo on complex real-world material interactions",
+      "Longer durations amplify drift; a 15s single-shot prompt often decays in the back half",
+      "Lip sync and voice quality trail Veo's native audio",
+      "Non-English speech is auto-translated to English rather than spoken natively (outside Chinese and English)",
+      "In-frame text rendering is unreliable",
+      "The default negative_prompt 'blur, distort, and low quality' silently applies unless you override it"
+    ],
+    "prompt_style": "Write like a director issuing shot directions, not like someone listing objects. Kling 3.0 rewards cinematic intent: name the framing, the subject's movement and the camera's behavior in the same breath. Define core subjects clearly at the very start and keep those exact descriptions consistent for the whole prompt, using unique labels rather than pronouns or synonyms. For anything longer than about 6 seconds, do not write one dense paragraph, use multi_prompt with one shot per beat and its own duration, because a single paragraph stretched over 15 seconds drifts. When native audio is on, state explicitly who speaks and when, bind the dialogue to a visible action, and add a vocal description. Use 'Immediately,' as a temporal marker to keep two lines from merging.",
+    "ideal_length_words": [60, 150],
+    "structure_template": "SINGLE SHOT: [Subject: unique labeled description, e.g. 'A black-suited agent, mid-40s, close-cropped grey hair'] in [Setting]. [Framing: e.g. macro close-up / profile shot / wide establishing]. [Subject motion] while [Camera behavior: tracking, panning, moving in sync]. [Lighting and mood]. [Style keywords]. [Audio: who speaks, vocal quality, then the quoted line]. || MULTI-SHOT (multi_prompt): [{prompt: 'Shot 1. [framing] [subject label] [action] [camera]', duration: '5'}, {prompt: 'Shot 2. Immediately, [framing] [same subject label] [action] [camera]', duration: '5'}] with the total at or under 15s.",
+    "motion_vocabulary": [
+      "tracking shot",
+      "following shot moving in sync with the subject",
+      "long take",
+      "panning left / right",
+      "freeze",
+      "profile shot",
+      "macro close-up",
+      "POV shot",
+      "shot-reverse-shot",
+      "push in / pull out",
+      "orbit around the subject",
+      "handheld",
+      "crane up / crane down",
+      "wide establishing shot",
+      "over-the-shoulder"
+    ],
+    "audio_prompting": "generate_audio defaults true and supports Chinese and English voice output; other languages are automatically translated to English. fal's schema states the convention explicitly: for English speech use lowercase letters, and use uppercase only for acronyms or proper nouns. Label speakers with a consistent unique identifier such as [Character A: Black-suited Agent] and add a vocal description such as [Character A, raspy deep voice]. Describe the visible action first, then the line, so speech binds to the motion. Use 'Immediately,' between lines to control ordering and stop two lines from merging. Never use pronouns or synonyms for a speaker, and never leave a line unattributed in a multi-character scene. Set generate_audio false for silent b-roll.",
+    "do": [
+      "Define each subject with a unique label at the top and repeat that exact label everywhere",
+      "Write camera behavior explicitly for every shot",
+      "Use multi_prompt with per-shot durations for anything over about 6 seconds",
+      "Attribute every dialogue line to a labeled character with a vocal descriptor",
+      "Use lowercase for English speech, uppercase only for acronyms and proper nouns",
+      "Override the default negative_prompt with terms specific to your failure mode",
+      "Raise cfg_scale toward 0.7-0.8 when the model ignores your prompt; lower toward 0.3 when output looks stiff or over-literal"
+    ],
+    "dont": [
+      "Don't use pronouns, synonyms, or vague speaker labels like 'the man'",
+      "Don't compress a multi-scene story into one paragraph; use multi_prompt",
+      "Don't write a flat list of visual attributes with no camera or action direction",
+      "Don't send prompt and multi_prompt together, they are mutually exclusive",
+      "Don't exceed 2500 characters on prompt or negative_prompt",
+      "Don't expect readable in-frame text or exact logos"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "None on this endpoint. Text-only. For subject references on Kling v3, use the pro image-to-video endpoint's `elements` array.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration is a string enum from '3' through '15' seconds, default '5'. aspect_ratio '16:9' (default) | '9:16' | '1:1'. multi_prompt supports up to six shots with per-shot durations totalling no more than 15s. fps and exact output resolution are not declared in the fal schema for the pro tier, so do not assert a number.",
+    "key_params": {
+      "prompt": "Directorial text, max 2500 chars. Mutually exclusive with multi_prompt.",
+      "multi_prompt": "Array of {prompt, duration} shots, up to six, total <= 15s. The right tool for any sequence.",
+      "duration": "'3' to '15' seconds as a string. '5' for concepting.",
+      "shot_type": "'customize' (default, you control the shots) or 'intelligent' (model decides the shot structure). Use 'intelligent' only when you have no storyboard.",
+      "aspect_ratio": "'16:9' | '9:16' | '1:1'.",
+      "generate_audio": "Default true. Set false for silent b-roll and cheaper runs.",
+      "negative_prompt": "Default 'blur, distort, and low quality'. Max 2500 chars. Override deliberately.",
+      "cfg_scale": "0 to 1, default 0.5. Higher sticks closer to the prompt, lower gives the model freedom. 0.7-0.8 for prompt adherence, 0.3-0.4 for natural motion."
+    },
+    "cheap_concepting_settings": {
+      "duration": "5",
+      "generate_audio": false,
+      "cfg_scale": 0.5,
+      "shot_type": "customize"
+    },
+    "worked_example": {
+      "user_idea": "a barista making a latte, then a customer taking the first sip and smiling",
+      "optimized_prompt": "multi_prompt: [{\"prompt\": \"Shot 1. Macro close-up. [Character A: a tattooed barista in a black apron] pours steamed milk in a slow spiral into a white ceramic cup, a rosetta forming on the surface. The camera tracks the pour downward and holds. Warm café light, shallow depth of field, photorealistic.\", \"duration\": \"5\"}, {\"prompt\": \"Shot 2. Immediately, medium profile shot. [Character B: a woman in a mustard coat] lifts the same white cup and takes the first sip, then a slow smile spreads across her face. The camera moves in sync with her, drifting in slightly. Same warm café light, soft window backlight, photorealistic.\", \"duration\": \"5\"}]"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/v3/pro/text-to-video",
+      "https://fal.ai/models/fal-ai/kling-video/v3/pro/text-to-video",
+      "https://blog.fal.ai/kling-3-0-prompting-guide/"
+    ]
+  },
+
+  "fal-ai/kling-video/v3/turbo/standard/text-to-video": {
+    "family": "kling",
+    "modality": "text-to-video",
+    "strengths": [
+      "Cheapest and fastest way to test a Kling v3 idea, including the long-duration and multi-shot behavior",
+      "Still supports multi_prompt storyboards of 1 to 6 shots up to 15s total, so sequence structure can be validated cheaply",
+      "Supports 1:1 alongside 16:9 and 9:16",
+      "A prompt validated here ports almost unchanged to the pro tier"
+    ],
+    "weaknesses": [
+      "720p only, so this is a concepting tier and not a delivery tier",
+      "NO negative_prompt, NO cfg_scale, NO generate_audio on this endpoint, so it is silent and unsteerable beyond the prompt itself",
+      "Lower fidelity on faces, hands, crowds and fine texture than pro",
+      "No audio means dialogue timing cannot be validated here at all"
+    ],
+    "prompt_style": "Same directorial grammar as Kling v3 pro, minus every audio consideration. Because there is no negative_prompt and no cfg_scale, the prompt is the only lever, so it has to be more explicit than on pro: state the framing, the subject motion and the camera behavior for every beat. Keep subjects labeled uniquely and repeated verbatim. Use multi_prompt for anything over about 6 seconds. Write nothing about speech; audio is not generated here.",
+    "ideal_length_words": [50, 130],
+    "structure_template": "SINGLE SHOT: [Subject: unique labeled description] in [Setting]. [Framing]. [Subject motion] while [Camera behavior]. [Lighting and mood]. [Style keywords]. || MULTI-SHOT (multi_prompt, 1-6 shots, total <= 15s): [{prompt: 'Shot 1. [framing] [subject label] [action] [camera]', duration: '5'}, {prompt: 'Shot 2. Immediately, [framing] [same subject label] [action] [camera]', duration: '5'}]",
+    "motion_vocabulary": [
+      "tracking shot",
+      "following shot moving in sync with the subject",
+      "long take",
+      "panning left / right",
+      "profile shot",
+      "macro close-up",
+      "POV shot",
+      "push in / pull out",
+      "orbit around the subject",
+      "handheld",
+      "wide establishing shot",
+      "over-the-shoulder"
+    ],
+    "audio_prompting": null,
+    "do": [
+      "Use this tier for every first pass on a Kling idea, then promote the winning prompt to v3 pro",
+      "Validate multi-shot structure and per-shot durations here, since multi_prompt is supported",
+      "Be more explicit than usual, because prompt text is the only control available",
+      "Keep unique subject labels repeated verbatim across shots",
+      "Judge composition, pacing and camera behavior here, not texture"
+    ],
+    "dont": [
+      "Don't write dialogue or audio direction; no audio is generated on this endpoint",
+      "Don't try to pass negative_prompt or cfg_scale, they do not exist here",
+      "Don't ship this tier as final; it is 720p concepting output",
+      "Don't send prompt and multi_prompt together, they are mutually exclusive",
+      "Don't judge fine detail and rewrite the prompt over it"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None. Text-only input.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "720p standard tier. duration string enum '3' through '15', default '5'. aspect_ratio '16:9' (default) | '9:16' | '1:1'. multi_prompt supports 1 to 6 shots with per-shot durations totalling no more than 15s. Prompt max 3072 characters, with the guide recommending under 2500. fps is not declared in the fal schema.",
+    "key_params": {
+      "prompt": "Directorial text, max 3072 chars, keep under 2500. Mutually exclusive with multi_prompt.",
+      "multi_prompt": "1 to 6 shots of {prompt, duration}, total <= 15s.",
+      "duration": "'3' to '15' as a string. '5' for concepting.",
+      "aspect_ratio": "'16:9' | '9:16' | '1:1'."
+    },
+    "cheap_concepting_settings": {
+      "duration": "5",
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "test whether a two-shot sequence of a runner at dawn works before I pay for the good model",
+      "optimized_prompt": "multi_prompt: [{\"prompt\": \"Shot 1. Wide establishing shot. [Runner A: a woman in a grey windbreaker and black leggings] runs along an empty coastal road at dawn, her breath visible in the cold air. The camera tracks alongside her, moving in sync at her pace. Low sun, long shadows, muted blue and amber palette, photorealistic.\", \"duration\": \"5\"}, {\"prompt\": \"Shot 2. Immediately, low-angle macro close-up on [Runner A]'s shoes striking wet asphalt, water flicking up with each stride. The camera holds low and pans right to follow the motion. Same dawn light, shallow depth of field, photorealistic.\", \"duration\": \"5\"}]"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/v3/turbo/standard/text-to-video",
+      "https://fal.ai/models/fal-ai/kling-video/v3/turbo/standard/text-to-video",
+      "https://blog.fal.ai/kling-3-0-prompting-guide/"
+    ]
+  },
+
+  "fal-ai/kling-video/v3/pro/image-to-video": {
+    "family": "kling",
+    "modality": "image-to-video",
+    "strengths": [
+      "The most capable single endpoint of the seven: start frame, optional end frame, an `elements` reference system, multi-shot, native audio and per-element voice binding all in one call",
+      "`elements` accepts image sets (a frontal image plus 1 to 3 additional angle references) or a video, referenced in the prompt as @Element1, @Element2, which is Kling's direct answer to Veo's reference-to-video for products and characters",
+      "start_image_url plus end_image_url gives explicit first-and-last-frame control, so a shot can be aimed at a known ending composition",
+      "Up to 15 seconds and up to six shots from one image, far past Veo's 8s image-to-video",
+      "fal's guide notes Kling maintains text, signage and visual detail from the source image, which matters for branded packaging",
+      "Per-element voice_id binding keeps a character's voice consistent"
+    ],
+    "weaknesses": [
+      "No aspect_ratio and no resolution parameter; framing is inherited from start_image_url, so the input image has to be right",
+      "Input images are constrained: max 10MB, min 300x300, aspect ratio between 0.40 and 2.50",
+      "Element videos are limited to one per request, 3 to 10.05 seconds, 720 to 2160 px, 24 to 60 fps, 200MB",
+      "Long durations still drift, especially away from the start frame's fine detail",
+      "The default negative_prompt 'blur, distort, and low quality' applies silently unless overridden",
+      "Physical realism trails Veo on complex material interactions"
+    ],
+    "prompt_style": "Treat the start image as an anchor and write how the scene EVOLVES from it, not what it contains. Describe subtle movement, environmental change and camera behavior; Kling maintains text, signage and detail from the source, so re-describing them only risks re-invention. When using `elements`, address them by their @Element1 / @Element2 handles in the prompt rather than describing their appearance, and keep the handle wording identical across shots. For anything over about 6 seconds, use multi_prompt with one shot per beat. With audio on, label who speaks, bind the line to a visible action, and use 'Immediately,' to sequence lines. If you supply end_image_url, write the prompt as the journey between the two frames.",
+    "ideal_length_words": [40, 120],
+    "structure_template": "[Short handle for the subject as shown, or @Element1] [Action: how the scene evolves from the frame, one continuous beat]. [Camera behavior: tracking / slow push in / pan right / holds static]. [Environmental change: light, particles, weather, focus]. [Style keywords]. [Optional audio: [Character A, vocal quality] then the quoted line]. || MULTI-SHOT: multi_prompt array of {prompt, duration}, total <= 15s, reusing the same handles verbatim.",
+    "motion_vocabulary": [
+      "tracking shot",
+      "following shot moving in sync with the subject",
+      "slow push in / pull out",
+      "panning left / right",
+      "orbit around the subject",
+      "macro close-up",
+      "profile shot",
+      "POV shot",
+      "long take",
+      "handheld drift",
+      "holds static while the subject moves",
+      "rack focus"
+    ],
+    "audio_prompting": "generate_audio defaults true, with Chinese and English voice output and other languages auto-translated to English. fal's schema states the convention: lowercase for English speech, uppercase only for acronyms and proper nouns. Label each speaker consistently, e.g. [Character A: the craftsman], add a vocal descriptor such as [Character A, low gravelly voice], describe the visible action before the line, and use 'Immediately,' to keep consecutive lines from merging. Elements can carry a voice_id (created via fal-ai/kling-video/create-voice) which binds a specific voice to that element, so every prompt reference to @Element1 speaks in that voice. Set generate_audio false for silent product b-roll.",
+    "do": [
+      "Write motion and evolution from the start frame, not a description of it",
+      "Feed a start image that already has the framing and aspect ratio you want, since neither can be set as a parameter",
+      "Use `elements` with a frontal image plus 1 to 3 additional angles for any product or character that must stay on-model",
+      "Reference elements strictly as @Element1, @Element2 in the prompt text",
+      "Use end_image_url when the shot must land on a known final composition",
+      "Use multi_prompt for anything over about 6 seconds",
+      "Override the default negative_prompt with your actual failure modes, e.g. 'warped label, extra fingers, morphing text'",
+      "Raise cfg_scale to 0.7-0.8 when the model ignores direction, drop to 0.3-0.4 when motion looks stiff"
+    ],
+    "dont": [
+      "Don't re-describe an element's appearance in the prompt; use its @ handle",
+      "Don't send more than one element containing a video in a single request",
+      "Don't send prompt and multi_prompt together",
+      "Don't send images outside 300x300 minimum, 10MB, or the 0.40 to 2.50 aspect ratio band",
+      "Don't expect an aspect_ratio or resolution parameter; there is none on this endpoint",
+      "Don't request a big camera move that reveals geometry no reference image covers"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "Three separate mechanisms. (1) start_image_url, required, sets the animated first frame and dictates framing and aspect ratio; max 10MB, min 300x300, aspect ratio 0.40 to 2.50. (2) end_image_url, optional, sets the target final frame with the same constraints, so the model interpolates a journey between the two. (3) `elements`, an optional array of characters or objects to insert into the video; each element is either an image set (frontal_image_url plus reference_image_urls, 1 to 3 additional angle images, at least one required) or a single video_url (3 to 10.05s, 720-2160px, 24-60fps, max 200MB, only one video element per request), and each element may carry a voice_id. Elements are addressed in the prompt as @Element1, @Element2 in array order.",
+    "reference_image_prompt_rules": [
+      "Describe MOTION, camera behavior and environmental change only, so an attached product image is preserved unchanged",
+      "Address every element by its positional handle @Element1, @Element2 and never restate its color, finish, logo or label text",
+      "Give each element a frontal image plus 1 to 3 additional angle references, since extra angles are what keep geometry stable through a camera move",
+      "Use clean, evenly lit, plain-background reference images, at least 300x300 and under 10MB, within the 0.40 to 2.50 aspect ratio band",
+      "Choose the start frame as the actual composition you want, because framing and aspect ratio cannot be set any other way on this endpoint",
+      "Keep the same @ handles and the same element ordering across every shot of a sequence",
+      "Add 'warped label, morphing text, extra text, distorted logo' to negative_prompt whenever branded packaging is in frame",
+      "Add a rear or three-quarter reference image before requesting any orbit past 90 degrees"
+    ],
+    "duration_and_fps": "duration string enum '3' through '15', default '5'. multi_prompt supports multi-shot within the same 15s ceiling. No aspect_ratio and no resolution parameter, both are inherited from start_image_url. Input images: max 10MB, min 300x300, aspect ratio 0.40 to 2.50. Element videos: 3 to 10.05s, 720-2160px, 24-60fps, max 200MB. Output fps and resolution are not declared in the fal schema.",
+    "key_params": {
+      "start_image_url": "Required. The animated first frame; also sets framing and aspect ratio. 10MB max, min 300x300, AR 0.40-2.50.",
+      "end_image_url": "Optional target last frame, same constraints. Use for a shot that must land on a known composition.",
+      "elements": "Array of characters/objects. Each is an image set (frontal_image_url + 1-3 reference_image_urls) or one video_url, optionally with voice_id. Referenced in the prompt as @Element1, @Element2. This is the product-consistency lane on Kling.",
+      "prompt": "Motion and evolution direction, max 2500 chars. Mutually exclusive with multi_prompt.",
+      "multi_prompt": "Array of {prompt, duration} shots, total <= 15s.",
+      "duration": "'3' to '15' as a string. '5' for concepting.",
+      "shot_type": "'customize' (default) or 'intelligent' to let the model decide shot structure.",
+      "generate_audio": "Default true. Set false for silent product b-roll.",
+      "negative_prompt": "Default 'blur, distort, and low quality', max 2500 chars. Override with real failure modes.",
+      "cfg_scale": "0 to 1, default 0.5. 0.7-0.8 for adherence, 0.3-0.4 for looser natural motion."
+    },
+    "cheap_concepting_settings": {
+      "duration": "5",
+      "generate_audio": false,
+      "cfg_scale": 0.5,
+      "shot_type": "customize"
+    },
+    "worked_example": {
+      "user_idea": "I have a photo of a kitchen counter and separate photos of my sauce jar, put the jar in the scene and make it feel like an ad",
+      "optimized_prompt": "start_image_url = the kitchen counter photo; elements[0] = {frontal_image_url: jar front, reference_image_urls: [jar three-quarter, jar back]}. Prompt: \"@Element1 sits on the counter in the foreground as steam curls up from the pan behind it and a hand out of frame sets down a wooden spoon. The camera pushes in slowly and racks focus from the pan to @Element1. Warm afternoon window light strengthens across the counter and the highlight along the jar's shoulder sharpens. Photorealistic food commercial, shallow depth of field.\" negative_prompt: \"warped label, morphing text, extra text, distorted logo, blur, distort, low quality\""
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/v3/pro/image-to-video",
+      "https://fal.ai/models/fal-ai/kling-video/v3/pro/image-to-video",
+      "https://blog.fal.ai/kling-3-0-prompting-guide/",
+      "https://fal.ai/models/fal-ai/kling-video/create-voice"
+    ]
+  }
+}

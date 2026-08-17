@@ -1,0 +1,629 @@
+{
+  "_meta": {
+    "researched": "2026-08-12",
+    "verification_policy": "Every duration, fps, resolution, enum and parameter below was read directly from the live fal OpenAPI schema for that endpoint (https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>) on 2026-08-12. Prompt-craft guidance comes from Alibaba Cloud Model Studio's Wan prompt guide, the Lightricks LTX-2 repo + ltx.io prompting guide, and xAI's docs. Anything not verifiable from a primary source is explicitly labelled UNVERIFIED in-line.",
+    "endpoint_id_gotcha": "fal resolves these ids WITHOUT the fal-ai/ prefix for the Wan 2.6, LTX and Grok families: 'wan/v2.6/image-to-video', 'lightricks/ltx-2.5/...', 'xai/grok-imagine-video/...'. Prefixing them with fal-ai/ returns an empty schema. Wan 2.7 endpoints DO use the fal-ai/ prefix.",
+    "no_generation_calls_made": true
+  },
+
+  "fal-ai/wan/v2.7/text-to-video": {
+    "family": "wan",
+    "modality": "text-to-video",
+    "strengths": [
+      "Very large prompt window (5000 characters), so long structured multi-clause prompts are actually honored rather than truncated",
+      "Durations 2 to 15 seconds in 1-second steps, the widest granular duration control of any model in this profile set",
+      "Native audio: if no audio_url is given the model auto-generates matching background music; dialogue, sound effects and BGM can be described in the prompt",
+      "Responds well to the documented Alibaba 'Entity + Scene + Motion + Aesthetic control + Stylization' formula, including explicit lens, light source and camera-movement terms",
+      "Multi-shot narration is prompt-driven (shot number + timestamp), so a whole mini-sequence can be authored in one call",
+      "Real negative_prompt support (500 chars) plus a seed for reproducible A/B tests"
+    ],
+    "weaknesses": [
+      "enable_prompt_expansion defaults to TRUE, which silently rewrites the prompt with an LLM; a carefully engineered prompt can be overwritten unless you turn it off",
+      "1080p default plus long durations makes it the expensive option for concepting",
+      "Alibaba explicitly warns against legible text, named real people, rapid scene changes inside one clip, long choreographed action, and reliable lip-sync to specific words",
+      "shot_type control was removed in 2.7; single-shot must be requested in natural language inside the prompt"
+    ],
+    "prompt_style": "Write one dense, structured paragraph (or several labelled clauses) using Alibaba's advanced formula: Entity(description) + Scene(description) + Motion(description) + Aesthetic control + Stylization. Aesthetic control means naming the light source (daylight, firelight, overcast), the lighting quality (soft, hard, high contrast), the shot size (close-up, medium, wide), the camera angle (over-the-shoulder, high-angle, aerial), the lens (long-focus, ultra-wide fisheye) and the camera movement (push-in, pull-out, tracking, orbit, fixed). Because 2.7 dropped the shot_type parameter, append the literal instruction 'Generate single shot.' when you want one continuous take, or author 'Shot 1 [0-3s] ... Shot 2 [3-6s] ...' when you want a sequence. Audio is part of the prompt language: describe voice as lines + emotion + tone + speed + timbre + accent, sound effects as source material + action + ambient, music as style. Suppress audio you do not want with 'No dialogue.' or 'No background music.'. Turn enable_prompt_expansion off once the prompt is engineered, and leave it on only when the user gave a one-line idea and you want Wan's own rewriter to do the elaboration.",
+    "ideal_length_words": [60, 150],
+    "structure_template": "[SUBJECT with 2-3 concrete visual attributes] in [SETTING with time of day and 2 environmental details]. [MOTION: what the subject does, in order, one or two beats only]. [CAMERA: shot size + angle + lens + movement]. [LIGHT: source + quality + color]. [STYLE: film stock / genre / render look]. [AUDIO: ambient + music style, or 'No dialogue. No background music.']. Generate single shot.",
+    "motion_vocabulary": [
+      "push-in",
+      "pull-out",
+      "tracking shot",
+      "orbit",
+      "fixed camera",
+      "handheld",
+      "over-the-shoulder",
+      "high-angle",
+      "low-angle",
+      "aerial",
+      "close-up",
+      "medium shot",
+      "wide-angle",
+      "long-focus lens",
+      "ultra-wide-angle fisheye",
+      "slow motion"
+    ],
+    "do": [
+      "Order the prompt Entity, Scene, Motion, Aesthetic, Style; Wan's own guide is built around that order",
+      "Name exactly one camera move per clip",
+      "Append 'Generate single shot.' for a continuous take, since shot_type no longer exists in 2.7",
+      "Set enable_prompt_expansion to false when you have written a full structured prompt, true when the user idea is one short line",
+      "Use the negative_prompt field for quality artifacts ('low resolution, worst quality, blurry, distorted hands, subtitles, watermark') rather than writing 'no X' in the main prompt",
+      "Pin a seed when comparing two prompt variants"
+    ],
+    "dont": [
+      "Do not name real public figures",
+      "Do not request legible on-screen text or logos with readable lettering",
+      "Do not stack multiple scene changes into a single clip unless you are deliberately using the multi-shot timestamp format",
+      "Do not write a long choreographed action chain; keep it to one or two physical beats",
+      "Do not rely on precise lip-sync to specific words",
+      "Do not leave prompt expansion on for an already-optimized prompt"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "None. This endpoint takes no image input. It accepts an optional audio_url (WAV or MP3, 3 to 30 seconds, max 15 MB) as a driving/background audio track; if omitted the model generates its own music.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration is an integer enum 2..15 seconds (default 5). resolution is '720p' or '1080p' (default 1080p). aspect_ratio is one of 16:9, 9:16, 1:1, 4:3, 3:4 (default 16:9). Output fps is not exposed as a parameter; fal's own 2.7 sample renders 1920x1080 at 30 fps (observed on the fal model page, not a documented guarantee).",
+    "key_params": {
+      "prompt": "Max 5000 characters. The main lever; use the full structured formula.",
+      "negative_prompt": "Max 500 characters. Artifact and style suppression only.",
+      "enable_prompt_expansion": "Default true. LLM rewrites your prompt. Set false to keep an engineered prompt verbatim; the response returns actual_prompt so you can see what was used.",
+      "duration": "2-15s integer. Use 5 for concepting; cost scales with seconds.",
+      "resolution": "720p or 1080p. 720p for concepting.",
+      "aspect_ratio": "16:9 default; 9:16 for vertical.",
+      "audio_url": "Optional driving audio, WAV/MP3, 3-30s, <=15MB. Omit to let the model score it.",
+      "seed": "0-2147483647. Pin for A/B comparisons.",
+      "enable_safety_checker": "Default true; disabling requires account authorization."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "enable_prompt_expansion": false,
+      "seed": 12345
+    },
+    "worked_example": {
+      "user_idea": "a coffee shop opening in the morning, cozy vibe",
+      "optimized_prompt": "A young barista in a charcoal apron and rolled sleeves unlocks the front door of a small corner coffee shop, then lifts the roller blind so morning light floods the room. Warm wooden counter, brass espresso machine, steam rising from a freshly pulled shot, chalkboard menu out of focus behind her. Medium shot on a long-focus lens, slow push-in that ends on her face as she smiles at the first customer. Low golden sunrise light from camera left, soft and warm, gentle haze in the air. Filmic, shallow depth of field, muted amber palette, 35mm grain. Ambient street noise and the hiss of the steam wand, soft acoustic background music. No dialogue. Generate single shot.",
+      "settings": {"resolution": "720p", "duration": 5, "enable_prompt_expansion": false, "negative_prompt": "low resolution, worst quality, blurry, distorted hands, subtitles, watermark, text"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.7/text-to-video",
+      "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-video-prompt",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-video-api-reference",
+      "https://github.com/Wan-Video"
+    ]
+  },
+
+  "fal-ai/wan/v2.7/reference-to-video": {
+    "family": "wan",
+    "modality": "reference-to-video",
+    "strengths": [
+      "Accepts BOTH reference images and reference videos, and multiple of each, for multi-subject scenes (one person plus one product, for example)",
+      "References carry appearance, and for reference videos also motion and voice timbre, per Alibaba's own description of the feature",
+      "Alibaba documents an explicit addressing syntax: refer to uploads as 'Image 1', 'Image 2', 'Video 1' inside the prompt and compose them ('Image 1 in Image 2')",
+      "multi_shots flag plus prompt-level shot/timestamp authoring gives short narrative sequences",
+      "Subjects supported per Alibaba docs: people, cartoon characters, pets and props, which makes it the strongest product-preservation option in this set",
+      "Real negative_prompt and seed"
+    ],
+    "weaknesses": [
+      "Shorter maximum duration than the 2.7 text-to-video endpoint: 2 to 10 seconds only",
+      "No enable_prompt_expansion switch is exposed on this endpoint, though the output still returns actual_prompt, implying rewriting may occur server-side. Treat this as UNVERIFIED and write the prompt as if it will be used verbatim",
+      "Billing on fal for the reference path counts input video duration as well as output duration ($0.10/second, with an 8s input video plus 3s output billed as 11 seconds), so reference VIDEOS are expensive",
+      "Describing the product's appearance in the prompt fights the reference image and causes drift"
+    ],
+    "prompt_style": "Treat the prompt as a stage direction, not a description. The reference images already define appearance, so the prompt should spend its words on what MOVES, what the camera does, where the subject is placed, and the light. Address each upload by its Alibaba identifier, 'Image 1', 'Image 2', 'Video 1', numbered in the order you passed them in reference_image_urls / reference_video_urls, and compose them explicitly ('the bottle from Image 1 placed on the marble counter from Image 2'). Add a single explicit preservation clause: 'The product in Image 1 keeps its exact shape, label, color and proportions, unchanged throughout.' Then camera, then light, then audio. Append 'Generate single shot.' unless multi_shots is on. Keep the total under about 130 words; long appearance passages are the main cause of a product going off-model.",
+    "ideal_length_words": [40, 120],
+    "structure_template": "[Identifier clause: 'Image 1 shows <subject noun only>' / 'Place the <object> from Image 1 into the scene from Image 2']. [PRESERVATION: exact shape, label, color and proportions unchanged throughout]. [MOTION: what moves, one or two beats]. [CAMERA: shot size + one move]. [LIGHT: source + quality]. [AUDIO or 'No dialogue. No background music.']. Generate single shot.",
+    "motion_vocabulary": [
+      "slow orbit around the subject",
+      "push-in",
+      "pull-out",
+      "tracking shot",
+      "fixed locked-off camera",
+      "turntable rotation",
+      "rack focus",
+      "close-up",
+      "macro detail shot",
+      "over-the-shoulder"
+    ],
+    "do": [
+      "Pass clean, well-lit reference images of the subject on a plain or simple background, shot from the angle you want to open on",
+      "Pass more than one image of the SAME product from different angles when you want it to survive an orbit or turntable move",
+      "Number references in your prompt exactly as they are ordered in the array, as 'Image 1', 'Image 2', 'Video 1'",
+      "Name the subject with a bare noun ('the bottle', 'the sneaker', 'the woman'), never a full appearance description",
+      "State the preservation clause once, explicitly",
+      "Use the environment reference image for the setting instead of describing the setting in words when you have one",
+      "Set multi_shots true only when you actually authored shot/timestamp beats in the prompt"
+    ],
+    "dont": [
+      "Do not describe the product's color, label text, material or logo in the prompt; that invites the model to regenerate it and it will drift",
+      "Do not ask for legible label text or readable logos",
+      "Do not request the product to deform, open, pour or transform, since geometry changes break identity",
+      "Do not pass low-resolution, cluttered or heavily-cropped references (max 20 MB each, but quality matters more than size)",
+      "Do not use reference VIDEOS for cheap concepting; fal bills their duration too"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "reference_image_urls is an array of image URLs, described by fal as 'Reference image URLs for character/object appearance. Pass multiple images for multi-subject generation. Max 20 MB each.' The schema sets NO explicit numeric cap on how many images may be passed; a hard maximum count is UNVERIFIED. A parallel array reference_video_urls accepts reference videos (max 100 MB and 30 seconds each) which carry appearance, motion and voice timbre. References guide appearance and are not used as a forced first frame; if you need an exact first frame, use the Wan 2.6 image-to-video endpoint instead.",
+    "reference_image_prompt_rules": [
+      "Describe MOTION and CAMERA, not appearance. The image already holds appearance.",
+      "Refer to uploads as 'Image 1', 'Image 2', 'Video 1' in prompt text, matching array order.",
+      "Include one explicit preservation sentence: 'The <object> from Image 1 keeps its exact shape, label, color and proportions, unchanged throughout.'",
+      "Compose multiple references with 'X from Image 1 in the scene from Image 2'.",
+      "Use a bare noun for the referenced subject so the text encoder cannot contradict the image.",
+      "Keep the product static or rigidly moving; motion belongs to the camera, the light and the surroundings.",
+      "For multi-subject scenes, assign each reference a consistent label and anchor its action to that label so identities do not merge."
+    ],
+    "duration_and_fps": "duration is an integer enum 2..10 seconds (default 5). resolution is '720p' or '1080p' (default 1080p). aspect_ratio one of 16:9, 9:16, 1:1, 4:3, 3:4 (default 16:9). Output fps is not a parameter; fal's sample output for 2.7 renders 1920x1080 at 30 fps (observed, not documented). Pricing on the fal page for this endpoint is $0.10 per second, counting input video duration plus output duration.",
+    "key_params": {
+      "prompt": "Max 5000 characters. Motion and camera only; use Image n identifiers.",
+      "reference_image_urls": "Array of image URLs, max 20 MB each, multiple allowed for multi-subject. Order defines Image 1, Image 2, ...",
+      "reference_video_urls": "Array of video URLs, max 100 MB and 30s each. Carries motion and voice timbre as well as appearance. Costly on fal.",
+      "negative_prompt": "Max 500 characters. Use to suppress deformation and artifacts.",
+      "multi_shots": "Default false. True enables intelligent multi-shot segmentation; leave false for one continuous product shot.",
+      "duration": "2-10s. 5 for concepting.",
+      "resolution": "720p or 1080p.",
+      "seed": "Pin it so a product test is repeatable.",
+      "enable_safety_checker": "Default true."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "duration": 5,
+      "multi_shots": false,
+      "aspect_ratio": "16:9",
+      "seed": 12345
+    },
+    "worked_example": {
+      "user_idea": "make my skincare bottle look premium, rotating on a stone slab",
+      "optimized_prompt": "The bottle from Image 1 stands upright on a polished grey stone slab. The bottle keeps its exact shape, label, color and proportions, unchanged throughout. It remains perfectly still while a slow camera orbit travels a quarter turn around it and a soft shadow sweeps across the slab behind it. Close-up product shot, shallow depth of field. Soft directional key light from the upper left, cool diffused fill, subtle specular highlight travelling along the glass edge. Quiet ambient room tone, no music. No dialogue. Generate single shot.",
+      "settings": {"reference_image_urls": ["<front-on product shot>", "<three-quarter product shot>"], "resolution": "720p", "duration": 5, "multi_shots": false, "negative_prompt": "deformed product, warped label, changed logo, extra bottles, melting, text artifacts, watermark, low quality"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.7/reference-to-video",
+      "https://fal.ai/models/fal-ai/wan/v2.7/reference-to-video",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-video-prompt",
+      "https://help.aliyun.com/en/model-studio/image-to-video-general-api-reference"
+    ]
+  },
+
+  "wan/v2.6/image-to-video": {
+    "family": "wan",
+    "modality": "image-to-video",
+    "strengths": [
+      "The input image is used as a true FIRST FRAME, so composition, product geometry and branding are locked at frame zero, which is the most reliable way to keep a supplied asset on-model",
+      "Wide input image tolerance: any dimension between 240 and 7680 px, public URL or base64 data URI",
+      "Supports a background audio track via audio_url, truncated or padded to the chosen duration",
+      "Long options: 5, 10 or 15 second outputs",
+      "Negative prompt, seed, and an explicit multi_shots toggle"
+    ],
+    "weaknesses": [
+      "Prompt window is 1500 characters, notably smaller than 2.7's 5000, so verbose structured prompts must be trimmed",
+      "duration is a STRING enum ('5', '10', '15'), not an integer, and only those three values; passing 7 fails",
+      "enable_prompt_expansion defaults true and will rewrite your prompt; multi_shots only works when expansion is on, which is an awkward coupling",
+      "Older generation than 2.7, so motion smoothness and scene coherence are behind it",
+      "Long durations from a single still frame drift; motion tends to decay past the first several seconds (widely observed, UNVERIFIED as an official statement)"
+    ],
+    "prompt_style": "Use Alibaba's image-to-video formula, which is deliberately narrower than the text-to-video one: 'Motion + Camera movement'. The still image already fixes subject, wardrobe, set and palette, so every word spent redescribing them competes with the frame. Write one or two sentences of what physically moves and in what order, then one camera move, then optional light change or atmosphere, then audio. Stay well under 1500 characters, and in practice under 60 words for a 5-second clip. Turn enable_prompt_expansion off if you have written this carefully, unless you also want multi_shots, which requires expansion to be on.",
+    "ideal_length_words": [25, 70],
+    "structure_template": "[What moves first, in the image, in order]. [Second beat, if any]. [CAMERA: one move]. [Optional light/atmosphere change]. [AUDIO or 'No dialogue. No background music.'].",
+    "motion_vocabulary": [
+      "push-in",
+      "pull-out",
+      "slow zoom in",
+      "tracking shot",
+      "orbit",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "fixed camera",
+      "handheld",
+      "rack focus",
+      "slow motion"
+    ],
+    "do": [
+      "Describe motion and camera only, matching Alibaba's image-to-video formula",
+      "Keep the first beat physically continuous with what the still frame already shows",
+      "Pick 5 seconds for concepting; 10 and 15 mostly buy drift",
+      "Use negative_prompt for morphing, warping and identity artifacts",
+      "Set enable_prompt_expansion false for engineered prompts, true when the user gave a one-liner",
+      "Pass 720p while iterating"
+    ],
+    "dont": [
+      "Do not restate the subject's appearance, clothing, colors or setting; the frame already holds them",
+      "Do not ask for a cut, a new location or a new subject entering from off-screen in a single shot",
+      "Do not pass an integer for duration; the schema requires the strings '5', '10' or '15'",
+      "Do not enable multi_shots while expansion is off, it will not take effect",
+      "Do not expect readable text to stay readable as it moves"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "Exactly ONE image via image_url, and it is used as the literal FIRST FRAME of the video, not as a loose style reference. Must be publicly accessible or a base64 data URI; dimensions between 240 and 7680 px. This is the right endpoint when a supplied product shot must appear pixel-faithful at frame zero; use Wan 2.7 reference-to-video instead when you want the subject placed into a new scene.",
+    "reference_image_prompt_rules": [
+      "Describe MOTION only. The first frame is the appearance contract.",
+      "Never redescribe the product; say 'the bottle', 'the phone', 'the subject'.",
+      "Give the camera the motion when the product must stay rigid: orbit, push-in, rack focus.",
+      "Any environment change must be additive (light shifts, steam, dust, reflections), never a replacement of what is in the frame.",
+      "Add anti-morph terms to negative_prompt: 'morphing, warping, deforming product, changing label, extra objects'."
+    ],
+    "duration_and_fps": "duration is a STRING enum: '5', '10' or '15' seconds (default '5'). resolution is '720p' or '1080p' (default '1080p'). Aspect ratio is not a parameter; it follows the input image. Output fps is not exposed by the schema and is UNVERIFIED for this endpoint.",
+    "key_params": {
+      "image_url": "The first frame. Public URL or base64 data URI, 240-7680 px per side.",
+      "prompt": "Max 1500 characters. Motion + camera only.",
+      "negative_prompt": "Max 500 characters, default empty.",
+      "enable_prompt_expansion": "Default true, LLM rewrite. Required true for multi_shots to work.",
+      "multi_shots": "Default false. Only active when enable_prompt_expansion is true.",
+      "duration": "String '5' | '10' | '15'. Use '5' for concepting.",
+      "resolution": "720p or 1080p. 720p for concepting.",
+      "audio_url": "Optional background music. Truncated to duration; shorter audio leaves the tail silent.",
+      "seed": "Pin for repeatability.",
+      "enable_safety_checker": "Default true."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "duration": "5",
+      "enable_prompt_expansion": false,
+      "multi_shots": false,
+      "seed": 12345
+    },
+    "worked_example": {
+      "user_idea": "animate this photo of my sneaker on a table so it looks like an ad",
+      "optimized_prompt": "The sneaker stays completely still on the table while a slow push-in moves toward it and settles on the laces. A soft highlight travels across the upper as the light shifts, and fine dust drifts through the beam. Shallow depth of field, quiet room tone, no music.",
+      "settings": {"image_url": "<the sneaker photo>", "resolution": "720p", "duration": "5", "enable_prompt_expansion": false, "negative_prompt": "morphing, warping, deforming product, changing logo, extra shoes, text artifacts, low quality"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=wan/v2.6/image-to-video",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-video-prompt",
+      "https://www.alibabacloud.com/help/en/model-studio/wan-image-to-video-guide"
+    ]
+  },
+
+  "lightricks/ltx-2.5/text-to-video/fast": {
+    "family": "ltx",
+    "modality": "text-to-video",
+    "strengths": [
+      "Speed-optimized mode built explicitly for rapid iteration and previews, which makes it the natural first-pass concepting model",
+      "Native synchronized audio generated in the same pass at every resolution (generate_audio defaults true)",
+      "Resolution ladder up to 4K (720p / 1080p / 1440p / 2160p) with published per-second pricing, 720p at $0.09/s",
+      "Selectable fps: 24, 25, 48 or 50, so it can be matched to a 24p edit or a 48/50p slow-motion pass",
+      "Long clips: 6 to 20 seconds, or 'auto' to let the model pick",
+      "A dedicated camera_motion enum removes the guesswork of whether a camera term will land"
+    ],
+    "weaknesses": [
+      "NO negative_prompt parameter on this endpoint, and no seed parameter either, so you cannot suppress artifacts by exclusion or pin a result for A/B testing; everything must be phrased positively",
+      "Only 16:9 and 9:16 aspect ratios; no square or 4:3",
+      "Minimum duration is 6 seconds, so there is no cheap 3 to 5 second test clip",
+      "Fast/distilled mode trades fidelity for speed relative to the full LTX-2.5 model",
+      "The published Lightricks guidance caps prompts at about 200 words, so it will not absorb a Wan-scale 5000-character prompt"
+    ],
+    "prompt_style": "VERIFIED AS STILL TRUE FOR 2.x: Lightricks' current official guidance (LTX-2 repo README and the ltx.io prompting guide it links to) still asks for detailed, CHRONOLOGICAL descriptions of actions and scenes written as a SINGLE FLOWING PARAGRAPH, under 200 words, starting directly with the action, literal and precise, 'like a cinematographer describing a shot list'. The documented ordering is: primary action in one sentence, then specific movements and gestures, then character/object appearance, then background and environment, then camera angle and movement, then lighting and colors, then any change or sudden event. This is the opposite of the Wan approach: LTX wants prose written in the order events happen, not a labelled formula. Because there is no negative prompt, state what IS in frame rather than what is not. Audio is generated in the same pass, so name the diegetic sound and the music mood inside the same paragraph. If you set camera_motion, keep the prose consistent with it rather than naming a conflicting move.",
+    "ideal_length_words": [80, 190],
+    "structure_template": "[One sentence: the primary action, starting with the subject doing it]. [Specific movements and gestures, in the order they happen]. [Precise appearance of the character or object]. [Background and environment]. [Camera angle and camera movement]. [Lighting and color palette]. [The change or sudden event that lands at the end]. [Sound and music mood].",
+    "motion_vocabulary": [
+      "dolly_in (param)",
+      "dolly_out (param)",
+      "dolly_left (param)",
+      "dolly_right (param)",
+      "jib_up (param)",
+      "jib_down (param)",
+      "static (param)",
+      "focus_shift (param)",
+      "follows",
+      "tracks",
+      "pans",
+      "circles",
+      "tilts",
+      "pushes in",
+      "pulls back",
+      "overhead view",
+      "handheld movement",
+      "slow motion",
+      "time-lapse",
+      "lingering shot"
+    ],
+    "do": [
+      "Write one flowing paragraph in chronological order, under 200 words",
+      "Open with the action, not with 'A cinematic shot of'",
+      "Be literal and physical: what moves, in what direction, how fast",
+      "Use the camera_motion enum for the main move and let the prose describe the framing",
+      "Name the sound design and music mood in the prose, since audio is generated with the video",
+      "Concept at 720p, 6 seconds, fps 24 or 25",
+      "Put the payoff beat at the end of the paragraph, since the model follows the order you wrote"
+    ],
+    "dont": [
+      "Do not write a bulleted or labelled parameter list; this family wants prose",
+      "Do not phrase anything as an exclusion ('no people', 'without text'), there is no negative prompt and negations are unreliable",
+      "Do not exceed roughly 200 words",
+      "Do not describe events out of order or jump backwards in time",
+      "Do not request 1:1 or 4:3, the schema only allows 16:9 and 9:16",
+      "Do not expect a seed; results are not reproducible on this endpoint"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None. Text only.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration enum: 6, 8, 10, 12, 14, 16, 18, 20 or 'auto' (default 'auto'). fps enum: 24, 25, 48 or 50 (default 25). resolution enum: 720p, 1080p, 1440p, 2160p (default 1080p). aspect_ratio: 16:9 or 9:16 (default 16:9). fal published pricing: 720p $0.09/s, 1080p $0.13/s, 1440p $0.19/s, 4K $0.30/s.",
+    "key_params": {
+      "prompt": "The only text lever. Chronological single paragraph under 200 words.",
+      "duration": "6-20 in even steps, or 'auto'. Use 6 for concepting.",
+      "fps": "24, 25, 48, 50. 24 or 25 for concepting; 48/50 only when you want smooth slow motion.",
+      "resolution": "720p for concepting; 2160p is more than 3x the 720p cost per second.",
+      "aspect_ratio": "16:9 or 9:16 only.",
+      "camera_motion": "Optional enum: dolly_in, dolly_out, dolly_left, dolly_right, jib_up, jib_down, static, focus_shift. Use it instead of hoping a prose camera term lands.",
+      "generate_audio": "Default true. Set false to save nothing on price but to get a clean silent plate for your own sound design."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "duration": 6,
+      "fps": 24,
+      "aspect_ratio": "16:9",
+      "generate_audio": true,
+      "camera_motion": "dolly_in"
+    },
+    "worked_example": {
+      "user_idea": "a welder working late at night in a workshop, moody",
+      "optimized_prompt": "A welder lowers his helmet and strikes an arc against a steel beam, and a burst of white sparks scatters across the concrete floor. He steadies the torch with his left hand, drags the bead slowly along the seam, then pauses and tilts his head to inspect the joint. He wears a scuffed leather apron over a grey work shirt, forearms streaked with soot, heavy gloves creased at the knuckles. Behind him the workshop is dark and cavernous, half-built frames stacked against corrugated walls, a single caged bulb swinging near the ceiling. The camera pushes in slowly from a low three-quarter angle and settles on the glow of the weld. Harsh blue-white light from the arc rakes across his visor while everything beyond a few feet falls into deep amber shadow. As the arc cuts out, the room drops back into darkness and only the cooling orange seam remains. Crackling arc, the hiss of gas, a low industrial hum underneath.",
+      "settings": {"resolution": "720p", "duration": 6, "fps": 24, "camera_motion": "dolly_in", "generate_audio": true}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=lightricks/ltx-2.5/text-to-video/fast",
+      "https://fal.ai/models/lightricks/ltx-2.5/text-to-video/fast",
+      "https://github.com/Lightricks/LTX-2",
+      "https://github.com/Lightricks/LTX-2/blob/main/README.md",
+      "https://ltx.io/blog/prompting-guide-for-ltx-2"
+    ]
+  },
+
+  "lightricks/ltx-2.5/image-to-video/fast": {
+    "family": "ltx",
+    "modality": "image-to-video",
+    "strengths": [
+      "Start frame AND optional end frame: supplying end_image_url turns the call into a controlled transition between two stills, which no other endpoint in this set offers",
+      "aspect_ratio 'auto' derives the frame from the input image, so a product still is not cropped or letterboxed by accident",
+      "Native synchronized audio in the same pass",
+      "Same 720p to 4K ladder and 24/25/48/50 fps selection as the text endpoint",
+      "camera_motion enum gives deterministic camera control on top of a fixed start frame"
+    ],
+    "weaknesses": [
+      "No negative_prompt and no seed, so no artifact suppression and no reproducibility",
+      "Minimum 6 seconds, which is long for a single still to sustain without drift",
+      "Fast/distilled quality tier",
+      "Only one start image; it is a first frame, not a multi-image identity reference system"
+    ],
+    "prompt_style": "Same chronological single-paragraph prose style as the text endpoint, but the paragraph now starts from what is already in the start frame and describes what happens NEXT, in order. Because the image supplies appearance, the appearance sentences from the standard structure shrink to a bare noun and the words go into movement, camera and light change. Keep the first described beat physically continuous with the still. If you supply end_image_url, write the paragraph as the journey from the start state to the end state in order, and let the last sentence describe the end frame's condition so the model has a target. Still under 200 words, still no negations.",
+    "ideal_length_words": [50, 150],
+    "structure_template": "[What in the start frame begins to move, first beat]. [Second beat, in order]. [Camera angle and movement]. [How the light or atmosphere changes]. [The final state, matching end_image_url if supplied]. [Sound and music mood].",
+    "motion_vocabulary": [
+      "dolly_in (param)",
+      "dolly_out (param)",
+      "dolly_left (param)",
+      "dolly_right (param)",
+      "jib_up (param)",
+      "jib_down (param)",
+      "static (param)",
+      "focus_shift (param)",
+      "pushes in",
+      "pulls back",
+      "circles",
+      "tilts",
+      "pans",
+      "handheld movement",
+      "slow motion",
+      "lingering shot"
+    ],
+    "do": [
+      "Start the paragraph from the state of the supplied frame and move forward in time",
+      "Use camera_motion 'static' plus a description of internal movement when a product must not be disturbed",
+      "Leave aspect_ratio on 'auto' so the input image's framing is respected",
+      "Use end_image_url when the client wants a specific before and after",
+      "Concept at 720p, 6 seconds, 24 fps"
+    ],
+    "dont": [
+      "Do not redescribe the subject's appearance in detail; the frame owns it",
+      "Do not ask for a cut or a scene change",
+      "Do not phrase anything as an exclusion; there is no negative prompt",
+      "Do not set an aspect_ratio that fights the input image unless a crop is intended",
+      "Do not expect the same result twice; there is no seed"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Exactly ONE start image via image_url, used as the start frame. An optional second image via end_image_url makes the model generate a transition video from the start frame to the end frame. These are frames, not multi-image identity references; for multi-image subject preservation use Wan 2.7 reference-to-video or Grok reference-to-video.",
+    "reference_image_prompt_rules": [
+      "The prompt describes MOTION forward in time from the given frame, never the frame's own appearance.",
+      "Refer to the subject with a bare noun so the text cannot contradict the image.",
+      "To keep a product rigid, set camera_motion and let the camera carry the movement while the subject stays still.",
+      "With end_image_url, order the paragraph start-state to end-state and describe the end state last.",
+      "Since exclusions are unavailable, positively assert stability: 'the bottle remains upright and unchanged throughout'."
+    ],
+    "duration_and_fps": "duration enum: 6, 8, 10, 12, 14, 16, 18, 20 or 'auto' (default 'auto'). fps enum: 24, 25, 48, 50 (default 25). resolution enum: 720p, 1080p, 1440p, 2160p (default 1080p). aspect_ratio: 'auto' (default), 16:9 or 9:16. Pricing follows the same LTX-2.5 fast per-second ladder published by fal (720p $0.09/s through 4K $0.30/s).",
+    "key_params": {
+      "image_url": "Start frame.",
+      "end_image_url": "Optional target frame; turns the generation into a start-to-end transition.",
+      "prompt": "Chronological prose, under 200 words, motion-forward from the start frame.",
+      "camera_motion": "dolly_in, dolly_out, dolly_left, dolly_right, jib_up, jib_down, static, focus_shift. 'static' is the product-safe default.",
+      "duration": "6 for concepting.",
+      "fps": "24 or 25 for concepting.",
+      "resolution": "720p for concepting.",
+      "aspect_ratio": "Leave 'auto' to inherit the image's ratio.",
+      "generate_audio": "Default true."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "720p",
+      "duration": 6,
+      "fps": 24,
+      "aspect_ratio": "auto",
+      "camera_motion": "static",
+      "generate_audio": true
+    },
+    "worked_example": {
+      "user_idea": "make this photo of a bowl of ramen look appetizing and alive",
+      "optimized_prompt": "Steam begins to curl upward from the surface of the broth in thin ribbons, and the oil slick on top shivers as the bowl settles. A pair of chopsticks enters from the right, lifts a small tangle of noodles, and holds it just above the surface so the broth runs off in a slow thread. The bowl itself remains upright and unchanged throughout. The camera holds a fixed overhead three-quarter framing while the focus shifts gently from the rim of the bowl to the lifted noodles. Warm overhead light picks out the sheen on the egg yolk and the char on the pork, while the wooden table behind stays in soft shadow. The clip settles with the noodles suspended and steam drifting across the frame. Quiet kitchen ambience, a soft broth simmer, no music.",
+      "settings": {"image_url": "<the ramen photo>", "resolution": "720p", "duration": 6, "fps": 24, "aspect_ratio": "auto", "camera_motion": "focus_shift"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=lightricks/ltx-2.5/image-to-video/fast",
+      "https://fal.ai/models/lightricks/ltx-2.5/image-to-video/fast",
+      "https://github.com/Lightricks/LTX-2/blob/main/README.md",
+      "https://ltx.io/blog/prompting-guide-for-ltx-2"
+    ]
+  },
+
+  "xai/grok-imagine-video/v1.5/text-to-video": {
+    "family": "grok",
+    "modality": "text-to-video",
+    "strengths": [
+      "The simplest surface in this set: prompt, duration, resolution, aspect_ratio and nothing else, so there is very little to get wrong",
+      "Finest-grained duration control here: any integer 1 to 15 seconds, including 1, 2 and 3 second clips no other model in this set will make",
+      "Widest aspect ratio range: 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, 9:16",
+      "480p tier available, which makes throwaway concepting genuinely cheap",
+      "Native 1080p is live in the 1.5 generation per xAI's own release note"
+    ],
+    "weaknesses": [
+      "NO negative_prompt, NO seed, NO fps control, NO prompt-expansion toggle. Everything must be carried by the prompt text",
+      "No published xAI prompt-formula guide comparable to Alibaba's or Lightricks'; xAI's docs give worked examples rather than a documented structure, so the structure below is inferred from xAI's own examples and is a WORKING HYPOTHESIS, not documented law",
+      "Results are not reproducible without a seed",
+      "Audio behavior on this fal endpoint is not exposed as a parameter and is UNVERIFIED"
+    ],
+    "prompt_style": "Write plainly and directly, the way xAI's own documentation examples read ('Make the water crash down and slowly pan out the camera'). Grok Imagine responds to short imperative or descriptive sentences naming the subject, the action, and the camera behavior, in that order. Because there is no negative prompt and no seed, put all steering in positive assertions and keep the sentence count low so nothing competes. A useful middle ground for this endpoint is two to four sentences: subject and setting, the action, the camera move, then the look. Longer literary prompts are not documented as helping here, so prefer clarity over density.",
+    "ideal_length_words": [25, 80],
+    "structure_template": "[SUBJECT + setting in one sentence]. [The ACTION, one or two beats]. [CAMERA: one move, phrased as an instruction]. [LOOK: lighting, palette, film or render style].",
+    "motion_vocabulary": [
+      "pan out",
+      "pan left",
+      "pan right",
+      "slowly zoom in",
+      "pull back",
+      "push in",
+      "tracking shot",
+      "orbit around",
+      "tilt up",
+      "tilt down",
+      "static camera",
+      "handheld",
+      "aerial shot",
+      "close-up",
+      "slow motion"
+    ],
+    "do": [
+      "Use short, direct, imperative camera instructions, matching xAI's own doc examples",
+      "Name subject, action, camera and look in that order",
+      "Use 480p and a short duration (3 to 6 seconds) for concepting; this endpoint's 1-second floor makes cheap tests possible",
+      "Pick the aspect ratio deliberately, since this endpoint offers seven of them",
+      "Re-run rather than tune when a result misses; there is no seed to hold constant"
+    ],
+    "dont": [
+      "Do not write exclusions; there is no negative prompt and 'no X' phrasing tends to summon X",
+      "Do not stack more than two action beats into one clip",
+      "Do not name real public figures",
+      "Do not expect legible on-screen text",
+      "Do not assume a documented prompt formula exists for this model; keep prompts simple"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None on this endpoint. Text only. Use xai/grok-imagine-video/reference-to-video for image guidance.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration is an integer, minimum 1, maximum 15, default 6. resolution enum: 480p, 720p, 1080p (default 720p). aspect_ratio enum: 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, 9:16 (default 16:9). fps is not exposed and is UNVERIFIED. Per-second pricing for this endpoint was not confirmed from a primary source.",
+    "key_params": {
+      "prompt": "The only steering lever. Short, direct, subject-action-camera-look.",
+      "duration": "Integer 1-15, default 6. Use 3-5 for concepting.",
+      "resolution": "480p | 720p | 1080p. 480p for throwaway tests.",
+      "aspect_ratio": "Seven options; pick to match the destination platform."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": 4,
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "a storm rolling in over a lighthouse",
+      "optimized_prompt": "A lone white lighthouse stands on a black rock headland as a heavy storm front rolls in from the sea. Waves crash against the rocks and throw spray across the base while the beam sweeps through the rain. Slowly pull the camera back and up to reveal the whole coastline. Overcast blue-grey light, heavy contrast, cinematic and windswept.",
+      "settings": {"resolution": "480p", "duration": 5, "aspect_ratio": "16:9"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=xai/grok-imagine-video/v1.5/text-to-video",
+      "https://fal.ai/models/xai/grok-imagine-video/v1.5/text-to-video",
+      "https://docs.x.ai/docs/guides/video-generations",
+      "https://x.ai/news/grok-imagine-video-1-5-references"
+    ]
+  },
+
+  "xai/grok-imagine-video/reference-to-video": {
+    "family": "grok",
+    "modality": "reference-to-video",
+    "strengths": [
+      "Explicit, documented multi-reference addressing syntax: up to 7 reference images, addressed in the prompt as @Image1, @Image2 and so on, in array order",
+      "Each reference locks one thing independently, per xAI: a face, a product, or a location, so you can hold the product and swap the scene, hold the scene and swap the subject, or hold both and change only the action",
+      "References influence the output WITHOUT forcing the first frame (xAI's own wording), so the product can be composited into a genuinely new shot rather than animated out of a still",
+      "Same seven aspect ratios as the text endpoint",
+      "480p default keeps reference iteration cheap"
+    ],
+    "weaknesses": [
+      "Resolution is capped at 720p on this endpoint (480p default); 1080p is text-to-video only",
+      "Duration capped at 10 seconds (default 8)",
+      "No negative_prompt, no seed, no fps control",
+      "Because references guide rather than lock the first frame, fine product detail (label typography, small logos) is less faithful than a Wan 2.6 image-to-video first-frame lock"
+    ],
+    "prompt_style": "Write a short, direct scene instruction that spends its words on placement, action and camera, and addresses each upload by its @ImageN token in the exact order it appears in reference_image_urls. Assign each reference a role explicitly in one clause ('@Image1 is the product, @Image2 is the location'), then state the action, then the camera move, then the look. Add one positive preservation assertion for anything that must stay on-model, since there is no negative prompt to forbid drift. Keep it short: this family's documented examples are one or two sentences, and extra prose about the product's appearance actively competes with the reference image.",
+    "ideal_length_words": [25, 80],
+    "structure_template": "[@Image1 is the <subject>, @Image2 is the <location or second subject>]. [Place @Image1 into @Image2 and state what happens, one or two beats]. [PRESERVATION: @Image1 keeps its exact shape, colors and markings throughout]. [CAMERA: one move]. [LOOK: lighting and style].",
+    "motion_vocabulary": [
+      "slowly pan out",
+      "push in",
+      "pull back",
+      "orbit around",
+      "tracking shot",
+      "static camera",
+      "tilt up",
+      "handheld",
+      "close-up",
+      "slow motion"
+    ],
+    "do": [
+      "Number and address references as @Image1, @Image2 ... matching the order of reference_image_urls exactly",
+      "Give every reference an explicit role in one short clause so the model does not blend them",
+      "Use one reference per locked thing: one for the product, one for the environment, one for the person",
+      "Add a positive preservation sentence, since exclusions are unavailable",
+      "Supply clean, uncluttered, well-lit references, ideally with the subject isolated",
+      "Concept at 480p and 5 to 6 seconds"
+    ],
+    "dont": [
+      "Do not exceed 7 reference images; that is the documented maximum",
+      "Do not describe the referenced subject's appearance in words; the image is the appearance contract",
+      "Do not mismatch @ImageN numbering against array order, the mapping is positional",
+      "Do not request readable label text or fine logo typography, and do not use this endpoint when pixel-exact branding is required (use Wan 2.6 image-to-video's first-frame lock instead)",
+      "Do not request 1080p here; the schema caps this endpoint at 720p"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "reference_image_urls is an array of up to 7 image URLs, addressed in the prompt as @Image1, @Image2 ... in array order. They act as style and content references that influence the generation without being forced as the first frame. xAI's own framing is that each reference locks one element (a face, a product, a location), which lets you hold one and vary the others. This is the multi-subject compositing tool of the set; it is not a pixel-faithful first-frame animator.",
+    "reference_image_prompt_rules": [
+      "Address references positionally as @Image1 ... @Image7, matching reference_image_urls order.",
+      "State each reference's role once ('@Image1 is the product, @Image2 is the kitchen').",
+      "Describe MOTION, placement, camera and light, never the product's colors, materials or label.",
+      "Use a bare noun for the referenced subject in the rest of the prompt.",
+      "Add a positive stability clause: '@Image1 keeps its exact shape, colors and markings throughout, and stays fully in frame.'",
+      "Give the camera the movement and keep the product rigid when identity matters.",
+      "Supply an extra angle of the same product as a second reference when the camera will orbit it."
+    ],
+    "duration_and_fps": "duration is an integer, minimum 1, maximum 10, default 8. resolution enum: 480p or 720p only (default 480p). aspect_ratio enum: 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, 9:16 (default 16:9). reference_image_urls accepts a maximum of 7 images. fps is not exposed and is UNVERIFIED. Per-second pricing was not confirmed from a primary source.",
+    "key_params": {
+      "prompt": "Short scene instruction using @ImageN tokens. Motion, placement, camera, look.",
+      "reference_image_urls": "Array, max 7. Order defines @Image1 ... @ImageN.",
+      "duration": "Integer 1-10, default 8. Use 5-6 for concepting.",
+      "resolution": "480p or 720p only. 480p default and correct for concepting.",
+      "aspect_ratio": "Seven options; match the destination."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": 5,
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "put my energy drink can into a skate park scene, make it look like a commercial",
+      "optimized_prompt": "@Image1 is the can, @Image2 is the skate park. Place the can from @Image1 upright on the concrete ledge in the location from @Image2, with a skater blurring past behind it. The can keeps its exact shape, colors and markings throughout and stays fully in frame. Push the camera in slowly toward the can as the skater passes. Late afternoon sun, hard shadows, high-contrast commercial look.",
+      "settings": {"reference_image_urls": ["<product can shot>", "<skate park photo>"], "resolution": "480p", "duration": 5, "aspect_ratio": "16:9"}
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=xai/grok-imagine-video/reference-to-video",
+      "https://fal.ai/models/xai/grok-imagine-video/reference-to-video/api",
+      "https://x.ai/news/grok-imagine-video-1-5-references",
+      "https://docs.x.ai/docs/guides/video-generations"
+    ]
+  }
+}

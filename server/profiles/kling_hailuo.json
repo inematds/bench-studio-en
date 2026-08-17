@@ -1,0 +1,366 @@
+{
+  "_meta": {
+    "researched": "2026-08-12",
+    "verification_policy": "Every schema fact (params, enums, defaults, limits) was pulled from the live fal OpenAPI queue schema for each endpoint id and is exact. Prompting rules are marked by source strength: OFFICIAL (Kling AI docs / MiniMax docs / fal model docs) vs VENDOR-GUIDE (fal.ai's own published prompting guides) vs UNVERIFIED (community practice, flagged inline). Nothing here was tested by calling a generation endpoint.",
+    "known_gaps": [
+      "kling.ai/quickstart/*-prompt-guide returns HTTP 446 to non-browser clients; its formula was recovered through search excerpts quoting it verbatim, not by direct fetch.",
+      "Kling has NO documented bracketed or symbolic camera-directive syntax. Camera control is plain natural language. Do not invent one.",
+      "MiniMax's bracketed camera directives are officially documented for the Director-series models (video-01-director) and reported for Hailuo 2.3. They are NOT documented for hailuo-02 on fal. Treat as opt-in/unverified on this endpoint.",
+      "No official Kling or MiniMax documentation specifically covers product-commercial or UGC-presenter prompting. Product/UGC rules below are derived from the documented image-to-video anchor behavior plus fal's published failure-mode guidance, and are labeled as such."
+    ]
+  },
+
+  "fal-ai/kling-video/v2.5-turbo/pro/text-to-video": {
+    "family": "kling",
+    "modality": "text-to-video",
+    "strengths": [
+      "Cinematic realism, physical motion plausibility, human body mechanics",
+      "Responds strongly to explicit cinematography language (shot size, lens, camera move) as style cues",
+      "Holds a single continuous action over 5-10s without cutting",
+      "Commercial/product-ad look: shallow depth of field, studio lighting, glossy surfaces"
+    ],
+    "weaknesses": [
+      "Multi-axis compound motion (rotate while zooming while tracking) causes warping",
+      "Object morphing over the clip when the subject is described vaguely",
+      "Contradictory lighting descriptors (golden hour + studio strobes) produce style confusion",
+      "Legible on-screen text and small logos are unreliable in text-to-video",
+      "No native audio/dialogue on this endpoint"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [45, 120],
+    "structure_template": "[Camera/shot framing]. [Subject + concrete appearance details]. [Subject movement, one primary action with an endpoint]. [Scene/environment]. [Lighting + atmosphere]. [Optional style/lens cue].  — Kling's official formula is: Subject (Subject Description) + Subject Movement + Scene (Scene Description) + (Camera Language + Lighting + Atmosphere). Leading with the shot framing is also valid; order is flexible, content is not.",
+    "motion_vocabulary": [
+      "slow push in",
+      "slow pull out",
+      "dolly forward",
+      "tracking shot following from the side",
+      "orbit around the subject",
+      "handheld follow",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "crane up",
+      "low angle",
+      "high angle",
+      "macro close-up",
+      "wide establishing shot",
+      "medium shot",
+      "close-up",
+      "profile shot",
+      "POV shot",
+      "static locked-off shot",
+      "rack focus",
+      "slow motion"
+    ],
+    "camera_directive_syntax": null,
+    "camera_directive_note": "Kling has no documented bracketed directive syntax. Write camera moves as plain English clauses inside the prompt, e.g. 'the camera slowly pushes in as she turns'. One primary camera move per clip.",
+    "do": [
+      "Name exactly ONE primary subject action and ONE primary camera move per generation.",
+      "Give the action an endpoint ('...then settles back into place', '...and holds'), which suppresses drift and loop artifacts.",
+      "Front-load concrete subject detail (clothing, material, hair, posture) so identity stays stable across the clip.",
+      "Use cinematography vocabulary (24mm, f/2.8, anamorphic, backlit) as STYLE cues; the model pattern-matches them, it does not simulate optics.",
+      "Keep lighting descriptors internally consistent (one light story per clip).",
+      "For product commercials: describe the product's material and finish explicitly (brushed aluminum, matte-black recycled plastic, condensation on cold glass) plus a surface and a light source; then one slow move (push in, orbit, or rack focus).",
+      "For a human presenter holding a product: state the hold ('holds the can at chest height, label facing camera, steady'), and state that the product stays in frame. Presenter delivery reads better as 'speaks to camera' framing than as lip-synced dialogue, since this endpoint returns no audio.",
+      "Use negative_prompt for artifact classes, not for content you simply omitted."
+    ],
+    "dont": [
+      "Do not stack compound camera motion (no '360 orbit while zooming and craning').",
+      "Do not request legible logos, brand wordmarks, packaging copy, or UI text in text-to-video; use image-to-video with a real product image instead.",
+      "Do not write shot lists or multi-scene scripts for a 5s clip; one shot per generation.",
+      "Do not pad with adjectives that carry no visual (epic, breathtaking, cinematic masterpiece).",
+      "Do not exceed 2500 characters (hard API limit on both prompt and negative_prompt).",
+      "Do not raise cfg_scale to force compliance; high values stiffen motion and increase artifacting."
+    ],
+    "negative_prompt_supported": true,
+    "negative_prompt_default": "blur, distort, and low quality",
+    "negative_prompt_recommended": "blurry, low quality, distorted, warped hands, extra fingers, morphing, flicker, jitter, watermark, subtitles, text overlay, duplicate limbs",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration enum '5' or '10' seconds (default '5'). aspect_ratio enum '16:9' | '9:16' | '1:1' (default '16:9'). Resolution and fps are not exposed as parameters on this endpoint and are not stated in the fal schema; Kling v2.5 turbo pro output is delivered as an MP4 URL.",
+    "key_params": {
+      "prompt": "Required, max 2500 chars. The whole scene in one paragraph.",
+      "duration": "'5' or '10'. 5 is roughly half the cost and is the concepting default; go to 10 only after the look is locked.",
+      "aspect_ratio": "'16:9' | '9:16' | '1:1'. Set from the delivery surface, not from taste.",
+      "negative_prompt": "Max 2500 chars. Artifact suppression list. Default 'blur, distort, and low quality' is weak; override it.",
+      "cfg_scale": "0..1, default 0.5. Higher = tighter prompt adherence but stiffer, more artifact-prone motion. 0.5 is the balanced baseline; 0.3-0.4 for natural organic motion, 0.6-0.7 only when the model is ignoring a required element."
+    },
+    "cheap_concepting_settings": {
+      "duration": "5",
+      "cfg_scale": 0.5,
+      "aspect_ratio": "16:9",
+      "negative_prompt": "blurry, low quality, distorted, morphing, flicker, watermark, text overlay"
+    },
+    "worked_example": {
+      "user_idea": "a coffee brand ad, steam, moody",
+      "optimized_prompt": "Macro close-up on a matte-black ceramic pour-over cup resting on a scarred walnut counter, thin ribbons of steam rising and curling in the air. The camera pushes in slowly and holds as the steam drifts across frame. Behind the cup, a dim cafe interior falls out of focus into soft warm bokeh. Single hard window light from camera left rakes across the counter, deep shadows, warm amber highlights on the ceramic rim. Shallow depth of field, 50mm, gentle film grain."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
+      "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video/api",
+      "https://kling.ai/quickstart/text-to-video-prompt-guide",
+      "https://blog.fal.ai/kling-3-0-prompting-guide/",
+      "https://fal.ai/learn/devs/kling-2-6-pro-prompt-guide"
+    ]
+  },
+
+  "fal-ai/kling-video/v2.5-turbo/pro/image-to-video": {
+    "family": "kling",
+    "modality": "image-to-video",
+    "strengths": [
+      "Treats the input image as a hard anchor: identity, layout, and text/logo detail from the source frame are preserved (fal's own Kling guidance states the model preserves identity, layout and text details of the source image)",
+      "Best available path for product shots where packaging copy and brand marks must stay correct",
+      "Optional tail_image_url gives a controlled end state, so the clip can be aimed at a specific final composition",
+      "Natural, physically plausible motion from a still"
+    ],
+    "weaknesses": [
+      "Re-describing what is already in the image fights the anchor and causes drift or morphing",
+      "Large requested motion (subject walks out of frame, full 180 orbit) breaks the anchored geometry",
+      "Watermarks, borders, or baked-in text in the source image get animated and smeared",
+      "Low-resolution source images degrade the whole clip"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [20, 70],
+    "structure_template": "[What moves and how, with an endpoint]. [How the camera moves]. [Environmental/atmospheric motion: steam, dust, light shift]. [Explicit preservation clause if a product or face must stay exact].",
+    "motion_vocabulary": [
+      "slow push in",
+      "slow pull out",
+      "gentle orbit",
+      "subtle handheld drift",
+      "parallax dolly",
+      "rack focus onto the product",
+      "tilt up along the subject",
+      "camera holds static while only the subject moves",
+      "slow motion",
+      "steam rises",
+      "fabric ripples",
+      "light shifts across the surface"
+    ],
+    "camera_directive_syntax": null,
+    "camera_directive_note": "No bracketed syntax. Plain English camera clauses only.",
+    "do": [
+      "Describe MOTION ONLY. The official Kling image-to-video guidance is that controlling the subject's motion is the core task; the image already carries appearance.",
+      "Name the moving element by role, not by full description ('the model's hand', 'the bottle', 'the steam'), so the anchor is referenced rather than re-specified.",
+      "Give the motion an endpoint so the clip resolves instead of looping into drift.",
+      "Keep total motion small and single-axis for product work; slow push-in or slow orbit preserves label legibility.",
+      "Add a preservation clause when a product or logo matters: 'the product stays fully in frame, label facing camera, unchanged and legible throughout'.",
+      "Supply a clean, high-resolution (1080p+) source image with no watermark, border, or overlaid text.",
+      "For a UGC presenter holding the product: prompt only the delivery motion ('she nods and gestures slightly with her free hand while keeping the bottle steady at chest height, label toward camera'), never her appearance.",
+      "Use tail_image_url when you need a specific final frame (e.g. hero pack shot) so the model interpolates toward it."
+    ],
+    "dont": [
+      "Do not restate the image contents ('a blonde woman in a red jacket holding a blue bottle') — that is the single biggest cause of the product changing shape mid-clip.",
+      "Do not introduce objects, people, or backgrounds that are absent from the source frame.",
+      "Do not request text changes, label edits, or new on-pack copy.",
+      "Do not ask for large translations of the subject or a full turn-around from one still.",
+      "Do not combine tail_image_url with a contradictory motion description."
+    ],
+    "negative_prompt_supported": true,
+    "negative_prompt_default": "blur, distort, and low quality",
+    "negative_prompt_recommended": "morphing, warping, distorted product, deformed hands, extra fingers, changing label, flicker, blurry, low quality, watermark, text overlay",
+    "reference_image_behavior": "image_url is the first frame and a strong structural anchor: identity, layout, and source-image text/logo detail are carried into the clip. Optional tail_image_url sets the last frame and the model animates from start to end frame.",
+    "reference_image_prompt_rules": [
+      "Prompt = verbs, not nouns. Every noun you write competes with the anchor image.",
+      "Reference objects by short role labels the image makes unambiguous.",
+      "Cap it at one subject motion plus one camera motion.",
+      "Add an explicit 'unchanged / stays in frame / remains legible' clause for the hero product.",
+      "If the product must not move at all, say the camera moves and the product is locked: 'the bottle remains perfectly still and centered while the camera orbits slowly around it'.",
+      "Environmental motion (steam, dust motes, light sweep, slight fabric movement) is the safest way to add life without risking the product."
+    ],
+    "duration_and_fps": "duration enum '5' or '10' seconds (default '5'). No aspect_ratio parameter: framing is inherited from image_url. Resolution/fps not exposed in the fal schema; output is an MP4 URL.",
+    "key_params": {
+      "image_url": "Required. The first frame and the anchor. Clean, 1080p+, no watermark or baked text you do not want animated.",
+      "prompt": "Required, max 2500 chars. Motion only.",
+      "duration": "'5' or '10'. Use 5 for concepting.",
+      "tail_image_url": "Optional last frame. Use for a guaranteed hero end composition; omit for open-ended motion.",
+      "negative_prompt": "Max 2500 chars. Aim it at morphing and label distortion for product work.",
+      "cfg_scale": "0..1, default 0.5. For product preservation stay at or below 0.5; higher values push the model to enact the prompt aggressively, which is exactly when anchored geometry breaks."
+    },
+    "cheap_concepting_settings": {
+      "duration": "5",
+      "cfg_scale": 0.45,
+      "negative_prompt": "morphing, warping, distorted product, changing label, flicker, blurry, low quality, watermark"
+    },
+    "worked_example": {
+      "user_idea": "make my skincare bottle photo into an ad clip",
+      "optimized_prompt": "The bottle remains perfectly still and centered, label facing camera, unchanged and legible throughout. The camera pushes in slowly and settles into a tight product framing. Soft light sweeps gradually across the glass, a faint highlight travels down the shoulder of the bottle, and a few dust motes drift through the beam behind it."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/v2.5-turbo/pro/image-to-video",
+      "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/image-to-video/api",
+      "https://kling.ai/quickstart/image-to-video-guide",
+      "https://blog.fal.ai/kling-3-0-prompting-guide/",
+      "https://fal.ai/learn/devs/kling-2-6-pro-prompt-guide"
+    ]
+  },
+
+  "fal-ai/minimax/hailuo-02/standard/text-to-video": {
+    "family": "hailuo",
+    "modality": "text-to-video",
+    "strengths": [
+      "Strong physics and character motion for the price; fast, cheap concepting tier",
+      "Handles a single expressive human or creature action well",
+      "MiniMax models are the family with an explicit, documented camera-directive vocabulary (see camera_directive_syntax caveat)",
+      "Built-in prompt_optimizer can lift a thin prompt without any client-side work"
+    ],
+    "weaknesses": [
+      "768p tier, so fine detail, small text, and distant faces are soft",
+      "prompt_optimizer rewrites your prompt server-side, which silently overrides careful phrasing",
+      "No negative_prompt on this endpoint: unwanted elements must be handled by omission and by positive framing",
+      "No aspect_ratio or resolution parameter on the standard text-to-video endpoint",
+      "Complex multi-subject choreography degrades fast"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [40, 100],
+    "structure_template": "[Optional camera directive]. [Subject with brief concrete description] [performs one specific action]. [Scene/environment]. [Lighting]. [Mood/style]. — MiniMax responds best when the subject's physical action is described first and most specifically, with camera and style as support rather than the lead.",
+    "motion_vocabulary": [
+      "push in",
+      "pull out",
+      "pan left",
+      "pan right",
+      "truck left",
+      "truck right",
+      "tilt up",
+      "tilt down",
+      "pedestal up",
+      "pedestal down",
+      "zoom in",
+      "zoom out",
+      "tracking shot",
+      "static shot",
+      "shake",
+      "camera tracks behind",
+      "dolly forward",
+      "handheld"
+    ],
+    "camera_directive_syntax": "Square-bracket directives, e.g. [Pan left] or [Zoom in], placed inline in the prompt (documented usage puts them at the start of the sentence they govern, e.g. '[Push in]A stylish woman walks down a Tokyo street...'). Up to 3 movements can be combined in one bracket, comma-separated: [Truck left, Pan right, Zoom in]. Documented supported set: [Truck left], [Truck right], [Pan left], [Pan right], [Push in], [Pull out], [Pedestal up], [Pedestal down], [Tilt up], [Tilt down], [Zoom in], [Zoom out], [Shake], [Tracking shot], [Static shot]. CAVEAT: this syntax is officially documented for MiniMax's Director-series models (fal-ai/minimax/video-01-director/*) and reported for Hailuo 2.3. It is NOT documented for hailuo-02 on fal or in MiniMax's hailuo-02 docs. Treat it as opt-in on this endpoint: harmless if ignored (it degrades to plain text), but do not promise it works. Always pair it with a natural-language restatement of the same move so the clip is correct either way.",
+    "do": [
+      "Lead with the subject's concrete physical action, described specifically, before scene and style.",
+      "Cover the six blocks that Hailuo guides converge on: camera/shot, subject, action, scene, lighting, mood/style.",
+      "Set prompt_optimizer to false when your backend has already written a full optimized prompt; leave it true when passing a short raw user idea straight through.",
+      "If using bracketed camera directives, restate the same move in plain language ('[Push in] the camera moves steadily closer as...').",
+      "Keep to one subject and one action per clip.",
+      "Describe motion quality, not just the motion (slow and deliberate, sharp and sudden, drifting)."
+    ],
+    "dont": [
+      "Do not rely on a negative prompt: the parameter does not exist here.",
+      "Do not use more than three bracketed camera movements.",
+      "Do not request legible on-screen text, logos, or UI at 768p.",
+      "Do not exceed 2000 characters (hard API limit).",
+      "Do not send a long hand-tuned prompt with prompt_optimizer left on and then debug the output as if the model saw your words.",
+      "Do not choreograph multiple characters doing different things."
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "duration enum '6' or '10' seconds (default '6'). No resolution parameter on this endpoint; 'standard' is the 768p tier. No aspect_ratio parameter. fps is not exposed or stated in the fal schema. Output is an MP4 URL. Note the schema's global caveat that 10s is not supported at 1080p (relevant only to the pro tier).",
+    "key_params": {
+      "prompt": "Required, max 2000 chars.",
+      "duration": "'6' or '10'. 6 is the cheap concepting default.",
+      "prompt_optimizer": "Boolean, default true. Server-side rewrite of your prompt. Set false when you are supplying an already-optimized prompt so the wording you engineered is what the model actually receives; set true for raw one-line user ideas."
+    },
+    "cheap_concepting_settings": {
+      "duration": "6",
+      "prompt_optimizer": false
+    },
+    "worked_example": {
+      "user_idea": "a chef flipping a pancake, cozy kitchen",
+      "optimized_prompt": "[Push in] A chef in a flour-dusted white apron grips a cast-iron skillet with both hands and flicks it sharply upward, sending a golden pancake spinning once through the air before it lands flat back in the pan. The camera moves steadily closer as the pancake peaks. A small cozy kitchen behind him, wooden counters, copper pans on a rail, soft morning light through a window camera left. Warm, unhurried, homely mood, natural handheld feel."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/minimax/hailuo-02/standard/text-to-video",
+      "https://fal.ai/models/fal-ai/minimax/hailuo-02/standard/text-to-video/api",
+      "https://fal.ai/models/fal-ai/minimax/video-01-director/image-to-video/api",
+      "https://platform.minimax.io/docs/guides/video-generation"
+    ]
+  },
+
+  "fal-ai/minimax/hailuo-02/standard/image-to-video": {
+    "family": "hailuo",
+    "modality": "image-to-video",
+    "strengths": [
+      "Cheapest fast path for animating a still, especially at 512P for concepting",
+      "Optional end_image_url for first/last-frame control, which MiniMax documents as a supported generation mode",
+      "Good natural character and creature motion from a single frame",
+      "prompt_optimizer can carry a one-line motion idea"
+    ],
+    "weaknesses": [
+      "Max 768P here, so packaging copy and small logos in the source image soften noticeably; Kling image-to-video is the better choice when label legibility is the deliverable",
+      "No negative_prompt",
+      "Re-describing the image contents causes the subject to drift from the anchor",
+      "prompt_optimizer may add motion or scene elements you did not ask for"
+    ],
+    "prompt_style": "paragraph",
+    "ideal_length_words": [15, 60],
+    "structure_template": "[Optional camera directive]. [What in the frame moves and how, with an endpoint]. [How the camera moves]. [Ambient motion]. [Preservation clause for any hero product].",
+    "motion_vocabulary": [
+      "push in",
+      "pull out",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "zoom in",
+      "zoom out",
+      "tracking shot",
+      "static shot",
+      "slow drift",
+      "steam rises",
+      "hair moves in the wind",
+      "light shifts across the surface"
+    ],
+    "camera_directive_syntax": "Same square-bracket form as the text-to-video entry: [Pan left], [Push in], up to three comma-separated inside one bracket, e.g. [Truck left, Pan right, Zoom in]. Documented for the Director-series image-to-video endpoint, NOT documented for hailuo-02. Use opt-in and always mirror it in plain language.",
+    "do": [
+      "Describe motion only. The still already defines appearance.",
+      "Reference elements by short role labels ('the bottle', 'her hand', 'the steam').",
+      "Give the motion an endpoint so the clip resolves.",
+      "Set prompt_optimizer false whenever a product must be preserved, so the optimizer cannot inject appearance language that fights the anchor.",
+      "Use resolution '512P' for the concepting pass and re-run the winner at '768P'.",
+      "Use end_image_url when a specific final frame is required.",
+      "For a presenter holding a product, prompt only the delivery motion and add 'the product stays in frame, label toward camera, unchanged'."
+    ],
+    "dont": [
+      "Do not restate what the image shows.",
+      "Do not add new objects, people, or backgrounds.",
+      "Do not send label-critical product work here at all if the copy must stay crisply legible; prefer the Kling image-to-video endpoint.",
+      "Do not exceed 2000 characters.",
+      "Do not exceed three bracketed camera movements.",
+      "Do not expect negative-prompt style suppression; it does not exist on this endpoint."
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "image_url is the first frame of the video and anchors composition and subject. Optional end_image_url sets the last frame, giving first/last-frame interpolation. Accepted image formats per MiniMax docs: JPG, JPEG, PNG, WEBP, HEIC, HEIF.",
+    "reference_image_prompt_rules": [
+      "Verbs, not nouns. Every noun you write competes with the anchor.",
+      "One subject motion plus at most one camera motion.",
+      "Add an explicit unchanged/in-frame clause for the hero product.",
+      "Prefer ambient motion (steam, dust, light sweep, slight fabric or hair movement) when the product itself must not deform.",
+      "Turn prompt_optimizer off for product preservation; its rewrites are the main uncontrolled variable on this endpoint.",
+      "If the product should be motionless, say the camera moves and the product stays locked."
+    ],
+    "duration_and_fps": "duration enum '6' or '10' seconds (default '6'). resolution enum '512P' or '768P' (default '768P') — this endpoint DOES expose resolution, unlike the standard text-to-video endpoint. No aspect_ratio parameter: framing is inherited from image_url. fps not exposed or stated in the fal schema. Output is an MP4 URL.",
+    "key_params": {
+      "image_url": "Required. First frame and anchor.",
+      "prompt": "Required, max 2000 chars. Motion only.",
+      "duration": "'6' or '10'. 6 for concepting.",
+      "resolution": "'512P' or '768P', default '768P'. 512P is the cheap concepting setting; 768P for the final.",
+      "end_image_url": "Optional last frame for first/last-frame control.",
+      "prompt_optimizer": "Boolean, default true. Set false for anchored product work and for prompts your backend already optimized."
+    },
+    "cheap_concepting_settings": {
+      "duration": "6",
+      "resolution": "512P",
+      "prompt_optimizer": false
+    },
+    "worked_example": {
+      "user_idea": "animate this photo of my sneaker on a pedestal",
+      "optimized_prompt": "[Push in] The sneaker stays perfectly still and centered on the pedestal, unchanged and fully in frame. The camera moves slowly closer and settles. Soft light sweeps gradually across the upper, the laces shift almost imperceptibly, and faint dust drifts through the beam in the background."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/minimax/hailuo-02/standard/image-to-video",
+      "https://fal.ai/models/fal-ai/minimax/hailuo-02/standard/text-to-video/api",
+      "https://fal.ai/models/fal-ai/minimax/video-01-director/image-to-video/api",
+      "https://platform.minimax.io/docs/guides/video-generation"
+    ]
+  }
+}

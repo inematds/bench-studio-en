@@ -1,0 +1,308 @@
+{
+  "_meta": {
+    "compiled": "2026-08-12",
+    "purpose": "Operational prompt-rewriting rules for four fal.ai Chinese-origin image endpoints. Parameter facts are taken verbatim from the live fal OpenAPI schemas; prompting rules are drawn from ByteDance Seed and Alibaba/Qwen primary docs plus fal's own guides. Claims that could not be verified against a primary source are explicitly labelled UNVERIFIED in the text.",
+    "confidence_notes": [
+      "fal `fal-ai/qwen-image-edit` accepts exactly ONE `image_url` (string, not array). Multi-image reference composition on fal is a Seedream v4 edit capability (up to 10 images), not this endpoint.",
+      "Seedream endpoints on fal expose NO negative_prompt. Exclusions must be written as positive statements inside the prompt.",
+      "Seedream on fal exposes `enhance_prompt_mode` (standard|fast). fal's schema does not document a way to disable prompt enhancement entirely, so a Seedream prompt should be written to survive a rewrite pass.",
+      "Qwen-Image on fal is the open-weights 20B model run directly, so the Alibaba Model Studio `prompt_extend` rewriter is NOT in the path on fal. Quoted strings therefore reach the model intact."
+    ]
+  },
+
+  "fal-ai/qwen-image": {
+    "family": "qwen",
+    "modality": "text-to-image",
+    "strengths": [
+      "Best-in-class legible in-image text among these four; the technical report's headline claim is complex text rendering, trained with a progressive curriculum from simple strings up to paragraph-level text",
+      "Renders Chinese (logographic) text unusually well, and English/Latin text reliably",
+      "Strong at poster, UI mockup, packaging and ad-layout compositions where copy is the point",
+      "Wide style range, photoreal through anime/illustration",
+      "Supports true negative prompts and up to 3 LoRAs"
+    ],
+    "weaknesses": [
+      "Text fidelity degrades as the number of distinct strings grows; long paragraphs of small copy still garble",
+      "`acceleration: high` and `use_turbo` trade text fidelity for speed (fal's own schema says high acceleration is 'recommended for text-free images')",
+      "Default guidance_scale is low (2.5); under-specified prompts drift"
+    ],
+    "prompt_style": "Write one dense descriptive paragraph in natural language, subject first, then style, then composition, then lighting, then camera/technical detail. Qwen responds to long, specific, comma-chained description rather than keyword soup. Any words that must literally appear in the image go in straight double quotes, with the surface they sit on and their typographic treatment named right next to them. Finish with a short quality tag; the official example code appends ', Ultra HD, 4K, cinematic composition.' in English and ', 超清，4K，电影级构图.' in Chinese.",
+    "ideal_length_words": [40, 120],
+    "structure_template": "[subject and its defining attributes], [medium/style e.g. product photography, flat vector poster], [composition and framing], [the exact copy: the headline reads \"EXACT WORDS\" in <weight/case/typeface family> on <surface>, positioned <where>], [color palette], [lighting], [lens/technical detail], Ultra HD, 4K, cinematic composition.",
+    "do": [
+      "Put every literal string in double quotes, one quoted string per text element",
+      "Name the surface the text sits on (banner, label, phone screen, wall) and its position in frame",
+      "Describe typography in plain words: bold condensed sans-serif, all caps, thin serif, handwritten marker",
+      "Keep total distinct text elements to 1-3 for reliable legibility; a headline plus one subline plus one badge is the safe ceiling",
+      "Set explicit negative_prompt for common failure modes when text matters: 'blurry text, misspelled text, distorted letters, watermark, extra fingers'",
+      "State aspect intent in the prompt as well as in image_size when layout matters",
+      "Raise guidance_scale toward 4.0-5.0 when prompt adherence or text accuracy matters more than aesthetics",
+      "For an Instagram ad, name the platform-native layout explicitly: 'square 1:1 social ad, headline in the upper third, clear negative space behind the copy'"
+    ],
+    "dont": [
+      "Do not use keyword-tag style ('masterpiece, best quality, 8k, trending on artstation'); it wastes the model's language grounding",
+      "Do not leave the intended copy unquoted; unquoted described copy gets paraphrased or invented",
+      "Do not ask for a paragraph of body copy and expect it legible",
+      "Do not use acceleration 'high' or use_turbo on any image containing text",
+      "Do not stack more than 3 LoRAs (hard schema limit)",
+      "Do not put the most important element at the end of a very long prompt"
+    ],
+    "negative_prompt_supported": true,
+    "bilingual_notes": "Qwen-Image is natively bilingual. The technical report frames English (alphabetic) rendering as solved and Chinese (logographic) rendering as the model's differentiating advance, so Chinese in-image text is a genuine strength rather than a fallback. Prompts themselves work in either language; the official example ships an English prompt with an English quality suffix and a Chinese prompt with a Chinese one. Match the prompt language to the language of the copy you want rendered. There is no verified evidence that Chinese-language prompts improve English-text output, so keep English prompts for English creative.",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Highest of the four. Verified primary claim: state-of-the-art text rendering, with a progressive training curriculum that scales from simple strings to paragraph-level text, and explicit strength on Chinese. To exploit it: quote the exact string, name its surface and position, name the typeface character, keep the string count low, run at 30+ steps, acceleration 'none' or 'regular', and guidance_scale 4.0-5.0. Verify the render and re-roll on seed rather than rewriting the prompt when only a letter is wrong.",
+    "key_params": {
+      "num_inference_steps": "2-250, default 30. 30 is the quality baseline; 8-12 is the cheap-concepting floor, and text degrades below ~20",
+      "guidance_scale": "0-20, default 2.5. CFG closeness to prompt. Use 2.5-3.5 for open aesthetic exploration, 4.0-5.0 when copy and layout must be obeyed",
+      "negative_prompt": "default ' '. Real negative conditioning; use it for text artifacts and anatomy",
+      "acceleration": "none|regular|high, default none. fal states 'high' is recommended for text-free images, so use regular for concepting and none for text-critical finals",
+      "use_turbo": "boolean, default false. Applies 10 steps and CFG 1.2. Fastest concepting mode, but do not use it for text",
+      "num_images": "1-4, default 1. Cheapest way to widen concept spread on one prompt",
+      "image_size": "square_hd | square | portrait_4_3 | portrait_16_9 | landscape_4_3 | landscape_16_9, default landscape_4_3. square_hd for Instagram feed, portrait_16_9 for Stories/Reels",
+      "output_format": "jpeg|png, default png. jpeg for cheap concept grids",
+      "loras": "up to 3 LoRA weights merged",
+      "seed": "fix it to iterate a layout without losing the composition"
+    },
+    "cheap_concepting_settings": {
+      "num_inference_steps": 10,
+      "guidance_scale": 3.0,
+      "acceleration": "regular",
+      "num_images": 4,
+      "output_format": "jpeg",
+      "image_size": "square_hd"
+    },
+    "worked_example": {
+      "user_idea": "instagram ad for my cold brew coffee brand",
+      "optimized_prompt": "A tall matte-black cold brew coffee can standing on a wet slate slab, condensation beading down the aluminium, studio product photography, centered square composition with generous empty space in the upper third, the headline reads \"BREWED COLD. HITS HARD.\" in bold condensed all-caps sans-serif set across the top of the frame in cream white, and a small badge on the can reads \"18H STEEP\" in thin uppercase letterforms, palette of deep charcoal, cream and burnt amber, hard directional key light from the upper left with a soft fill and a crisp specular edge on the can, shot on 85mm macro with shallow depth of field, Ultra HD, 4K, cinematic composition.",
+      "suggested_negative_prompt": "blurry text, misspelled text, distorted letters, warped can, watermark, logo artifacts, cluttered background"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/qwen-image",
+      "https://huggingface.co/Qwen/Qwen-Image",
+      "https://arxiv.org/abs/2508.02324",
+      "https://fal.ai/models/fal-ai/qwen-image",
+      "https://www.alibabacloud.com/help/en/model-studio/text-to-image"
+    ]
+  },
+
+  "fal-ai/qwen-image-edit": {
+    "family": "qwen",
+    "modality": "image-edit-single-reference",
+    "strengths": [
+      "Two distinct edit regimes: semantic editing (rotation, style transfer, IP restyling, pixels may change globally while meaning is held) and appearance editing (add/remove/modify one element while every other region stays completely unchanged)",
+      "Best-in-class in-image text EDITING: add, delete or rewrite text already present in a photo while preserving the original font, size and style",
+      "Dual conditioning (Qwen2.5-VL for semantics plus a VAE encoder for appearance) is what makes untouched regions actually stay untouched",
+      "Supports true negative prompts"
+    ],
+    "weaknesses": [
+      "fal's endpoint takes exactly one `image_url`; no multi-reference composition here",
+      "Complex glyphs and dense copy may need iterative, region-by-region correction rather than one shot",
+      "Input images outside roughly 384-3072 px degrade: too small goes blurry, too large costs time"
+    ],
+    "prompt_style": "Write a short imperative edit instruction, not a scene description. Name the single change, then explicitly name what must remain untouched. The model was trained on instructions of the form 'Turn this cat into a dog' or 'Change the rabbit's color to purple, with a flash light background', so one clear verb plus one clear target beats a paragraph. For text edits, quote both the old string and the new string.",
+    "ideal_length_words": [8, 45],
+    "structure_template": "<Imperative verb> <the one target element> <the desired new state>. Keep the <product/subject/logo/label/text/lighting/pose> exactly as in the original, unchanged in shape, color, proportions and detail. Do not alter anything else in the image.",
+    "do": [
+      "Change one thing per call; chain calls for multi-step edits",
+      "Explicitly enumerate the preserve list; 'unchanged' regions are a stated capability but only reliable when you name them",
+      "For text: 'Replace \"OLD TEXT\" with \"NEW TEXT\", keeping the same font, size, color and placement'",
+      "Feed an input image between 384 and 3072 px on each side, under 10 MB",
+      "Use negative_prompt for artifacts: 'blur, extra fingers, distorted text, duplicated object'",
+      "Raise guidance_scale toward 4-6 when the edit is being ignored; lower it toward 2.5-3.5 when the model is overcooking and drifting off the source",
+      "Fix the seed while tuning the wording so you can attribute changes to the prompt"
+    ],
+    "dont": [
+      "Do not re-describe the whole scene; a full scene description invites a full regeneration and the product will drift",
+      "Do not bundle 'change the background AND swap the label AND relight it' into one instruction",
+      "Do not pass an array to image_url; this endpoint is single-image",
+      "Do not rely on 'keep everything else the same' alone for a hero product; name the product's specific attributes",
+      "Do not use acceleration 'high' on a text edit"
+    ],
+    "negative_prompt_supported": true,
+    "bilingual_notes": "Explicitly bilingual text editing, Chinese and English, with font/size/style preserved through the edit. Chinese glyph editing is the headline differentiator versus western models. Edit instructions themselves are understood in either language; keep the instruction in the same language as the copy being written into the image.",
+    "reference_image_behavior": "Exactly one reference image. It is encoded twice: through Qwen2.5-VL for semantic control and through the VAE encoder for appearance control. That is the mechanism behind appearance editing, where untouched regions are meant to survive pixel-identically. In practice, treat it as strong-but-not-guaranteed preservation and verify.",
+    "reference_image_prompt_rules": [
+      "Open with the preservation clause, not the change: 'Keep the product in the image exactly as it is, identical shape, label, typography, color and proportions.'",
+      "Then state the single change, scoped to a region: 'Replace only the background with a sunlit marble countertop.'",
+      "Close with an explicit boundary: 'Do not redraw, restyle, re-letter or reposition the product. Do not change its lighting direction.'",
+      "Name the product's identifying features in words so the model has a semantic anchor for them (brand text, cap color, bottle silhouette)",
+      "Prefer background/context swaps and relights over anything that asks the model to re-render the product surface",
+      "If the label re-letters itself, drop guidance_scale, raise steps, and re-run on a new seed before rewriting the prompt"
+    ],
+    "text_rendering_quality": "Very strong for editing existing text in place; the model card claims direct addition, deletion and modification of text while preserving original font, size and style, in both Chinese and English. Prompt it by quoting old and new strings and naming the properties to hold constant. For net-new headlines on a blank surface, the text-to-image endpoint is the better tool.",
+    "key_params": {
+      "image_url": "REQUIRED, single string URL. Keep source between 384-3072 px per side, under 10 MB",
+      "num_inference_steps": "2-50, default 30. 30 is the working default; the reference implementation uses 50 for difficult edits",
+      "guidance_scale": "0-20, default 4. Adherence to the edit instruction. 4 is a good centre; go up to obey, down to preserve",
+      "negative_prompt": "default ' '. Use for blur, distorted text, extra limbs",
+      "acceleration": "none|regular|high, default regular. Keep at regular for concepting, none for a text-critical or product-critical final",
+      "image_size": "optional, default null which follows the input. Leave null to preserve source framing; set it only when you deliberately want a reframe",
+      "num_images": "1-4, default 1. Run 3-4 and pick, since edit fidelity varies by seed",
+      "output_format": "jpeg|png, default png",
+      "seed": "hold constant while iterating wording"
+    },
+    "cheap_concepting_settings": {
+      "num_inference_steps": 20,
+      "guidance_scale": 4,
+      "acceleration": "regular",
+      "num_images": 4,
+      "output_format": "jpeg",
+      "image_size": null
+    },
+    "worked_example": {
+      "user_idea": "put my product bottle on a beach instead of the plain white studio background",
+      "optimized_prompt": "Keep the bottle exactly as it appears in the original image, identical silhouette, label artwork, label typography, cap color, proportions and surface reflections. Replace only the plain white studio background with a sunlit beach at golden hour, soft out-of-focus waves and pale sand behind the bottle. Match the scene lighting to the existing highlights on the bottle so it sits naturally in the new background. Do not redraw, restyle, re-letter, resize or reposition the bottle, and do not add any new objects.",
+      "suggested_negative_prompt": "distorted text, warped label, duplicated bottle, blur, watermark, extra objects"
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/qwen-image-edit",
+      "https://huggingface.co/Qwen/Qwen-Image-Edit",
+      "https://www.alibabacloud.com/help/en/model-studio/qwen-image-edit-guide",
+      "https://arxiv.org/abs/2508.02324"
+    ]
+  },
+
+  "fal-ai/bytedance/seedream/v4/text-to-image": {
+    "family": "seedream",
+    "modality": "text-to-image",
+    "strengths": [
+      "Native high resolution, 1K to 4K, with reported ~1.8s for a 2K image; the fastest path to a large, finished-looking frame",
+      "Very strong prompt following and aesthetics; ByteDance reports top internal Elo across prompt-following, aesthetics and text-rendering in text-to-image",
+      "Handles cinematic, editorial and commercial photography language natively (lens, lighting, grade)",
+      "Can emit up to 6 varied generations per call via max_images"
+    ],
+    "weaknesses": [
+      "No negative_prompt on fal; exclusions must be phrased positively",
+      "A built-in prompt enhancer is always in the path (enhance_prompt_mode), so exact wording is less sacred than on Qwen",
+      "fal's own guide warns it 'can become confused with overly long prompts'",
+      "Weights concepts appearing earlier in the prompt more heavily, so a buried key element gets dropped",
+      "In-image text is good but not the reason to choose it over Qwen-Image"
+    ],
+    "prompt_style": "Direct a scene in fluent natural language, roughly 30-100 words, front-loading whatever matters most. The proven anatomy is subject, then style, then composition, then lighting and atmosphere, then technical camera detail. It rewards concrete photographic and art-direction vocabulary over abstract adjectives, and it punishes rambling.",
+    "ideal_length_words": [30, 100],
+    "structure_template": "[Subject with defining characteristics], [artistic or photographic style], [composition approach], [lighting and atmosphere], [camera and technical specs].",
+    "do": [
+      "Lead with the single most important element; the model emphasises earlier concepts",
+      "Stay inside 30-100 words",
+      "Use real photographic vocabulary: '85mm lens', 'shallow depth of field', 'golden hour', 'dramatic side lighting', 'symmetrical composition', 'rule of thirds', 'overhead perspective'",
+      "Express exclusions as positive statements, e.g. 'clean uncluttered background, single subject only' instead of a negative prompt",
+      "Quote literal in-image copy in double quotes and keep it to one or two short strings",
+      "Use image_size 'auto_2K' for fast concepting and 'auto_4K' only for a chosen final",
+      "Set max_images 4-6 for a concept sheet from a single prompt"
+    ],
+    "dont": [
+      "Do not exceed ~100 words or write unstructured stream-of-consciousness",
+      "Do not expect a negative_prompt parameter; there is none on fal",
+      "Do not bury the hero subject at the end of the prompt",
+      "Do not render a full paragraph of in-image body copy here; route text-heavy layouts to Qwen-Image",
+      "Do not concept at 4K; it wastes time and money for no compositional information"
+    ],
+    "negative_prompt_supported": false,
+    "bilingual_notes": "Seedream's lineage is explicitly Chinese-English bilingual: Seedream 2.0 was published as a native Chinese-English bilingual generation foundation model, and the family has carried bilingual text rendering forward. Both Chinese and English prompts are supported. There is no primary evidence that either prompt language yields better results for English creative, so default to English prompts for English copy and Chinese prompts for Chinese copy.",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "text_rendering_quality": "Good. ByteDance reports high internal scores on text rendering for text-to-image, and the bilingual lineage is real, but no primary source positions Seedream as a text-rendering specialist the way the Qwen-Image report does. Practical rule: one short quoted headline plus at most one short subline is safe; anything typographically dense belongs on Qwen-Image. Prompt text by quoting the string, naming its surface, and naming the letterform style.",
+    "key_params": {
+      "image_size": "presets square_hd, square, portrait_4_3, portrait_16_9, landscape_4_3, landscape_16_9, auto, auto_2K, auto_4K, or custom 960-4096 px. Default 2048x2048",
+      "num_images": "1-6, default 1. Separate model generations of the same prompt",
+      "max_images": "1-6, default 1. Set above 1 to enable multi-image generation from one run",
+      "enhance_prompt_mode": "standard|fast, default standard. standard prioritises quality, fast prioritises speed. Use fast for concepting",
+      "seed": "fix to hold a composition while iterating wording",
+      "enable_safety_checker": "default true; leave on",
+      "sync_mode": "default false; true returns a data URI and drops the result from request history"
+    },
+    "cheap_concepting_settings": {
+      "image_size": "auto_2K",
+      "enhance_prompt_mode": "fast",
+      "num_images": 4,
+      "max_images": 4
+    },
+    "worked_example": {
+      "user_idea": "instagram ad for my cold brew coffee brand",
+      "optimized_prompt": "A matte-black cold brew coffee can beaded with condensation on a wet slate slab, high-end commercial product photography, tight square composition with the can slightly right of centre and clean negative space above it for copy, hard directional key light from the upper left with soft fill and a crisp specular edge, deep charcoal, cream and burnt amber palette, shot on an 85mm lens with shallow depth of field, 4K detail. The can carries the words \"BREWED COLD\" in bold condensed uppercase lettering."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/bytedance/seedream/v4/text-to-image",
+      "https://arxiv.org/abs/2509.20427",
+      "https://seed.bytedance.com/en/seedream4_0",
+      "https://fal.ai/learn/devs/seedream-v4-5-prompt-guide",
+      "https://huggingface.co/papers/2503.07703"
+    ]
+  },
+
+  "fal-ai/bytedance/seedream/v4/edit": {
+    "family": "seedream",
+    "modality": "image-edit-multi-reference",
+    "strengths": [
+      "Accepts up to 10 reference images in one call, which makes it the right tool for composition tasks: put this product, on this model, in this environment, in this style",
+      "Unified architecture covering text-to-image, single-image editing and multi-image composition, with a fine-tuned VLM in the loop for in-context reasoning about the references",
+      "ByteDance reports a strong balance between prompt-following and fidelity to the source image on single-image editing",
+      "Outputs up to 4K natively, so an edited hero shot is delivery-ready"
+    ],
+    "weaknesses": [
+      "No negative_prompt on fal",
+      "The always-on prompt enhancer can reinterpret an edit instruction, so preservation language must be blunt and repeated",
+      "Multi-reference blending is easier to control two images at a time than all ten at once",
+      "No primary source guarantees pixel-identical preservation of an untouched region the way the Qwen-Image-Edit card does; for absolute product fidelity, Qwen-Image-Edit's appearance-editing regime is the safer default"
+    ],
+    "prompt_style": "Write a direct instruction that names each reference by its position in the image_urls array, states exactly what to take from each, and states what must not change. fal's official example is instruction-shaped, not scene-shaped ('Dress the model in the clothes and hat. Add a cat to the scene.'). Keep it under about 100 words and front-load the preservation clause when fidelity is the priority.",
+    "ideal_length_words": [15, 80],
+    "structure_template": "Use image 1 as <role>, image 2 as <role>. <Imperative change>. Keep <the element that must survive> exactly as it appears in image <n>, identical in shape, color, typography, proportions and detail. Do not alter <explicit list>. [lighting / integration instruction].",
+    "do": [
+      "Order image_urls deliberately and refer to them by number in the prompt; the numbering must match the array order",
+      "Assign each reference an explicit role: product, model, garment, pose, environment, style",
+      "State preservation before change when a product must survive untouched, and restate it as a closing 'do not' line",
+      "Blend two references at a time and iterate on the result when the composition is complex, rather than throwing ten in at once",
+      "Add an integration instruction so the composite reads as one photograph: 'match the lighting direction and color temperature of image 1'",
+      "Name which stylistic elements come from which source when merging styles",
+      "Use enhance_prompt_mode 'fast' and auto_2K while exploring, then re-run the winner at auto_4K"
+    ],
+    "dont": [
+      "Do not exceed 10 reference images (hard schema limit)",
+      "Do not write a full scene description; that reads as permission to regenerate the product",
+      "Do not assume unnamed elements are protected, name them",
+      "Do not expect negative_prompt to exist; phrase exclusions positively inside the instruction",
+      "Do not ask for the product surface to be restyled and preserved in the same call",
+      "Do not concept at 4K"
+    ],
+    "negative_prompt_supported": false,
+    "bilingual_notes": "Same bilingual Chinese-English lineage as the text-to-image endpoint. Edit instructions work in both languages; no primary evidence favours one prompt language for Latin-script output. Keep instruction language matched to the language of any copy being written into the image.",
+    "reference_image_behavior": "Up to 10 images passed as `image_urls`. The model reasons over them jointly through a fine-tuned VLM and composes rather than simply inpainting, so it will happily re-render a reference subject unless told not to. Reference order is semantically meaningful because the prompt addresses images by index.",
+    "reference_image_prompt_rules": [
+      "Give the product image index 1 and open the prompt with it: 'Image 1 is the product. Reproduce it exactly as shown.'",
+      "Spell out the invariants: 'identical bottle silhouette, identical label artwork and label typography, identical cap color, identical proportions and material finish'",
+      "Scope the change to everything BUT the product: 'Change only the surrounding scene and lighting.'",
+      "Close with an explicit prohibition list: 'Do not redraw, restyle, re-letter, recolor, resize, rotate or reposition the product from image 1. Do not add text to the product.'",
+      "Because there is no negative prompt, the prohibition list inside the prompt is the only exclusion mechanism available",
+      "Run num_images 4 and select; preservation fidelity varies seed to seed",
+      "For a hero shot where the label must be literally unchanged, prefer fal-ai/qwen-image-edit; use Seedream v4 edit when you need multi-reference composition that Qwen-Image-Edit cannot do"
+    ],
+    "text_rendering_quality": "Good, and it will attempt to preserve text present in a reference, but preservation of existing label typography is not a guaranteed behavior in any primary source. Always inspect the label in the output. For text-critical edits, route to fal-ai/qwen-image-edit, whose model card explicitly claims font/size/style-preserving text editing.",
+    "key_params": {
+      "image_urls": "REQUIRED array, up to 10 URLs. Order is referenced by the prompt",
+      "image_size": "presets incl. auto, auto_2K, auto_4K, or custom 1-14142 px. Default 2048x2048. Use auto to follow the source framing",
+      "num_images": "1-6, default 1. Separate generations of the same instruction; run 4 and select",
+      "max_images": "1-6, default 1. Set above 1 for multi-image output from one run",
+      "enhance_prompt_mode": "standard|fast, default standard. fast for concepting, standard for finals",
+      "seed": "hold constant while tuning the instruction wording",
+      "enable_safety_checker": "default true; leave on",
+      "sync_mode": "default false"
+    },
+    "cheap_concepting_settings": {
+      "image_size": "auto_2K",
+      "enhance_prompt_mode": "fast",
+      "num_images": 4,
+      "max_images": 4
+    },
+    "worked_example": {
+      "user_idea": "put my product bottle in the hands of the model from this other photo, on a beach",
+      "optimized_prompt": "Image 1 is the product bottle. Image 2 is the model. Reproduce the bottle from image 1 exactly as shown, identical silhouette, label artwork, label typography, cap color, proportions and material finish, and place it held in the right hand of the model from image 2. Keep the model's face, hair and clothing unchanged from image 2. Set the scene on a sunlit beach at golden hour with soft out-of-focus waves behind them, and match the lighting direction and color temperature across both subjects so it reads as a single photograph. Do not redraw, restyle, re-letter, recolor or resize the bottle, and do not add any text to the product."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/bytedance/seedream/v4/edit",
+      "https://arxiv.org/abs/2509.20427",
+      "https://seed.bytedance.com/en/seedream4_0",
+      "https://fal.ai/learn/devs/seedream-v4-5-prompt-guide"
+    ]
+  }
+}

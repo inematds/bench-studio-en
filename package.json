@@ -1,0 +1,45 @@
+{
+  "name": "bench-studio-public",
+  "private": true,
+  "version": "1.3.2",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n server,web -c magenta,cyan \"node server/server.mjs\" \"vite\"",
+    "server": "node server/server.mjs",
+    "web": "vite",
+    "registry": "node server/build_registry.mjs",
+    "capabilities": "node server/build_capabilities.mjs",
+    "catalog:sync": "node server/discover_catalog.mjs",
+    "mcp": "node server/mcp.mjs",
+    "set-password": "node server/set_password.mjs",
+    "build:mcp-app": "vite build --config server/mcp-app/vite.config.mjs",
+    "test:mcp": "node server/smoke_mcp.mjs",
+    "test:contracts": "node --test tests/contracts.test.mjs tests/db.test.mjs tests/api.test.mjs tests/config.test.mjs tests/auth.test.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:release": "npm run build && npm run build:mcp-app && npm run test:contracts && npm run test:mcp && npm run test:e2e",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "@openai/codex-sdk": "^0.146.1",
+    "express": "^4.19.2",
+    "multer": "^2.2.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "concurrently": "^9.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^8.2.1",
+    "vite-plugin-singlefile": "^2.3.3"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}

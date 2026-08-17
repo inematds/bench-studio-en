@@ -1,0 +1,526 @@
+{
+  "_meta": {
+    "researched": "2026-08-12",
+    "verification_note": "All duration/resolution/aspect-ratio/param facts come from the live fal OpenAPI schema for each specific endpoint (https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>), which is authoritative and overrides marketing copy. IMPORTANT CORRECTION: fal's Seedance 2.5 text-to-video and image-to-video endpoints cap at 720p, NOT 4K. The '4K / 50 reference files' Seedance 2.5 claims circulating online describe the native ByteDance/Volcengine model, not the fal endpoints. Only bytedance/seedance-2.0/reference-to-video exposes 1080p and 4k on fal. No endpoint in this set exposes a negative_prompt field.",
+    "unverified_flags": [
+      "MiniMax H3 fps: 24 fps is reported by MiniMax marketing pages; not stated in the fal schema.",
+      "H3 '4K' resolution option exists on fal but MiniMax's own docs only document 768P and 2K, so 4K is likely a fal-side upscale. Treat 2K as the real native ceiling.",
+      "MiniMax's H3 video-generation guide confirms bracketed camera directives generically ([pan], [zoom], [static]) but does not republish the full movement list; the full list below is the documented Hailuo/Director-lineage list and should be treated as high-confidence-but-inherited for H3.",
+      "Seedance 2.5 fps of 24 comes from fal's learn article, not the schema."
+    ]
+  },
+
+  "bytedance/seedance-2.5/text-to-video": {
+    "family": "seedance",
+    "modality": "text-to-video",
+    "strengths": [
+      "Native single-take generation up to 30 seconds with no splice drift, which is the standout capability in this set",
+      "Reasons over the whole take at once, so multi-beat cause-and-effect sequences hold together",
+      "Joint native audio: sound effects, ambience and lip-synced speech at no extra cost",
+      "Responds well to timestamped shot lists and staged beats",
+      "Wide aspect ratio support including 21:9 ultrawide and 9:16 vertical"
+    ],
+    "weaknesses": [
+      "Hard 720p ceiling on this fal endpoint, so it is not a finishing model for high-res delivery",
+      "No negative prompt, no seed input, no CFG-style control; steering is prompt-only",
+      "Long durations get expensive fast (billed per second of output)",
+      "Vague or unordered story beats force the model to invent its own sequencing"
+    ],
+    "prompt_style": "Write like a director calling a shot, in this order: camera, subject, action, environment, look, sound. For anything longer than about 8 seconds, stop writing prose and write staged beats or a timed shot list instead, because the model allocates pacing across the whole take in one pass. Name the ending frame explicitly; if you do not, the model decides where the scene lands. Describe motion with direction, distance, speed, contact and reaction rather than adjectives. Make sound cues concrete nouns the model can act on (gravel, rain, servo whine) rather than moods. Put any spoken line in double quotes to trigger lip-synced audio. Clarity beats density: describe only what you actually need to control and leave the rest for the model.",
+    "ideal_length_words": [45, 120],
+    "structure_template": "[Camera framing and movement] + [subject, described concretely] + [action verb chain with direction and speed] + [environment and time of day] + [visual style / lighting / lens] + [concrete sound cues]. For 10s+: 0-Xs: <beat 1, one primary change>. X-Ys: <beat 2, one primary change>. Y-Zs: <beat 3>. End frame: <exact final composition>.",
+    "motion_vocabulary": [
+      "slow push in", "pull out", "dolly forward", "tracking shot", "orbit around", "pan left", "pan right",
+      "tilt up", "tilt down", "crane up", "handheld follow", "static locked-off shot", "rack focus",
+      "whip pan", "low angle", "overhead top-down", "macro close-up", "cut to"
+    ],
+    "camera_directive_syntax": "No bracketed directive DSL. Seedance takes camera direction as plain language placed FIRST in the sentence or in a labeled field block. Two documented shapes: (1) inline, e.g. \"Slow push in on a chrome espresso machine as steam rises...\"; (2) a bracketed FIELD block (not a camera command), e.g. \"【Concept】product hero\\n【Style】clean commercial, soft key\\n【Scene】matte black desk\\n【Camera】slow dolly in, ending on a locked macro of the logo\". The field block is for separating style from action, not for issuing camera commands.",
+    "do": [
+      "Lead with the camera move, then subject, then action",
+      "Use explicit timestamps (0-6s, 6-12s) whenever duration is 10s or more",
+      "Name the final frame in words so the beat order cannot drift",
+      "Put dialogue in double quotes for lip sync",
+      "Give one primary change per stage, never two",
+      "Set duration explicitly rather than leaving it on 'auto' when pacing matters"
+    ],
+    "dont": [
+      "Do not write a mood-board paragraph with no ordered action",
+      "Do not stack three simultaneous camera moves in one sentence",
+      "Do not generate two clips separately and expect them to match; use one long take",
+      "Do not ask for 1080p or 4K here, the endpoint does not offer it",
+      "Do not include negative instructions like 'no text, no watermark'; there is no negative prompt and phrasing it positively works better"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None. This endpoint is text-only. Use bytedance/seedance-2.5/image-to-video for a start frame or bytedance/seedance-2.0/reference-to-video for subject/product references.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "Duration: 'auto' or any whole number 4 to 30 seconds (string enum). Resolution: 480p or 720p only, default 720p. Aspect ratio: auto, 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, default auto. fal reports 24 fps (not in schema). Audio on by default, same price either way.",
+    "key_params": {
+      "prompt": "The only required field. Carries all direction.",
+      "duration": "String, 'auto' or '4'-'30'. Use '5' for cheap concepting; every extra second bills.",
+      "resolution": "'480p' or '720p'. Use '480p' for concepting, roughly half the per-second cost.",
+      "aspect_ratio": "'16:9' for YouTube, '9:16' for shorts, '21:9' for cinematic. Set it explicitly rather than 'auto'.",
+      "generate_audio": "Boolean, default true. Costs nothing extra, so leave on unless you are scoring the clip yourself.",
+      "bitrate_mode": "'standard' or 'high'. Encode quality only, not model quality. Keep 'standard' for concepting.",
+      "end_user_id": "Optional abuse-tracking identifier, no creative effect."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": "5",
+      "bitrate_mode": "standard",
+      "generate_audio": true,
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "a cool shot of my coffee brand's bag on a counter",
+      "optimized_prompt": "Slow dolly push in on a matte black coffee bag standing upright on a wet concrete counter. Steam drifts across frame from a cup just outside the shot. Morning window light rakes in from camera left, hard edge on the bag, deep shadow on the right. Shallow depth of field, 50mm, clean commercial look, no on-screen text. Sound: low room tone, a spoon tapping ceramic once, distant steam wand hiss. End frame: the bag centered and sharp, steam clearing, the counter surface still glistening."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedance-2.5/text-to-video",
+      "https://fal.ai/learn/tools/seedance-2-5-workflows",
+      "https://lumalabs.ai/learning-center/articles/seedance-2-5-prompting-guide"
+    ]
+  },
+
+  "bytedance/seedance-2.5/image-to-video": {
+    "family": "seedance",
+    "modality": "image-to-video",
+    "strengths": [
+      "Start frame is honored tightly, so a rendered product still stays on-model",
+      "Supports an end_image_url for a controlled first-frame-to-last-frame transition",
+      "Up to 30 seconds of single-take animation from one still",
+      "Native audio including lip sync if the still shows a person"
+    ],
+    "weaknesses": [
+      "720p ceiling; whatever your start frame resolution is, output is capped",
+      "aspect_ratio is forced to 'auto' and inherited from the image, so framing must be right before you call it",
+      "Re-describing the subject's appearance in the prompt fights the image and causes drift",
+      "No negative prompt or seed control"
+    ],
+    "prompt_style": "The image already answers 'what does it look like'. Your prompt must answer only 'what moves, and how does the camera move'. Write motion, not appearance. Start with the camera move, then the subject's action with direction and speed, then how the light or environment changes over the take, then concrete sound. Refer to the subject generically ('the bag', 'the man in frame') rather than re-describing its color, logo, or material, because restating appearance invites the model to reinterpret and redraw it. If you supply an end_image_url, describe the transition path between the two frames rather than either frame's contents.",
+    "ideal_length_words": [30, 90],
+    "structure_template": "[Camera move] + [what the subject does, with direction and speed] + [what changes in the environment or light across the take] + [concrete sound cues] + [End frame: final composition]",
+    "motion_vocabulary": [
+      "slow push in", "pull back", "orbit clockwise around the subject", "tracking shot", "pan left", "pan right",
+      "tilt up", "crane down", "handheld drift", "static locked-off shot", "rack focus to the foreground",
+      "parallax move", "subtle breathing motion", "cut to"
+    ],
+    "camera_directive_syntax": "No bracketed directive DSL. Plain-language camera direction placed at the start of the prompt, same as Seedance text-to-video. Example: \"Slow orbit clockwise around the subject, ending square to camera.\"",
+    "do": [
+      "Describe motion and camera only",
+      "Refer to the subject by a short generic noun the image already defines",
+      "State the end frame in words",
+      "Use end_image_url when you need a guaranteed landing composition",
+      "Feed a start frame already in the aspect ratio you want, since aspect_ratio is locked to auto"
+    ],
+    "dont": [
+      "Do not re-describe the product's colors, logo, text, or materials",
+      "Do not request a different framing than the image provides",
+      "Do not ask for content that is not in the frame; it will be hallucinated inconsistently",
+      "Do not exceed 30 MB on the input image"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Exactly ONE start frame via image_url (required alongside prompt), optionally ONE end frame via end_image_url. JPEG, PNG or WebP, max 30 MB each. The start frame sets both the opening composition and the output aspect ratio. With end_image_url set, the model generates a transition from the start image to the end image.",
+    "reference_image_prompt_rules": [
+      "Write motion, never appearance; the pixels are already decided",
+      "Name the subject with the shortest possible generic noun phrase ('the can', 'the sneaker')",
+      "Say what the camera does to the subject, not what the subject looks like",
+      "Describe lighting only as a CHANGE over time ('light warms as the sun clears the building'), never as a static description that competes with the image",
+      "For hard product-fidelity jobs, keep the subject roughly still and put all the motion in the camera and the environment"
+    ],
+    "duration_and_fps": "Duration: 'auto' or 4 to 30 seconds (whole numbers, string enum). Resolution: 480p or 720p, default 720p. Aspect ratio: always 'auto', inherited from image_url. fal reports 24 fps. Audio on by default.",
+    "key_params": {
+      "image_url": "Required start frame. Sets composition and aspect ratio. Max 30 MB.",
+      "end_image_url": "Optional last frame. Use it to guarantee where the shot lands.",
+      "prompt": "Required. Motion and camera direction only.",
+      "duration": "'auto' or '4'-'30'. Use '5' for concepting.",
+      "resolution": "'480p' or '720p'. '480p' for concepting.",
+      "generate_audio": "Default true, no extra cost.",
+      "aspect_ratio": "Ignored, always auto."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": "5",
+      "generate_audio": true
+    },
+    "worked_example": {
+      "user_idea": "make my sneaker photo feel like an ad",
+      "optimized_prompt": "Slow push in on the shoe, camera drifting slightly left to right for parallax, subject held still. Studio light sweeps across the frame from the left over the first three seconds, catching the upper and then falling off. Fine dust motes float through the beam. Shallow depth of field, focus stays locked on the midsole. Sound: low sub hum, one soft fabric rustle. End frame: the shoe filling two thirds of frame, highlight resting on the heel, background fully dark."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedance-2.5/image-to-video",
+      "https://fal.ai/learn/tools/seedance-2-5-workflows",
+      "https://lumalabs.ai/learning-center/articles/seedance-2-5-prompting-guide"
+    ]
+  },
+
+  "bytedance/seedance-2.0/fast/text-to-video": {
+    "family": "seedance",
+    "modality": "text-to-video",
+    "strengths": [
+      "Fastest and cheapest lane in the Seedance family, built for volume concepting",
+      "Same prompt grammar as 2.5, so a prompt drafted here transfers upward without rewriting",
+      "Native audio included",
+      "Full aspect ratio range including 21:9 and 9:16"
+    ],
+    "weaknesses": [
+      "15 second cap, so no 30-second single takes",
+      "720p ceiling",
+      "Lower fidelity and weaker prompt adherence than 2.5; complex multi-beat sequences degrade",
+      "No negative prompt, no seed input"
+    ],
+    "prompt_style": "Treat this as the draft lane. Keep prompts tighter and simpler than you would for 2.5, because the fast model holds fewer beats. One camera move, one subject, one clear action, one environment, one lighting idea, one sound cue. Still lead with the camera. If the idea genuinely needs three beats, use timestamps but keep each beat to a single primary change and keep total duration at or under 10 seconds. Once the shot reads correctly here, re-run the same prompt on seedance-2.5 for the finished version.",
+    "ideal_length_words": [35, 90],
+    "structure_template": "[Camera move] + [subject] + [one clear action with direction] + [environment and light] + [one concrete sound cue] + [End frame: ...]",
+    "motion_vocabulary": [
+      "slow push in", "pull out", "dolly forward", "tracking shot", "orbit around", "pan left", "pan right",
+      "tilt up", "tilt down", "handheld follow", "static locked-off shot", "rack focus", "low angle", "overhead top-down"
+    ],
+    "camera_directive_syntax": "No bracketed directive DSL. Plain-language camera direction at the start of the prompt. Example: \"Handheld follow behind a cyclist, camera low near the rear wheel.\"",
+    "do": [
+      "Keep it to one or two beats",
+      "Lead with the camera move",
+      "Use this endpoint to test premise and composition before spending on 2.5",
+      "Set duration explicitly at 5 for the cheapest useful read"
+    ],
+    "dont": [
+      "Do not push five-beat narratives through this model",
+      "Do not expect 2.5-level physics or hand and text fidelity",
+      "Do not ask for durations over 15 seconds",
+      "Do not write negative instructions; no negative prompt exists"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None. Text only.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "Duration: 'auto' or 4 to 15 seconds (whole numbers, string enum). Resolution: 480p or 720p, default 720p. Aspect ratio: auto, 21:9, 16:9, 4:3, 1:1, 3:4, 9:16. Audio on by default.",
+    "key_params": {
+      "prompt": "Required.",
+      "duration": "'auto' or '4'-'15'. '5' for concepting.",
+      "resolution": "'480p' or '720p'. '480p' for concepting.",
+      "aspect_ratio": "Set explicitly rather than auto.",
+      "generate_audio": "Default true, no extra cost.",
+      "bitrate_mode": "'standard' or 'high'; encode only."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": "5",
+      "bitrate_mode": "standard",
+      "aspect_ratio": "16:9",
+      "generate_audio": true
+    },
+    "worked_example": {
+      "user_idea": "quick test shot of a robot arm assembling something",
+      "optimized_prompt": "Locked-off medium shot, slight slow push in. A white industrial robot arm pivots down, closes its gripper on a small brushed-metal part, and lifts it clean out of a tray in one smooth motion. Cool overhead factory light, faint blue rim from a monitor off camera left. Sound: servo whine, one metallic click on contact. End frame: the arm holding the part still at the top of its lift, tray empty below."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedance-2.0/fast/text-to-video",
+      "https://fal.ai/learn/tools/seedance-2-5-workflows"
+    ]
+  },
+
+  "bytedance/seedance-2.0/reference-to-video": {
+    "family": "seedance",
+    "modality": "reference-to-video",
+    "strengths": [
+      "THE product-ad lane in the Seedance family: up to 9 subject/product reference images addressed individually",
+      "Only endpoint in this whole set that exposes 1080p and 4k on fal",
+      "Also accepts up to 3 reference videos (motion/style transfer) and up to 3 reference audio clips",
+      "Explicit @Image1 / @Video1 / @Audio1 addressing means you can assign a different job to each asset",
+      "Cheaper per second than the plain 2.5 lanes when a video reference is supplied"
+    ],
+    "weaknesses": [
+      "15 second cap, unlike 2.5's 30",
+      "Fidelity is 2.0-class, below 2.5, so fine product text and logos can still soften",
+      "12 files total across all modalities is a hard ceiling",
+      "No negative prompt, no seed input",
+      "Cost climbs sharply at 1080p/4k, so concept at 480p first"
+    ],
+    "prompt_style": "Assign every reference an explicit ROLE before you describe any action. Do not just attach images and hope. Write something like \"@Image1 is the product, keep it exactly as shown. @Image2 is the environment. @Video1 is the camera motion to copy.\" Then describe only motion, camera and environment change. Never re-describe the product's colors, materials, logo or label text, because restating appearance gives the model permission to reinterpret it. Not every reference needs to appear in every beat; say which asset drives which moment. Keep the product itself relatively static and put the energy in camera and light, which is the single most reliable way to keep a product on-model. Close with an explicit end frame.",
+    "ideal_length_words": [50, 130],
+    "structure_template": "@Image1 is <role, e.g. the product; reproduce exactly as shown, unchanged>. @Image2 is <role>. @Video1 is <role, e.g. the camera motion to match>. [Camera move] + [action and how the referenced subject moves, direction and speed] + [environment and light change] + [concrete sound] + [End frame: ...]",
+    "motion_vocabulary": [
+      "slow push in", "pull out", "orbit clockwise around the subject", "tracking shot", "pan left", "pan right",
+      "tilt up", "crane down", "handheld drift", "static locked-off shot", "rack focus", "parallax move",
+      "match the camera motion in @Video1", "cut to"
+    ],
+    "camera_directive_syntax": "No bracketed camera DSL. Camera direction is plain language. The bracketed-looking tokens here are ASSET references, not camera commands: '@Image1', '@Image2', '@Video1', '@Audio1', numbered by their position in image_urls / video_urls / audio_urls. Example: \"@Image1 is the product, reproduce it exactly. Slow orbit clockwise around @Image1, matching the camera rhythm of @Video1.\"",
+    "do": [
+      "State the role of every attached asset in the first sentence",
+      "Use the words 'reproduce exactly as shown, unchanged' for the product image",
+      "Use a reference video when you want a specific camera rhythm you cannot describe",
+      "Keep the product still and move the camera and light around it",
+      "Concept at 480p, then re-run the identical prompt at 1080p once the motion is right"
+    ],
+    "dont": [
+      "Do not describe the product's appearance in words",
+      "Do not attach more than 12 files total across images, videos and audio",
+      "Do not exceed 9 images, 3 videos (2-15s each, 15s combined, under 50 MB total) or 3 audio files (15s combined, 15 MB each)",
+      "Do not leave assets unlabeled; unlabeled references get averaged together",
+      "Do not jump straight to 4k, it is the most expensive setting in this whole profile set"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Up to 9 reference images via image_urls (JPEG, PNG, WebP, max 30 MB each), addressed in the prompt as @Image1, @Image2 and so on by list position. Additionally up to 3 videos via video_urls (MP4/MOV, 2-15s each, 2-15s combined, under 50 MB total, addressed @Video1...) and up to 3 audio files via audio_urls (MP3/WAV, 15s combined, max 15 MB each, addressed @Audio1...). Total files across all three modalities must not exceed 12. Images should show the product or subject cleanly from the angles you want preserved; one clean hero angle plus one or two alternates beats nine noisy shots.",
+    "reference_image_prompt_rules": [
+      "Open by assigning a role to each numbered asset, one clause each",
+      "For the product image write: '@Image1 is the product. Reproduce it exactly as shown, unchanged, including label and proportions.'",
+      "Describe MOTION and CAMERA only for the rest of the prompt",
+      "Never restate the product's color, finish, logo, or on-pack text",
+      "If a reference is only relevant to one beat, say which beat it drives",
+      "Supply the product on a clean, evenly lit background so the model is not also learning the reference's environment",
+      "Put the subject motion budget into the camera: an orbit or push-in around a static product is the highest-fidelity shape"
+    ],
+    "duration_and_fps": "Duration: 'auto' or 4 to 15 seconds (whole numbers, string enum). Resolution: 480p, 720p, 1080p or 4k, default 720p. This is the ONLY endpoint in this profile set offering 1080p or 4k. Aspect ratio: auto, 21:9, 16:9, 4:3, 1:1, 3:4, 9:16. Audio on by default.",
+    "key_params": {
+      "prompt": "Required. Must contain the role assignments for @Image1 etc.",
+      "image_urls": "Up to 9 subject/product references, addressed by list order as @Image1..@Image9.",
+      "video_urls": "Up to 3 motion/style references, @Video1..@Video3, 2-15s each, 15s combined.",
+      "audio_urls": "Up to 3 audio references, @Audio1..@Audio3, 15s combined.",
+      "duration": "'auto' or '4'-'15'. '5' for concepting.",
+      "resolution": "'480p' concepting, '720p' review, '1080p' delivery, '4k' only when it must be delivered at 4k.",
+      "aspect_ratio": "Set explicitly to the delivery ratio.",
+      "generate_audio": "Default true, no extra cost.",
+      "bitrate_mode": "'standard' or 'high'; encode only."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "duration": "5",
+      "bitrate_mode": "standard",
+      "aspect_ratio": "16:9",
+      "generate_audio": true
+    },
+    "worked_example": {
+      "user_idea": "make an ad for my skincare bottle using these product photos",
+      "optimized_prompt": "@Image1 is the product. Reproduce it exactly as shown, unchanged, including the label, cap and proportions. @Image2 is the surface and environment reference. Slow orbit clockwise around the product, ninety degrees over the full take, camera at bottle-shoulder height. The product stays perfectly still on its plinth. A soft key light travels with the camera so the highlight rolls around the glass, and a thin haze catches the backlight behind it. Shallow depth of field, background falls to soft grey. Sound: low ambient pad, one soft glass tap at the start. End frame: the product square to camera, label fully readable, single vertical highlight down the left edge."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedance-2.0/reference-to-video",
+      "https://fal.ai/learn/tools/seedance-2-5-workflows",
+      "https://lumalabs.ai/learning-center/articles/seedance-2-5-prompting-guide"
+    ]
+  },
+
+  "minimax/h3/text-to-video": {
+    "family": "hailuo",
+    "modality": "text-to-video",
+    "strengths": [
+      "Highest resolution ceiling in this set on fal (2K default, 4K option) with native stereo audio",
+      "Explicit, documented bracketed camera-directive syntax, which makes camera control far more deterministic than Seedance's plain language",
+      "Strong physical motion and character movement, the historic Hailuo strength",
+      "Built-in prompt expansion (enable_prompt_expansion) that fills in a thin idea with a vision-language model",
+      "Open-weights lineage, well documented at platform.minimax.io"
+    ],
+    "weaknesses": [
+      "5 to 15 second cap, so no long single takes",
+      "Prompt expansion is ON by default and will rewrite a carefully tuned prompt; turn it off once your prompt is dialed in",
+      "No negative prompt, no seed input",
+      "Safety checker on by default can reject brand or likeness-adjacent content",
+      "MiniMax's own docs only document 768P and 2K native; the fal '4K' option is likely an upscale"
+    ],
+    "prompt_style": "Write a single flowing scene description in natural language and inject bracketed camera directives at the exact points in the sentence where the move should start. That placement matters: the directive applies from where you put it. Describe subject, then action, then environment, then style, and let the brackets carry all camera work rather than writing 'the camera slowly pushes in'. Use at most three movements. If you want the model to embellish, leave enable_prompt_expansion on and write two sentences. If you want exactly what you wrote, set enable_prompt_expansion to false and write the full scene yourself. Prompt limit is 7,000 characters, but concise beats long here.",
+    "ideal_length_words": [40, 110],
+    "structure_template": "[Camera directive]<subject and appearance> <action with direction and speed> <environment, time of day, lighting> [second camera directive]<what changes> <style and lens> <sound cues>",
+    "motion_vocabulary": [
+      "Truck left", "Truck right", "Pan left", "Pan right", "Push in", "Pull out", "Pedestal up", "Pedestal down",
+      "Tilt up", "Tilt down", "Zoom in", "Zoom out", "Shake", "Tracking shot", "Static shot", "Follow"
+    ],
+    "camera_directive_syntax": "Square-bracket directives placed inline, immediately before the description they should govern. Documented in MiniMax's H3 video-generation guide (which confirms bracketed directives such as [pan], [zoom], [static] placed directly after key descriptions) and in the canonical Hailuo/Director movement list. Movements: Truck left/right, Pan left/right, Push in/Pull out, Pedestal up/down, Tilt up/down, Zoom in/out, Shake, Tracking shot, Static shot. Up to 3 movements per prompt. Movements inside ONE bracket fire simultaneously: [Truck left, Pan right, Zoom in]. Movements in SEPARATE brackets fire in sequence at their position in the text. Real example: \"[Push in, Follow]A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse.[Pan left] The street opens into a small plaza where street vendors sell steaming food under colorful awnings.\"",
+    "do": [
+      "Use bracketed directives instead of describing the camera in prose",
+      "Group simultaneous moves in one bracket, sequence them with separate brackets",
+      "Cap it at three movements total",
+      "Set enable_prompt_expansion to false once the prompt is final, so you get what you wrote",
+      "Set duration explicitly (5 to 15, integer)"
+    ],
+    "dont": [
+      "Do not mix bracketed directives and prose camera description in the same prompt; pick one, the brackets win",
+      "Do not use more than 3 movements",
+      "Do not invent bracket names outside the documented list; unknown tokens are treated as literal text",
+      "Do not write negative instructions; there is no negative prompt field",
+      "Do not assume 4K is native quality"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "None on this endpoint. Use minimax/h3/image-to-video for a first frame, or minimax/h3/reference-to-video for subject/product references.",
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "Duration: integer seconds, fal default 5; MiniMax documents 4 to 15 seconds (integers only), and H3 marketing states 5 to 15. Treat 5 to 15 as the safe range. Resolution: '768P', '2K' or '4K', default 2K (768P and 2K are the documented native options). Aspect ratio: 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, default 16:9. Native stereo audio on every result. 24 fps reported by MiniMax, not stated in the fal schema.",
+    "key_params": {
+      "prompt": "Required. Up to 7,000 characters per MiniMax docs.",
+      "duration": "Integer seconds, 5 to 15. Use 5 for concepting.",
+      "resolution": "'768P' for cheap concepting, '2K' for delivery, '4K' rarely worth it.",
+      "aspect_ratio": "Default 16:9; set 9:16 for shorts.",
+      "enable_prompt_expansion": "Default true. TRUE = a VLM rewrites and enriches your prompt (good for thin ideas, bad for tuned prompts). Set FALSE for exact control and for reproducible A/B tests.",
+      "enable_safety_checker": "Default true. Leave on."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "768P",
+      "duration": 5,
+      "enable_prompt_expansion": true,
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "a barista making latte art, feels cinematic",
+      "optimized_prompt": "[Push in]A barista in a charcoal apron tilts a steel pitcher over a white ceramic cup, pouring a steady white stream that folds into a rosetta on the crema. Warm morning light comes through a shopfront window behind her, catching the steam. [Tilt down]The frame settles on the finished cup as she sets the pitcher down on the bar. Shallow depth of field, 50mm, warm filmic grade, soft grain. Sound: steam wand hiss fading out, ceramic setting on wood, low cafe murmur."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3/text-to-video",
+      "https://platform.minimax.io/docs/guides/video-generation",
+      "https://www.minimax.io/blog/minimax-h3",
+      "https://fal.ai/models/fal-ai/minimax/video-01-director/image-to-video/api"
+    ]
+  },
+
+  "minimax/h3/image-to-video": {
+    "family": "hailuo",
+    "modality": "image-to-video",
+    "strengths": [
+      "Start frame drives the output aspect ratio automatically and is held tightly",
+      "Optional end_image_url for first-to-last keyframe control",
+      "Same bracketed camera-directive control as H3 text-to-video, so camera moves off a still are unusually precise",
+      "2K output with native stereo audio",
+      "Degrades gracefully: if image_url is omitted it just runs as text-to-video at 16:9"
+    ],
+    "weaknesses": [
+      "15 second cap",
+      "Prompt expansion on by default can add appearance details that fight the start frame; turn it off for product work",
+      "No negative prompt, no seed",
+      "Fine label text on a product still can soften over a long move"
+    ],
+    "prompt_style": "The still already fixes appearance, so write motion only. Lead with a bracketed camera directive, then say what the subject does, then what changes in the light or environment across the take. Refer to the subject with the shortest generic noun the image already defines ('the bottle', 'the woman') and never restate its color, material, logo or text. For product work specifically, set enable_prompt_expansion to false, because the expansion VLM will otherwise invent appearance language that competes with your image. If you supply end_image_url, describe the path between the frames rather than either frame's contents.",
+    "ideal_length_words": [30, 90],
+    "structure_template": "[Camera directive]<what the subject does, direction and speed> <what changes in light or environment across the take> [optional second camera directive]<the landing beat> <sound cues>",
+    "motion_vocabulary": [
+      "Push in", "Pull out", "Truck left", "Truck right", "Pan left", "Pan right", "Pedestal up", "Pedestal down",
+      "Tilt up", "Tilt down", "Zoom in", "Zoom out", "Tracking shot", "Static shot", "Shake", "Follow"
+    ],
+    "camera_directive_syntax": "Identical to H3 text-to-video: inline square brackets before the description they govern, up to 3 movements, simultaneous inside one bracket, sequential across brackets. Example against a product still: \"[Push in]The bottle holds still on the plinth as a soft key light travels across the glass. [Pedestal up]The frame rises to meet the cap.\"",
+    "do": [
+      "Write motion and camera only",
+      "Use bracketed directives rather than prose camera description",
+      "Turn enable_prompt_expansion off for product or brand work",
+      "Feed a start frame already cropped to the delivery aspect ratio",
+      "Use end_image_url when the landing composition is non-negotiable"
+    ],
+    "dont": [
+      "Do not re-describe the subject's appearance",
+      "Do not request framing the start frame does not contain",
+      "Do not exceed 3 camera movements",
+      "Do not leave prompt expansion on when comparing two prompts; it makes results non-comparable"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Exactly ONE first frame via image_url (optional; if omitted the call behaves as text-to-video at 16:9) and optionally ONE last frame via end_image_url for first-to-last keyframe generation. The first frame determines the output aspect ratio. This endpoint takes a start frame, not a subject reference set; for multiple product references use minimax/h3/reference-to-video.",
+    "reference_image_prompt_rules": [
+      "Describe MOTION, never appearance, so an attached product image is preserved unchanged",
+      "Name the subject with a bare generic noun the image already defines",
+      "Express lighting as a change over time, not as a static description",
+      "Keep the product itself static and put the motion in the camera and the light",
+      "Set enable_prompt_expansion to false so no invented appearance language reaches the model",
+      "Supply the still at the delivery aspect ratio, since the image sets the output ratio"
+    ],
+    "duration_and_fps": "Duration: integer seconds, fal default 5; MiniMax documents 4 to 15, safe range 5 to 15. Resolution: '768P', '2K' or '4K', default 2K. Aspect ratio: inherited from image_url (16:9 if no image supplied). Native stereo audio. 24 fps reported by MiniMax, not in the schema.",
+    "key_params": {
+      "image_url": "Optional first frame; sets the output aspect ratio when present.",
+      "end_image_url": "Optional last frame for first-to-last keyframe generation.",
+      "prompt": "Required. Motion and camera only.",
+      "duration": "Integer 5 to 15. Use 5 for concepting.",
+      "resolution": "'768P' concepting, '2K' delivery.",
+      "enable_prompt_expansion": "Default true. Set FALSE for product/brand fidelity and for reproducible tests.",
+      "enable_safety_checker": "Default true."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "768P",
+      "duration": 5,
+      "enable_prompt_expansion": false
+    },
+    "worked_example": {
+      "user_idea": "animate my product photo of a watch",
+      "optimized_prompt": "[Push in]The watch stays perfectly still on its stand as a narrow key light travels left to right across the crystal, the highlight rolling around the bezel. Faint haze catches the backlight behind it. [Tilt down]The frame settles on the crown and case edge. Shallow depth of field, background falls to soft charcoal. Sound: low ambient pad, one soft metallic tick."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3/image-to-video",
+      "https://platform.minimax.io/docs/guides/video-generation",
+      "https://fal.ai/models/fal-ai/minimax/video-01-director/image-to-video/api"
+    ]
+  },
+
+  "minimax/h3/reference-to-video": {
+    "family": "hailuo",
+    "modality": "reference-to-video",
+    "strengths": [
+      "The strongest product-ad lane in this set on quality terms: up to 9 subject/style reference images at 2K with native stereo audio",
+      "Generalized reference: relationships between assets are expressed in plain natural language, e.g. 'reference the camera movement from Video 1, have the character in Image 2 speak, matching the voice in Audio 1'",
+      "Accepts up to 3 reference videos (motion, camera rhythm, edit rhythm) and up to 3 reference audio clips (voice, atmosphere)",
+      "Bracketed camera directives still available on top of the references",
+      "Explicit aspect_ratio control including 'adaptive', unlike the image-to-video endpoint",
+      "MiniMax states the model keeps reference subject features consistent through the generated video"
+    ],
+    "weaknesses": [
+      "15 second cap",
+      "12 files total across all modalities is a hard ceiling",
+      "Audio cannot be the only reference input; at least one image or video is required alongside it",
+      "Prompt expansion on by default will invent appearance language that competes with your product references",
+      "No negative prompt, no seed"
+    ],
+    "prompt_style": "Assign a role to every reference first, in plain language, using the exact addressing the endpoint documents: 'Image 1', 'Image 2', 'Video 1', 'Audio 1' (spelled out with a space, numbered by position in each list). Then describe motion, camera and environment only. For the product asset, say explicitly that it must be reproduced unchanged. Never restate its color, material, logo or on-pack text, because restating appearance licenses reinterpretation. Layer bracketed camera directives on top for precise moves. Turn enable_prompt_expansion off for any brand or product job so no invented appearance language reaches the model. Not every reference needs to appear in every beat; say which asset drives which moment.",
+    "ideal_length_words": [50, 130],
+    "structure_template": "Image 1 is <role, e.g. the product; keep it exactly as shown, unchanged>. Image 2 is <role>. Video 1 is <role, e.g. the camera motion to match>. Audio 1 is <role>. [Camera directive]<what moves and how, direction and speed> <environment and light change> [second camera directive]<landing beat> <sound cues>. End frame: <final composition>.",
+    "motion_vocabulary": [
+      "Push in", "Pull out", "Truck left", "Truck right", "Pan left", "Pan right", "Pedestal up", "Pedestal down",
+      "Tilt up", "Tilt down", "Zoom in", "Zoom out", "Tracking shot", "Static shot", "Shake", "Follow"
+    ],
+    "camera_directive_syntax": "Two separate syntaxes coexist on this endpoint and must not be confused. (1) ASSET addressing, documented by the endpoint: plain text 'Image 1', 'Image 2', 'Video 1', 'Audio 1', numbered by position in reference_image_urls / reference_video_urls / reference_audio_urls. Note this is the spelled-out form, unlike Seedance's '@Image1'. (2) CAMERA directives: inline square brackets, up to 3 movements, simultaneous inside one bracket, sequential across brackets, from the list Truck left/right, Pan left/right, Push in/Pull out, Pedestal up/down, Tilt up/down, Zoom in/out, Shake, Tracking shot, Static shot. Combined example: \"Image 1 is the product, keep it exactly as shown. Video 1 is the camera rhythm to match. [Push in]The product holds still on the plinth as the light sweeps across it. [Pedestal up]The frame rises to the cap.\"",
+    "do": [
+      "Open by naming the role of every reference asset",
+      "Use the spelled-out 'Image 1' form on this endpoint, not '@Image1'",
+      "Say 'keep it exactly as shown, unchanged' for the product asset",
+      "Set enable_prompt_expansion to false for brand work",
+      "Concept at 768P and 5 seconds, then re-run identically at 2K",
+      "Give at least one image or video reference whenever you supply audio"
+    ],
+    "dont": [
+      "Do not describe the product's appearance in words",
+      "Do not exceed 9 images, 3 videos, 3 audio, or 12 files total",
+      "Do not supply audio as the only reference",
+      "Do not exceed 3 camera movements",
+      "Do not write negative instructions; there is no negative prompt field",
+      "Do not leave prompt expansion on when comparing prompt variants"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "Up to 9 subject/style reference images via reference_image_urls, addressed in the prompt as 'Image 1', 'Image 2' and so on by list position. Plus up to 3 motion/reference video clips via reference_video_urls (2-15 seconds each, 15 seconds combined, addressed 'Video 1'...) and up to 3 reference audio clips via reference_audio_urls (2-15 seconds each, 15 seconds combined, addressed 'Audio 1'...). All modalities together must not exceed 12 files. Audio cannot be the only reference type. MiniMax states the model keeps the reference subject's features consistent throughout the generated video. For products, one clean hero angle plus one or two alternate angles on a plain evenly lit background outperforms nine busy lifestyle shots.",
+    "reference_image_prompt_rules": [
+      "Assign an explicit role to each numbered asset in the first sentence, one clause each",
+      "For the product write: 'Image 1 is the product. Keep it exactly as shown, unchanged, including label, cap and proportions.'",
+      "Describe MOTION and CAMERA only for the rest of the prompt, so the attached product image is preserved unchanged",
+      "Never restate color, finish, logo or on-pack text",
+      "Shoot references on a clean neutral background so the model does not also inherit the reference's environment",
+      "Keep the product static and put the motion budget into the camera and the light; an orbit or push-in around a still product is the highest-fidelity shape",
+      "If a reference only matters to one beat, say which beat it drives",
+      "Turn enable_prompt_expansion off so the expansion model cannot invent competing appearance details"
+    ],
+    "duration_and_fps": "Duration: integer seconds, fal default 5; MiniMax documents 4 to 15, safe range 5 to 15. Resolution: '768P', '2K' or '4K', default 2K (768P and 2K are the documented native options; 4K is likely upscaled). Aspect ratio: adaptive, 21:9, 16:9, 4:3, 1:1, 3:4, 9:16, default adaptive. Native stereo audio. 24 fps reported by MiniMax, not stated in the schema.",
+    "key_params": {
+      "prompt": "Required. Must open with the role assignments for Image 1 etc.",
+      "reference_image_urls": "Up to 9 subject/style references, addressed 'Image 1'..'Image 9'.",
+      "reference_video_urls": "Up to 3 motion/camera-rhythm references, 2-15s each, 15s combined, addressed 'Video 1'..",
+      "reference_audio_urls": "Up to 3 audio references, 2-15s each, 15s combined, addressed 'Audio 1'.. Cannot be the only reference type.",
+      "duration": "Integer 5 to 15. Use 5 for concepting.",
+      "resolution": "'768P' concepting, '2K' delivery.",
+      "aspect_ratio": "'adaptive' follows the references; set explicitly for a fixed delivery ratio.",
+      "enable_prompt_expansion": "Default true. Set FALSE for product fidelity and reproducible tests.",
+      "enable_safety_checker": "Default true; can reject likeness or brand-adjacent content."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "768P",
+      "duration": 5,
+      "enable_prompt_expansion": false,
+      "aspect_ratio": "16:9"
+    },
+    "worked_example": {
+      "user_idea": "an ad for my hot sauce bottle using my product photos, moody and premium",
+      "optimized_prompt": "Image 1 is the product. Keep it exactly as shown, unchanged, including the label, cap and proportions. Image 2 is the surface and set reference. [Push in]The bottle stays perfectly still on a dark slate slab as a narrow warm key light travels across the glass from the left, the highlight rolling around the shoulder of the bottle. Thin haze drifts behind it, catching a cool rim light. [Pedestal up]The frame rises slightly to settle square on the label. Shallow depth of field, background falls to near black, filmic grade. Sound: low sub pad, one glass tap on stone at the start. End frame: the bottle centered, label fully readable and sharp, a single vertical highlight down its left edge."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3/reference-to-video",
+      "https://platform.minimax.io/docs/guides/video-generation",
+      "https://www.minimax.io/blog/minimax-h3",
+      "https://fal.ai/models/fal-ai/minimax/video-01-director/image-to-video/api"
+    ]
+  }
+}

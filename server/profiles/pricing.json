@@ -1,0 +1,214 @@
+{
+  "_meta": {
+    "checked_on": "2026-08-12",
+    "billed_amount_readback": "YES, and this is the important finding. fal returns the REAL billed quantity in the `x-fal-billable-units` response header on the result fetch (the GET of the queue result, i.e. https://queue.fal.run/<endpoint>/requests/<request_id>). The header is already denominated in the endpoint's priced unit (images, megapixels, video seconds, compute seconds, whatever that model bills in), so actual cost = billable_units * unit_price, unit-agnostic. The unit_price comes from fal's pricing API: GET https://api.fal.ai/v1/models/pricing?endpoint_id=<endpoint_id> (Key auth), which returns the endpoint's unit and unit_price; there is also a pricing estimate endpoint documented at https://docs.fal.ai/platform-apis/v1/models/pricing/estimate. Implementation notes: read response.headers BEFORE parsing the body (reading headers does not consume the body); the header is set per-model by the model author via the FastAPI Response object, so it is present for most first-party fal endpoints but NOT guaranteed for every one. When the header is absent, fal falls back to per-second GPU-machine billing and you must fall back to the estimate below. RECOMMENDED DESIGN: log estimate at submit time, then overwrite with billable_units * unit_price when the header is present, and mark the row 'verified' vs 'estimated' in the UI. Sources: https://github.com/tanstack/ai/issues/722 , https://fal.ai/docs/documentation/serverless/publishing-to-marketplace , https://docs.fal.ai/platform-apis/v1/models/pricing/estimate . Account-level truth is the billing/usage dashboard at https://fal.ai/dashboard/billing (not verified as a public API in this pass).",
+    "notes": "Prices were read from each model page's own generated pricing widget ('Your request will cost ...'), which is the authoritative on-page number; marketing prose elsewhere on the same page can be stale (veo3/fast literally contradicts itself, see that entry). Megapixel-billed image models round UP to the nearest whole megapixel, so a 1024x1024 image bills as 2 MP? No: 1024x1024 = 1.048 MP, which rounds up to 2 MP. This rounding is a common source of undercounting, do not skip it. gpt-image-1 additionally rounds the total request cost up to the nearest cent and charges for input text tokens. Multi-image requests (num_images > 1) multiply. fal has no free tier and no minimum commitment; everything is pay-as-you-go against account balance."
+  },
+
+  "fal-ai/flux/schnell": {
+    "unit": "per_megapixel",
+    "price": 0.003,
+    "currency": "USD",
+    "formula": "0.003 * ceil(width * height / 1048576) * num_images. Images are billed by rounding up to the nearest megapixel.",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/flux/schnell"
+  },
+  "fal-ai/flux/dev": {
+    "unit": "per_megapixel",
+    "price": 0.025,
+    "currency": "USD",
+    "formula": "0.025 * ceil(width * height / 1048576) * num_images. Images are billed by rounding up to the nearest megapixel.",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/flux/dev"
+  },
+  "fal-ai/nano-banana": {
+    "unit": "per_image",
+    "price": 0.039,
+    "currency": "USD",
+    "formula": "0.039 * num_images",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/nano-banana"
+  },
+  "fal-ai/nano-banana/edit": {
+    "unit": "per_image",
+    "price": 0.039,
+    "currency": "USD",
+    "formula": "0.039 * num_images (output images, not input reference images)",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/nano-banana/edit"
+  },
+  "fal-ai/bytedance/seedream/v4/text-to-image": {
+    "unit": "per_image",
+    "price": 0.03,
+    "currency": "USD",
+    "formula": "0.03 * num_images",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/bytedance/seedream/v4/text-to-image"
+  },
+  "fal-ai/bytedance/seedream/v4/edit": {
+    "unit": "per_image",
+    "price": 0.03,
+    "currency": "USD",
+    "formula": "0.03 * num_images (output images)",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/bytedance/seedream/v4/edit"
+  },
+  "fal-ai/qwen-image": {
+    "unit": "per_megapixel",
+    "price": 0.02,
+    "currency": "USD",
+    "formula": "0.02 * ceil(width * height / 1048576) * num_images. Rounds up to the nearest megapixel.",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/qwen-image"
+  },
+  "fal-ai/qwen-image-edit": {
+    "unit": "per_megapixel",
+    "price": 0.03,
+    "currency": "USD",
+    "formula": "0.03 * ceil(width * height / 1048576) * num_images. Rounds up to the nearest megapixel.",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/qwen-image-edit"
+  },
+  "fal-ai/flux-pro/kontext": {
+    "unit": "per_image",
+    "price": 0.04,
+    "currency": "USD",
+    "formula": "0.04 * num_images",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/flux-pro/kontext"
+  },
+  "fal-ai/gpt-image-1/text-to-image": {
+    "unit": "per_image",
+    "price": 0.042,
+    "currency": "USD",
+    "formula": "Tiered by quality AND size, plus text input tokens. Output image: low = 0.011 if 1024x1024 else 0.016; medium = 0.042 if 1024x1024 else 0.063; high = 0.167 if 1024x1024 else 0.25. Multiply by num_images. Add 0.002 per 1000 input text tokens. Total request cost is rounded UP to the nearest cent. Default price shown here is the medium/1024x1024 case.",
+    "resolution_multipliers": {
+      "low_1024x1024": 0.011,
+      "low_other": 0.016,
+      "medium_1024x1024": 0.042,
+      "medium_other": 0.063,
+      "high_1024x1024": 0.167,
+      "high_other": 0.25
+    },
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/gpt-image-1/text-to-image"
+  },
+  "fal-ai/recraft/v3/text-to-image": {
+    "unit": "per_image",
+    "price": 0.04,
+    "currency": "USD",
+    "formula": "0.04 * num_images, or 0.08 * num_images if the requested style is a vector style (style starts with 'vector_illustration')",
+    "resolution_multipliers": {"raster": 1.0, "vector": 2.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/recraft/v3/text-to-image"
+  },
+
+  "fal-ai/wan/v2.2-a14b/text-to-video/turbo": {
+    "unit": "per_video",
+    "price": 0.1,
+    "currency": "USD",
+    "formula": "Flat per video, set by the resolution param only: 720p = 0.10, 580p = 0.075, 480p = 0.05. The model page shows no duration multiplier for the turbo endpoint (standard output is 5s); if you request a longer duration, treat the estimate as a floor and prefer the x-fal-billable-units readback.",
+    "resolution_multipliers": {"480p": 0.5, "580p": 0.75, "720p": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/wan/v2.2-a14b/text-to-video/turbo"
+  },
+  "fal-ai/wan/v2.2-a14b/image-to-video/turbo": {
+    "unit": "per_video",
+    "price": 0.1,
+    "currency": "USD",
+    "formula": "Flat per video by resolution: 720p = 0.10, 580p = 0.075, 480p = 0.05. Same caveat on duration as the text-to-video turbo endpoint.",
+    "resolution_multipliers": {"480p": 0.5, "580p": 0.75, "720p": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/wan/v2.2-a14b/image-to-video/turbo"
+  },
+  "fal-ai/minimax/hailuo-02/standard/text-to-video": {
+    "unit": "per_video_second",
+    "price": 0.045,
+    "currency": "USD",
+    "formula": "0.045 * duration_seconds. Standard tier is 768p. A 6 second video costs 0.27.",
+    "resolution_multipliers": {"768p": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/minimax/hailuo-02/standard/text-to-video"
+  },
+  "fal-ai/minimax/hailuo-02/standard/image-to-video": {
+    "unit": "per_video_second",
+    "price": 0.045,
+    "currency": "USD",
+    "formula": "0.045 * duration_seconds on the standard (768p) endpoint. A 6 second 768p video costs 0.27. Note the separate pro/1080p endpoint bills 0.08 per second, do not apply that rate here.",
+    "resolution_multipliers": {"768p": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/minimax/hailuo-02/standard/image-to-video"
+  },
+  "fal-ai/kling-video/v2.5-turbo/pro/text-to-video": {
+    "unit": "per_video",
+    "price": 0.35,
+    "currency": "USD",
+    "formula": "0.35 base for a 5 second video, plus 0.07 for every additional second: 0.35 + max(0, duration_seconds - 5) * 0.07. A 10 second video costs 0.70.",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video"
+  },
+  "fal-ai/kling-video/v2.5-turbo/pro/image-to-video": {
+    "unit": "per_video",
+    "price": 0.35,
+    "currency": "USD",
+    "formula": "0.35 base for a 5 second video, plus 0.07 per additional second: 0.35 + max(0, duration_seconds - 5) * 0.07",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/image-to-video"
+  },
+  "fal-ai/bytedance/seedance/v1/lite/text-to-video": {
+    "unit": "per_video",
+    "price": 0.18,
+    "currency": "USD",
+    "formula": "Token-based: cost = 1.80 * tokens / 1000000 where tokens = (height * width * fps * duration_seconds) / 1024. fal quotes the reference case as 0.18 for a 720p 5 second video (the raw formula at 1280x720/24fps/5s gives ~0.194, so fal's quoted 0.18 implies their own fps/rounding convention). Use 0.18 for 720p/5s, 0.36 for 720p/10s, and scale by pixels*fps*duration otherwise. Prefer the x-fal-billable-units readback for this model.",
+    "resolution_multipliers": {"480p": 0.44, "720p": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/text-to-video"
+  },
+  "fal-ai/bytedance/seedance/v1/lite/image-to-video": {
+    "unit": "per_video",
+    "price": 0.18,
+    "currency": "USD",
+    "formula": "Same token formula as the lite text-to-video endpoint: 0.18 per 720p 5 second video, 1.80 per million video tokens where tokens = (height * width * fps * duration) / 1024. WARNING: the fal model page now marks this endpoint DEPRECATED and states further requests are re-routed to Seedance 1.0 Pro Fast, which is priced higher (~0.243 per 1080p 5 second video). If requests are actually re-routed, your real bill will exceed this estimate, so this endpoint especially needs the x-fal-billable-units readback rather than the estimate.",
+    "resolution_multipliers": {"480p": 0.44, "720p": 1.0},
+    "confidence": "inferred",
+    "source": "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/image-to-video"
+  },
+  "fal-ai/ltx-video-13b-distilled": {
+    "unit": "per_video",
+    "price": 0.04,
+    "currency": "USD",
+    "formula": "0.04 flat per video generated",
+    "resolution_multipliers": {},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/ltx-video-13b-distilled"
+  },
+  "fal-ai/veo3/fast": {
+    "unit": "per_video_second",
+    "price": 0.15,
+    "currency": "USD",
+    "formula": "0.15 * duration_seconds with audio on, 0.10 * duration_seconds with audio off (generate_audio param). Default the app to audio-on unless the request explicitly disables it. NOTE: the model page contains a contradictory marketing block quoting 0.25 / 0.40 per second; the 0.10 / 0.15 figures come from fal's own generated billing sentence ('For every second of video you generated, you will be charged...') and are consistent with veo3 fast being 60-80% cheaper than standard veo3 at 0.40/sec. Treat 0.10/0.15 as the estimate and confirm with x-fal-billable-units on the first real call.",
+    "resolution_multipliers": {"audio_off": 0.6667, "audio_on": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/veo3/fast"
+  },
+  "fal-ai/veo3/fast/image-to-video": {
+    "unit": "per_video_second",
+    "price": 0.15,
+    "currency": "USD",
+    "formula": "0.15 * duration_seconds with audio on, 0.10 * duration_seconds with audio off. A 5 second video with audio costs 0.75.",
+    "resolution_multipliers": {"audio_off": 0.6667, "audio_on": 1.0},
+    "confidence": "verified",
+    "source": "https://fal.ai/models/fal-ai/veo3/fast/image-to-video"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "_meta": {
+    "researched": "2026-08-16",
+    "verification_policy": "Nada aqui veio da documentação oficial da Agnes. Tudo saiu de ~70 chamadas reais medidas em ~/projetos/videos-agnes/README.md e ~/projetos/agnes-nei/NOTAS-API.md, mais uma sonda direta contra a API viva em 2026-08-16 que corrigiu o parâmetro `mode`. Onde a doc e a prática divergem, vale a prática.",
+    "hard_constraint": "A API recusa prompt em português com HTTP 400 (filtro de conteúdo) mesmo em conteúdo perfeitamente legítimo — 'usar um galho como alavanca' foi recusado 4x em PT e passou de primeira em EN. Por isso o refinador SEMPRE devolve inglês, e é essa a razão principal deste perfil existir.",
+    "cost": "US$ 0. Sem créditos, sem cobrança."
+  },
+
+  "agnes/agnes-image-2.1-flash": {
+    "family": "agnes",
+    "modality": "text-to-image",
+    "strengths": "Cenário, paisagem, atmosfera e ambientação. Avatar humano fotorrealista também sai bem.",
+    "weaknesses": "Fraco em personagem (sobretudo não-humano estilizado). Não trava identidade entre gerações. Sem seed e sem LoRA, então não há como reproduzir uma saída exatamente.",
+    "prompt_style": "Escreva UM parágrafo descritivo em INGLÊS. Comece pelo assunto com atributos concretos, depois composição e enquadramento, depois luz, depois paleta, e só então o estilo. O descritor de estilo deve conter APENAS estética (medium, época, qualidade de luz, tratamento de cor) — nunca palavras que carreguem criatura, personagem ou público-alvo. MEDIDO: 'fur', 'expressive eyes' e 'children's book' injetaram personagens em prompts que pediam só cenário (uma paisagem voltou com uma menina no meio). O estilo também sequestra o assunto: 'futurista' deixou um esquilo ruivo prateado, e 'castanha' virou cupcake em 7 de 10 estilos — então reafirme o atributo essencial do assunto DEPOIS de nomear o estilo.",
+    "ideal_length_words": [40, 90],
+    "structure_template": "[SUBJECT with 2-3 concrete visual attributes] in [SETTING with time of day and 2 environmental details]. [COMPOSITION: shot size + angle]. [LIGHT: source + quality + direction]. [COLOR: palette in 2-3 words]. [STYLE: purely aesthetic descriptor]. [RESTATE the subject's essential attribute so the style does not hijack it].",
+    "do": [
+      "Write the entire prompt in ENGLISH, always, whatever language the idea arrived in — Portuguese is rejected with HTTP 400 by the content filter, not by the model's ability",
+      "Keep the style descriptor purely aesthetic: medium, era, lighting quality, color treatment",
+      "Restate the subject's defining attribute after the style clause, because the style overrides subject attributes",
+      "For a character, prefer a profile or three-quarter view and say so explicitly",
+      "For ANY animal or creature subject, always include the full positive count clause naming EVERY duplicable part at once — 'exactly one tail, one head' — never a partial one. MEDIDO 2026-08-16: um prompt que dizia apenas 'exactly one head' voltou com DUAS caudas. O bug de espelhamento atinge a parte que você deixou de contar",
+      "Keep any in-image text to a few large words, quoted exactly, with its placement named"
+    ],
+    "dont": [
+      "Never write the prompt in Portuguese, and never leave a Portuguese phrase inside an otherwise English prompt",
+      "Never use creature or audience words as style ('fur', 'expressive eyes', 'children's book', 'cartoon mascot') unless that creature IS the subject — they inject characters into empty scenery",
+      "Never phrase anatomy as a negation ('no two tails', 'not two heads') — MEDIDO: a negação vira atrator e o defeito volta; use a forma positiva",
+      "Never request a perfectly frontal symmetric pose for an animal or character — dispara o bug de espelhamento (cauda/cabeça dupla)",
+      "Never write dense paragraphs of in-image text — vira sopa de letras",
+      "Never mention seed, reproducibility or LoRA: a imagem não tem esses controles",
+      "Never restate the pixel size in words; ele já vai como parâmetro"
+    ],
+    "reference_image_behavior": "Referências preservam estilo e composição, mas NÃO travam identidade de personagem com uma única imagem (o rosto muda). Com duas, a identidade melhora muito. Teto útil: 2 (com 5 a saída vira confete de pixels e o prompt é ignorado). Limite de 10 MB por imagem de entrada, então uma saída 4K não serve como referência depois.",
+    "reference_image_prompt_rules": [
+      "Describe what should CHANGE relative to the reference, not what the reference already shows",
+      "With one reference, do not promise identity preservation in the prompt — say which concrete attributes must carry over (clothing, palette, framing)",
+      "With two references, state what each one contributes",
+      "Never refer to a third image"
+    ],
+    "key_params": "size em pixels explícitos (ex.: 1312x736). MEDIDO: `ratio` é ignorado em img2img — pedir 1K + 16:9 com referência devolve 1024x1024. 1K sai em ~32s; 4K leva ~150s e falha muito.",
+    "worked_example": "A weathered wooden fishing pier stretching into a still alpine lake at dawn, two moored rowboats and a low bank of mist along the far shore. Wide shot, low camera close to the water. Soft directional sunrise light raking from the left. Muted teal and pale amber palette. Large-format landscape photography, fine grain, natural color. The pier planks stay bare and weathered, unpainted.",
+    "sources": ["~/projetos/videos-agnes/README.md", "~/projetos/agnes-nei/NOTAS-API.md"]
+  },
+
+  "agnes/agnes-image-2.1-flash/edit": {
+    "family": "agnes",
+    "modality": "image-editing",
+    "strengths": "Derivar variações coerentes de uma âncora: outras vistas do mesmo indivíduo, mesma paleta, mesmo tratamento.",
+    "weaknesses": "Uma referência sozinha não trava rosto. `ratio` é ignorado neste modo.",
+    "prompt_style": "Escreva em INGLÊS, curto e direto, dizendo o que MUDA em relação à referência. A referência já carrega estilo e composição; repetir o que ela mostra desperdiça o prompt e às vezes faz o modelo redesenhar tudo. Para model sheet, o caminho medido é: uma âncora-mãe em text-to-image e todas as demais vistas derivadas DELA aqui — gerar N vistas independentes em text-to-image produz N personagens diferentes.",
+    "ideal_length_words": [20, 60],
+    "structure_template": "[WHAT CHANGES: pose, angle, expression, lighting or setting]. [WHAT MUST CARRY OVER from the reference, named concretely]. [Optional: framing].",
+    "do": [
+      "Write the entire prompt in ENGLISH, always",
+      "Lead with the change, not with a description of the reference",
+      "Name the carry-over attributes concretely: garment, color, hair, markings",
+      "Prefer profile or three-quarter angles when deriving character views",
+      "With two references, say what each contributes"
+    ],
+    "dont": [
+      "Never write in Portuguese",
+      "Never re-describe the whole reference image",
+      "Never assume more than two references are in play",
+      "Never phrase anatomy as a negation",
+      "Never claim identity is locked when only one reference is attached"
+    ],
+    "reference_image_behavior": "Idem ao modelo t2i: 2 referências é o teto útil; identidade só fica estável com duas.",
+    "reference_image_prompt_rules": [
+      "Describe only the delta from the reference",
+      "Name explicitly which attributes must survive the edit",
+      "With one reference, expect facial drift and do not fight it in words",
+      "Never refer to a third image"
+    ],
+    "key_params": "size em pixels explícitos — obrigatório aqui, porque `ratio` é ignorado em img2img e a saída volta 1024x1024.",
+    "worked_example": "Same character turned to a three-quarter view facing left, calm expression. Keep the rust-red scarf, the cream wool coat and the short dark hair exactly as in the reference. Waist-up framing, background replaced by a soft neutral studio gray.",
+    "sources": ["~/projetos/videos-agnes/README.md"]
+  },
+
+  "agnes/agnes-video-v2.0": {
+    "family": "agnes",
+    "modality": "text-to-video",
+    "strengths": "Planos curtos e atmosféricos. Ponto doce medido: ~3,4s.",
+    "weaknesses": "Clipe longo desmorona — o morph inventa o 'entre': objetos se atravessam, movimento vaza, coisas surgem sem razão. Esticar para 18s é onde quebra.",
+    "prompt_style": "Escreva em INGLÊS, uma frase de ação seguida de uma frase de câmera e uma de atmosfera. UM movimento de câmera por clipe, e um único beat de ação — este modelo não sustenta encadeamento de ações. Trate a duração como fixa e curta: descreva o que cabe em ~3 segundos, não uma cena inteira.",
+    "ideal_length_words": [25, 60],
+    "structure_template": "[SUBJECT and ONE action, in the present continuous]. [CAMERA: one movement only]. [LIGHT and ATMOSPHERE]. [Optional: ambient sound].",
+    "motion_vocabulary": [
+      "slow push in",
+      "slow pull out",
+      "static locked-off shot",
+      "gentle handheld drift",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "tracking alongside",
+      "slow orbit"
+    ],
+    "do": [
+      "Write the entire prompt in ENGLISH, always",
+      "Name exactly one camera movement",
+      "Describe one action beat only, sized for about three seconds",
+      "Prefer atmospheric motion (mist, water, cloth, light) — é onde o modelo é forte",
+      "Use negative_prompt for artifacts you keep seeing; ele existe de verdade no vídeo"
+    ],
+    "dont": [
+      "Never write in Portuguese",
+      "Never chain multiple actions or shots in one prompt",
+      "Never ask for on-screen text or readable signage in motion",
+      "Never restate duration, fps or resolution in words",
+      "Never describe fast complex choreography — o morph inventa o intervalo e falha"
+    ],
+    "negative_prompt_supported": true,
+    "key_params": "duration vira num_frames pela regra 8n+1 (teto 441 = 18,4s @24fps). seed e negative_prompt EXISTEM no vídeo (na imagem não). AVISO: o size da resposta mente — pediu 1312x736, entrega 1280x704; medir com ffprobe.",
+    "cheap_concepting_settings": "duration 3.4 e size 1312x736. Custo é zero, mas o rate limit de criação é 5/min e o polling também é limitado — ou seja, o recurso escasso aqui é tempo, não dinheiro.",
+    "worked_example": "Mist drifting slowly across the surface of a still mountain lake at sunrise. Slow push in toward the far shore. Soft golden backlight, cool blue shadows, calm and quiet. Faint ambient water and birdsong.",
+    "sources": ["~/projetos/videos-agnes/README.md"]
+  },
+
+  "agnes/agnes-video-v2.0/i2v": {
+    "family": "agnes",
+    "modality": "image-to-video",
+    "strengths": "Com DUAS referências entra em modo keyframes e interpola A->B de verdade, mantendo o personagem consistente durante o movimento — é o caminho mais confiável para personagem neste modelo.",
+    "weaknesses": "Dois defeitos distintos e medidos. Dentro do clipe: o morph inventa o intervalo (objetos se atravessam, roupa se deforma), e piora quanto mais longo. No corte entre clipes: keyframes gerados separadamente derivam, então roupa e rosto mudam na emenda.",
+    "prompt_style": "Escreva em INGLÊS. Descreva a TRANSIÇÃO entre os dois keyframes, não cada quadro — o modelo já vê as pontas. Uma transformação, um movimento de câmera. Com uma referência só, o clipe é imagem-viva: peça movimento sutil e ambiente, não ação. Técnica medida para sequências: planos curtos de ~3,4s com corte seco em vez de um morph longo, e cada plano usando o quadro anterior como referência, o que carrega figurino e estado adiante.",
+    "ideal_length_words": [25, 60],
+    "structure_template": "[THE CHANGE from the first frame to the last, as one continuous movement]. [CAMERA: one movement only]. [LIGHT and ATMOSPHERE that must stay constant across the clip].",
+    "motion_vocabulary": [
+      "slow push in",
+      "slow pull out",
+      "static locked-off shot",
+      "gentle handheld drift",
+      "pan left",
+      "pan right",
+      "tilt up",
+      "tilt down",
+      "tracking alongside",
+      "slow orbit"
+    ],
+    "do": [
+      "Write the entire prompt in ENGLISH, always",
+      "Describe the transition between the frames as one continuous motion",
+      "Name what must remain constant (garment, palette, light) so the morph does not drift",
+      "Keep it to one camera movement and about three seconds",
+      "With a single reference, ask for subtle ambient motion rather than an action"
+    ],
+    "dont": [
+      "Never write in Portuguese",
+      "Never describe the two keyframes separately — o modelo já os tem",
+      "Never request a long transformation; morphs longos é onde o modelo desmorona",
+      "Never ask for a cut or a second shot inside one clip",
+      "Never restate duration or resolution in words"
+    ],
+    "negative_prompt_supported": true,
+    "reference_image_behavior": "1 imagem = vídeo de imagem única (movimento sutil, deriva menos). 2 imagens = modo keyframes A->B. Base64 funciona apesar de a doc afirmar que exige URL pública.",
+    "reference_image_prompt_rules": [
+      "Describe the motion that connects the frames, never the frames themselves",
+      "Name the attributes that must stay identical across the whole clip",
+      "With one reference, promise only ambient motion",
+      "Never refer to a third image"
+    ],
+    "key_params": "duration vira num_frames por 8n+1 (teto 441). seed e negative_prompt existem. O size da resposta mente — medir com ffprobe.",
+    "worked_example": "The seated figure slowly rises and turns toward the window as daylight strengthens across the room. Slow push in. The rust-red scarf, the cream coat and the warm morning light stay constant throughout.",
+    "sources": ["~/projetos/videos-agnes/README.md", "~/projetos/agnes-nei/NOTAS-API.md"]
+  }
+}

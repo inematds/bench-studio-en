@@ -1,0 +1,2379 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-17T00:48:24.142Z",
+  "schema_generated_at": "2026-08-12T18:57:37.821Z",
+  "source": "fal.ai public OpenAPI queue schemas",
+  "status_legend": {
+    "schema-supported": "Declared by fal's live OpenAPI schema; not necessarily exercised.",
+    "submission-verified": "A real request containing this field was accepted.",
+    "output-verified": "A generated result was manually or automatically checked against the input.",
+    "failed": "A real request containing this field was rejected.",
+    "untested": "No current evidence exists."
+  },
+  "models": [
+    {
+      "model_id": "fal-ai/flux-2/flash",
+      "label": "FLUX.2 flash",
+      "vendor": "Black Forest Labs",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/flux-2-pro",
+      "label": "FLUX.2 pro",
+      "vendor": "Black Forest Labs",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/nano-banana-pro",
+      "label": "Nano Banana Pro",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/nano-banana-2",
+      "label": "Nano Banana 2",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "openai/gpt-image-2",
+      "label": "GPT Image 2",
+      "vendor": "OpenAI",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "bytedance/seedream/v5/pro/text-to-image",
+      "label": "Seedream 5 pro",
+      "vendor": "ByteDance",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "alibaba/qwen-image-3/text-to-image",
+      "label": "Qwen Image 3",
+      "vendor": "Alibaba",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/recraft/v4.1/text-to-image",
+      "label": "Recraft v4.1",
+      "vendor": "Recraft",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "xai/grok-imagine-image/v2.0/text-to-image",
+      "label": "Grok Imagine 2",
+      "vendor": "xAI",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/nano-banana-pro/edit",
+      "label": "Nano Banana Pro edit",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "The URLs of the images to use for image-to-image generation or image editing.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls is an array of image URLs, minimum 1. fal publishes no maximum. Google documents Nano Banana Pro as accepting up to 6 object images plus up to 5 character-consistency images; keep to 2-3 in production for predictable results. Images are used as semantic references, not as a latent init, so the model reasons about their content and can preserve, relocate or recombine elements by description.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/nano-banana-2/edit",
+      "label": "Nano Banana 2 edit",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "audio_url",
+          "modality": "audio",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "Optional audio file to use as input context. Accepts an http(s)/data URL (downloaded and sent inline, max 15MB).",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 15,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": false,
+          "description": "The URLs of the images to use for image-to-image generation or image editing. Optional when at least one of `video_url`, `audio_url`, or `pdf_url` is provided.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "video_url",
+          "modality": "video",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "Optional video to use as input context. Accepts an http(s)/data URL to a video file (downloaded and sent inline, max 15MB) or a YouTube URL (passed through to the model without downloading).",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 15,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "pdf_url",
+          "modality": "document",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "Optional PDF document to use as input context. Accepts an http(s)/data URL (downloaded and sent inline, max 15MB).",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 15,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "audio",
+        "image",
+        "video",
+        "document"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls is an array of image URLs with no published maximum on fal. Google documents the Nano Banana 2 tier as accepting up to 10 object images, up to 4 character-consistency images and up to 3 style references; in practice keep to 2-3. This endpoint additionally accepts video_url, audio_url and pdf_url (15MB each) as extra context, which is unique in this set. References are semantic, not a latent init.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "openai/gpt-image-2/edit",
+      "label": "GPT Image 2 edit",
+      "vendor": "OpenAI",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "mask_url",
+          "modality": "image",
+          "role": "mask",
+          "arity": "single",
+          "required": false,
+          "description": "The URL of the mask image to use for the generation. This indicates what part of the image to edit.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "The URLs of the images to use as a reference for the generation. A maximum of 16 images are allowed.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 16,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls is an array of up to 16 image URLs used as references for the generation. mask_url optionally supplies a mask indicating which part of the image to edit; OpenAI's guidance is that the source image and mask must match in format and size and the mask must carry an alpha channel. image_size defaults to auto and infers dimensions from the input images.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "bytedance/seedream/v5/pro/edit",
+      "label": "Seedream 5 edit",
+      "vendor": "ByteDance",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "List of URLs of input reference images. Up to 10 images are supported; if more are sent, only the last 10 are used.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 10,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls takes an array of reference image URLs. Up to 10 are supported; if more are sent only the last 10 are used. References supply subject identity, product appearance, style and scene material simultaneously, and fal's own example prompt is a swap phrased as 'Replace the product in Figure 1 with that in Figure 2', so positional phrasing is understood but content-based phrasing is more reliable. When references are provided, image_size is optional and framing can follow the reference.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "alibaba/qwen-image-3/edit",
+      "label": "Qwen Image 3 edit",
+      "vendor": "Alibaba",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "Reference images for editing (1-3 images required). Order matters: reference as 'image 1', 'image 2', 'image 3' in prompt. Resolution: 384-2048px each dimension. Max size: 10MB each. Formats: JPEG, JPG, PNG (no alpha), WEBP.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls takes 1 to 3 reference images (required). Each must be 384 to 2048 px, under 10 MB, JPEG/JPG/PNG/WEBP. Alibaba's guide states the model numbers images by their order in the input array and that the prompt should reference them by that position, so array order carries meaning. References supply subject identity, product appearance and scene material; the model is documented to preserve key details such as facial features and identity while applying the requested change.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/flux-2-pro/edit",
+      "label": "FLUX.2 pro edit",
+      "vendor": "Black Forest Labs",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "List of URLs of input images for editing",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "Takes image_urls, an array of one or more image URLs. All attached images act as references, not as a single init image with a denoise strength; the prompt decides which reference contributes what. BFL documents up to 8 reference images via the [pro] API (10 in their playground for [max], 4 for [klein]), bounded by a combined input-plus-output pixel budget of roughly 9MP for [pro]. Order matters only because you refer to them by index in the prompt, so keep 'image 1' as the primary subject or product. fal's image_size defaults to auto, meaning output dimensions follow the model's read of the input.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "lightricks/ltx-2.5/text-to-video/fast",
+      "label": "LTX 2.5 fast",
+      "vendor": "Lightricks",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. Text only.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/kling-video/v3/turbo/standard/text-to-video",
+      "label": "Kling 3 turbo",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. Text-only input.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/kling-video/v3/pro/text-to-video",
+      "label": "Kling 3 pro",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None on this endpoint. Text-only. For subject references on Kling v3, use the pro image-to-video endpoint's `elements` array.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "bytedance/seedance-2.5/text-to-video",
+      "label": "Seedance 2.5",
+      "vendor": "ByteDance",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. This endpoint is text-only. Use bytedance/seedance-2.5/image-to-video for a start frame or bytedance/seedance-2.0/reference-to-video for subject/product references.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "bytedance/seedance-2.0/fast/text-to-video",
+      "label": "Seedance 2 fast",
+      "vendor": "ByteDance",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. Text only.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "minimax/h3/text-to-video",
+      "label": "Hailuo H3",
+      "vendor": "MiniMax",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None on this endpoint. Use minimax/h3/image-to-video for a first frame, or minimax/h3/reference-to-video for subject/product references.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/wan/v2.7/text-to-video",
+      "label": "Wan 2.7",
+      "vendor": "Alibaba",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [
+        {
+          "field": "audio_url",
+          "modality": "audio",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "URL of driving audio. Supports WAV and MP3. Duration: 3-30s. Max 15 MB. If not provided, the model auto-generates matching background music.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 15,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "audio"
+      ],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. This endpoint takes no image input. It accepts an optional audio_url (WAV or MP3, 3 to 30 seconds, max 15 MB) as a driving/background audio track; if omitted the model generates its own music.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/veo3.1/fast",
+      "label": "Veo 3.1 fast",
+      "vendor": "Google",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. Text-only input on this endpoint.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "fal-ai/veo3.1",
+      "label": "Veo 3.1",
+      "vendor": "Google",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None. This endpoint is pure text-to-video with no image input.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "blackforestlabs/flux-3/text-to-video",
+      "label": "FLUX.3 video",
+      "vendor": "Black Forest Labs",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "Not on this endpoint. blackforestlabs/flux-3/text-to-video on fal takes prompt only, with no image or video input field in the schema. FLUX 3 the model does support image-to-video, keyframe-controlled transitions, and video continuation from up to four seconds of supplied video plus audio, but those run through different endpoints; do not send reference images here.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "xai/grok-imagine-video/v1.5/text-to-video",
+      "label": "Grok Video 1.5",
+      "vendor": "xAI",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "None on this endpoint. Text only. Use xai/grok-imagine-video/reference-to-video for image guidance.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "lightricks/ltx-2.5/image-to-video/fast",
+      "label": "LTX 2.5 fast i2v",
+      "vendor": "Lightricks",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image_url",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "The URL of the start image to use for the generated video.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "end_image_url",
+          "modality": "image",
+          "role": "end-frame",
+          "arity": "single",
+          "required": false,
+          "description": "The URL of the end image to use for the generated video. When provided, generates a transition video between start and end frames.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Exactly ONE start image via image_url, used as the start frame. An optional second image via end_image_url makes the model generate a transition video from the start frame to the end frame. These are frames, not multi-image identity references; for multi-image subject preservation use Wan 2.7 reference-to-video or Grok reference-to-video.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/kling-video/v3/pro/image-to-video",
+      "label": "Kling 3 pro i2v",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "elements",
+          "modality": "mixed",
+          "role": "source",
+          "arity": "multiple",
+          "required": false,
+          "description": "Elements (characters/objects) to include in the video. Each example can either be an image set (frontal + reference images) or a video. Reference in prompt as @Element1, @Element2, etc.",
+          "accepted_type": "array",
+          "item_type": "object",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "end_image_url",
+          "modality": "image",
+          "role": "end-frame",
+          "arity": "single",
+          "required": false,
+          "description": "URL of the image to be used for the end of the video",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "start_image_url",
+          "modality": "image",
+          "role": "start-frame",
+          "arity": "single",
+          "required": true,
+          "description": "URL of the image to be used for the video",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "mixed",
+        "image"
+      ],
+      "primary_image_field": "start_image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Three separate mechanisms. (1) start_image_url, required, sets the animated first frame and dictates framing and aspect ratio; max 10MB, min 300x300, aspect ratio 0.40 to 2.50. (2) end_image_url, optional, sets the target final frame with the same constraints, so the model interpolates a journey between the two. (3) `elements`, an optional array of characters or objects to insert into the video; each element is either an image set (frontal_image_url plus reference_image_urls, 1 to 3 additional angle images, at least one required) or a single video_url (3 to 10.05s, 720-2160px, 24-60fps, max 200MB, only one video element per request), and each element may carry a voice_id. Elements are addressed in the prompt as @Element1, @Element2 in array order.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "bytedance/seedance-2.5/image-to-video",
+      "label": "Seedance 2.5 i2v",
+      "vendor": "ByteDance",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image_url",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "The URL of the starting frame image to animate. Supported formats: JPEG, PNG, WebP. Max 30 MB.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 30,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "end_image_url",
+          "modality": "image",
+          "role": "end-frame",
+          "arity": "single",
+          "required": false,
+          "description": "The URL of the image to use as the last frame of the video. When provided, the generated video will transition from the starting image to this ending image. Supported formats: JPEG, PNG, WebP. Max 30 MB.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 30,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Exactly ONE start frame via image_url (required alongside prompt), optionally ONE end frame via end_image_url. JPEG, PNG or WebP, max 30 MB each. The start frame sets both the opening composition and the output aspect ratio. With end_image_url set, the model generates a transition from the start image to the end image.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "minimax/h3/image-to-video",
+      "label": "Hailuo H3 i2v",
+      "vendor": "MiniMax",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "end_image_url",
+          "modality": "image",
+          "role": "end-frame",
+          "arity": "single",
+          "required": false,
+          "description": "Optional URL of the image to use as the last frame, for first-to-last keyframe generation.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "image_url",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "Optional URL of the image to use as the first frame. When provided, the output aspect ratio follows this image. When omitted, the request is handled as text-to-video (16:9 by default).",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Exactly ONE first frame via image_url (optional; if omitted the call behaves as text-to-video at 16:9) and optionally ONE last frame via end_image_url for first-to-last keyframe generation. The first frame determines the output aspect ratio. This endpoint takes a start frame, not a subject reference set; for multiple product references use minimax/h3/reference-to-video.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "wan/v2.6/image-to-video",
+      "label": "Wan 2.6 i2v",
+      "vendor": "Alibaba",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image_url",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "URL of the image to use as the first frame. Must be publicly accessible or base64 data URI. Image dimensions must be between 240 and 7680.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "audio_url",
+          "modality": "audio",
+          "role": "source",
+          "arity": "single",
+          "required": false,
+          "description": "\nURL of the audio to use as the background music. Must be publicly accessible.\nLimit handling: If the audio duration exceeds the duration value (5, 10, or 15 seconds),\nthe audio is truncated to the first N seconds, and the rest is discarded. If\nthe audio is shorter than the video, the remaining part of the video will be silent.\nFor example, if the audio is 3 seconds long and the video duration is 5 seconds, the\nfirst 3 seconds of the output video will have sound, and the last 2 seconds will be silent.\n- Format: WAV, MP3.\n- Duration: 3 to 30 s.\n- File size: Up to 15 MB.\n",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image",
+        "audio"
+      ],
+      "primary_image_field": "image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Exactly ONE image via image_url, and it is used as the literal FIRST FRAME of the video, not as a loose style reference. Must be publicly accessible or a base64 data URI; dimensions between 240 and 7680 px. This is the right endpoint when a supplied product shot must appear pixel-faithful at frame zero; use Wan 2.7 reference-to-video instead when you want the subject placed into a new scene.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/veo3.1/fast/image-to-video",
+      "label": "Veo 3.1 fast i2v",
+      "vendor": "Google",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image_url",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "URL of the input image to animate. Should be 720p or higher resolution in 16:9 or 9:16 aspect ratio. If the image is not in 16:9 or 9:16 aspect ratio, it will be cropped to fit.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_url",
+      "image_arity": "single",
+      "prompt_profile": true,
+      "researched_input_evidence": "Exactly one image via image_url, used as the animated START frame. It sets the first frame, the composition and the aspect ratio. Should be 720p or higher in 16:9 or 9:16; other ratios are cropped to fit. Max 8MB. It is a starting point, not a per-frame lock, so identity and fine detail drift as the clip progresses.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/veo3.1/reference-to-video",
+      "label": "Veo 3.1 reference",
+      "vendor": "Google",
+      "output": "video",
+      "lane": "r2v",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": true,
+          "description": "URLs of the reference images to use for consistent subject appearance",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "image_urls is an array of asset reference images of a SINGLE person, character or product. Google documents up to three, with referenceType 'asset'; style references are not supported on Veo 3.1. The model preserves the subject's appearance while generating an entirely new scene, so unlike image-to-video these images do NOT set the first frame, the composition or the aspect ratio. Best results come from 1 to 3 clean, well-lit views of the same subject from different angles on a plain background, with the subject filling most of the frame and no other objects competing for identity. Duration is fixed at 8s here, consistent with Google's note that reference images require the 8s mode.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "bytedance/seedance-2.0/reference-to-video",
+      "label": "Seedance 2 reference",
+      "vendor": "ByteDance",
+      "output": "video",
+      "lane": "r2v",
+      "inputs": [
+        {
+          "field": "audio_urls",
+          "modality": "audio",
+          "role": "source",
+          "arity": "multiple",
+          "required": false,
+          "description": "Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file.If audio is provided, at least one reference image or video is required.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 3,
+            "max_megabytes": 15,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "source",
+          "arity": "multiple",
+          "required": false,
+          "description": "Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPEG, PNG, WebP. Max 30 MB per image. Up to 9 images. Total files across all modalities must not exceed 12.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 9,
+            "max_megabytes": 30,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "video_urls",
+          "modality": "video",
+          "role": "source",
+          "arity": "multiple",
+          "required": false,
+          "description": "Reference videos to guide video generation. Refer to them in the prompt as @Video1, @Video2, etc. Supported formats: MP4, MOV. Up to 3 videos, combined duration must be between 2 and 15 seconds, total size under 50 MB. Each video must be between ~480p (640x640) and ~720p (834x1112) in resolution.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 3,
+            "max_megabytes": 50,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "audio",
+        "image",
+        "video"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "Up to 9 reference images via image_urls (JPEG, PNG, WebP, max 30 MB each), addressed in the prompt as @Image1, @Image2 and so on by list position. Additionally up to 3 videos via video_urls (MP4/MOV, 2-15s each, 2-15s combined, under 50 MB total, addressed @Video1...) and up to 3 audio files via audio_urls (MP3/WAV, 15s combined, max 15 MB each, addressed @Audio1...). Total files across all three modalities must not exceed 12. Images should show the product or subject cleanly from the angles you want preserved; one clean hero angle plus one or two alternates beats nine noisy shots.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "minimax/h3/reference-to-video",
+      "label": "Hailuo H3 reference",
+      "vendor": "MiniMax",
+      "output": "video",
+      "lane": "r2v",
+      "inputs": [
+        {
+          "field": "reference_image_urls",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": false,
+          "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 9,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "reference_audio_urls",
+          "modality": "audio",
+          "role": "reference",
+          "arity": "multiple",
+          "required": false,
+          "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Audio cannot be the only reference input; provide at least one reference image or video with it. Reference images, videos, and audio clips must add up to at most 12 files.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 3,
+            "max_megabytes": null,
+            "min_seconds": 2,
+            "max_seconds": 15
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "reference_video_urls",
+          "modality": "video",
+          "role": "reference",
+          "arity": "multiple",
+          "required": false,
+          "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": 3,
+            "max_megabytes": null,
+            "min_seconds": 2,
+            "max_seconds": 15
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image",
+        "audio",
+        "video"
+      ],
+      "primary_image_field": "reference_image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "Up to 9 subject/style reference images via reference_image_urls, addressed in the prompt as 'Image 1', 'Image 2' and so on by list position. Plus up to 3 motion/reference video clips via reference_video_urls (2-15 seconds each, 15 seconds combined, addressed 'Video 1'...) and up to 3 reference audio clips via reference_audio_urls (2-15 seconds each, 15 seconds combined, addressed 'Audio 1'...). All modalities together must not exceed 12 files. Audio cannot be the only reference type. MiniMax states the model keeps the reference subject's features consistent throughout the generated video. For products, one clean hero angle plus one or two alternate angles on a plain evenly lit background outperforms nine busy lifestyle shots.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "fal-ai/wan/v2.7/reference-to-video",
+      "label": "Wan 2.7 reference",
+      "vendor": "Alibaba",
+      "output": "video",
+      "lane": "r2v",
+      "inputs": [
+        {
+          "field": "reference_image_urls",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": false,
+          "description": "Reference image URLs for character/object appearance. Pass multiple images for multi-subject generation. Max 20 MB each.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 20,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        },
+        {
+          "field": "reference_video_urls",
+          "modality": "video",
+          "role": "reference",
+          "arity": "multiple",
+          "required": false,
+          "description": "Reference video URLs for character/object appearance and motion. Pass multiple videos for multi-subject generation. Max 100 MB each.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": 100,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image",
+        "video"
+      ],
+      "primary_image_field": "reference_image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "reference_image_urls is an array of image URLs, described by fal as 'Reference image URLs for character/object appearance. Pass multiple images for multi-subject generation. Max 20 MB each.' The schema sets NO explicit numeric cap on how many images may be passed; a hard maximum count is UNVERIFIED. A parallel array reference_video_urls accepts reference videos (max 100 MB and 30 seconds each) which carry appearance, motion and voice timbre. References guide appearance and are not used as a forced first frame; if you need an exact first frame, use the Wan 2.6 image-to-video endpoint instead.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "xai/grok-imagine-video/reference-to-video",
+      "label": "Grok reference",
+      "vendor": "xAI",
+      "output": "video",
+      "lane": "r2v",
+      "inputs": [
+        {
+          "field": "reference_image_urls",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "description": "One or more reference image URLs to guide the video generation as style and content references. Reference in prompt as @Image1, @Image2, etc. Maximum 7 images.",
+          "accepted_type": "array",
+          "item_type": "string",
+          "limits": {
+            "min_items": 1,
+            "max_items": 7,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "reference_image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "reference_image_urls is an array of up to 7 image URLs, addressed in the prompt as @Image1, @Image2 ... in array order. They act as style and content references that influence the generation without being forced as the first frame. xAI's own framing is that each reference locks one element (a face, a product, a location), which lets you hold one and vary the others. This is the multi-subject compositing tool of the set; it is not a pixel-faithful first-frame animator.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "agnes/agnes-image-2.1-flash",
+      "label": "Agnes Image 2.1 flash",
+      "vendor": "Agnes AI",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": "Referências preservam estilo e composição, mas NÃO travam identidade de personagem com uma única imagem (o rosto muda). Com duas, a identidade melhora muito. Teto útil: 2 (com 5 a saída vira confete de pixels e o prompt é ignorado). Limite de 10 MB por imagem de entrada, então uma saída 4K não serve como referência depois.",
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "agnes/agnes-image-2.1-flash/edit",
+      "label": "Agnes Image 2.1 edit",
+      "vendor": "Agnes AI",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "description": "Ate 2 referencias (URL publica ou data URI base64). MEDIDO: 2 e o teto util — 5 destroem a saida (confete de pixels) e o prompt passa a ser ignorado. Preserva estilo e composicao; com 1 ref a identidade do personagem NAO trava (o rosto muda), com 2 melhora muito.",
+          "accepted_type": "array",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "Idem ao modelo t2i: 2 referências é o teto útil; identidade só fica estável com duas.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "agnes/agnes-video-v2.0",
+      "label": "Agnes Video 2.0",
+      "vendor": "Agnes AI",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": true,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "agnes/agnes-video-v2.0/i2v",
+      "label": "Agnes Video 2.0 (keyframes)",
+      "vendor": "Agnes AI",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "description": "1 imagem = video de imagem unica (o parametro `mode` e OMITIDO; medido contra a API viva em 2026-08-16 — a doc antiga falava em `ti2vid`, que hoje devolve 400). 2 imagens = modo `keyframes` A->B, que interpola de verdade e mantem o personagem consistente no movimento. Base64 funciona (a doc afirma exigir URL publica — medido como falso).",
+          "accepted_type": "array",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "multiple",
+      "prompt_profile": true,
+      "researched_input_evidence": "1 imagem = vídeo de imagem única (movimento sutil, deriva menos). 2 imagens = modo keyframes A->B. Base64 funciona apesar de a doc afirmar que exige URL pública.",
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "inemaimg/flux2-klein",
+      "label": "FLUX.2 klein (local)",
+      "vendor": "INEMA / DGX",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "inemaimg/flux2-klein/edit",
+      "label": "FLUX.2 klein edit (local)",
+      "vendor": "INEMA / DGX",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "images",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "description": "Ate 4 referencias, aceitas NATIVAMENTE pelo flux2-klein (nao exige troca de modelo). O adapter converte URL ou data URI para base64 cru, que e o que o servidor espera.",
+          "accepted_type": "array",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "images",
+      "image_arity": "multiple",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kie/z-image",
+      "label": "Z-Image (kie)",
+      "vendor": "Alibaba",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kie/nano-banana-pro",
+      "label": "Nano Banana Pro (kie)",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kie/nano-banana-pro/edit",
+      "label": "Nano Banana Pro edit (kie)",
+      "vendor": "Google",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "reference",
+          "arity": "multiple",
+          "required": true,
+          "description": "Ate 2 referencias. PRECISA ser URL publica — o kie.ai nao aceita data URI nem caminho local (nota de campo medida). O anexo enviado pela UI do Bench vira URL publica no storage do fal, entao funciona.",
+          "accepted_type": "array",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "multiple",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kie/veo3_fast",
+      "label": "Veo 3 fast (kie)",
+      "vendor": "Google",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image_urls",
+          "modality": "image",
+          "role": "start-frame",
+          "arity": "multiple",
+          "required": false,
+          "description": "Um frame de partida, como URL publica. Sem referencia, roda como text-to-video.",
+          "accepted_type": "array",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image_urls",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-v2_5",
+      "label": "Kling v2.5 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-v2_6",
+      "label": "Kling v2.6 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-o1",
+      "label": "Kling o1 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0_omni",
+      "label": "Kling v3.0.omni · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0",
+      "label": "Kling v3.0 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0_turbo",
+      "label": "Kling v3.0.turbo · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "t2v",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-video-v2_5/i2v",
+      "label": "Kling v2.5 i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-v2_6/i2v",
+      "label": "Kling v2.6 i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-o1/i2v",
+      "label": "Kling o1 i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0_omni/i2v",
+      "label": "Kling v3.0.omni i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0/i2v",
+      "label": "Kling v3.0 i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-video-v3_0_turbo/i2v",
+      "label": "Kling v3.0.turbo i2v · via Kling",
+      "vendor": "Kuaishou",
+      "output": "video",
+      "lane": "i2v",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/gemini-3.1-flash-image",
+      "label": "gemini-3.1-flash-image · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/gpt-image-2",
+      "label": "gpt-image-2 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/gemini-3-pro-image",
+      "label": "gemini-3-pro-image · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-image-v3_0_omni",
+      "label": "Kling v3.0.omni · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-image-o1",
+      "label": "Kling o1 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-image-v3_0",
+      "label": "Kling v3.0 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/kling-image-v2_1",
+      "label": "Kling v2.1 · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "t2i",
+      "inputs": [],
+      "modalities": [],
+      "primary_image_field": null,
+      "image_arity": null,
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-reports-no-media-input"
+    },
+    {
+      "model_id": "kling/gemini-3.1-flash-image/edit",
+      "label": "gemini-3.1-flash-image edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/gpt-image2/edit",
+      "label": "gpt-image2 edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/gemini-3-pro-image/edit",
+      "label": "gemini-3-pro-image edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-image-v3_0_omni/edit",
+      "label": "Kling v3.0.omni edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-image-o1/edit",
+      "label": "Kling o1 edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-image-v3_0/edit",
+      "label": "Kling v3.0 edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    },
+    {
+      "model_id": "kling/kling-image-v2_1/edit",
+      "label": "Kling v2.1 edit · via Kling",
+      "vendor": "Kuaishou",
+      "output": "image",
+      "lane": "i2i",
+      "inputs": [
+        {
+          "field": "image",
+          "modality": "image",
+          "role": "source",
+          "arity": "single",
+          "required": true,
+          "description": "Imagem de referência. O CLI aceita URL pública ou caminho local e faz o upload sozinho.",
+          "accepted_type": "string",
+          "item_type": null,
+          "limits": {
+            "min_items": null,
+            "max_items": null,
+            "max_megabytes": null,
+            "min_seconds": null,
+            "max_seconds": null
+          },
+          "provenance": [
+            {
+              "source": "fal-openapi",
+              "status": "schema-supported",
+              "checked_at": "2026-08-12T18:57:37.821Z"
+            }
+          ]
+        }
+      ],
+      "modalities": [
+        "image"
+      ],
+      "primary_image_field": "image",
+      "image_arity": "single",
+      "prompt_profile": false,
+      "researched_input_evidence": null,
+      "confidence": "schema-supported"
+    }
+  ]
+}

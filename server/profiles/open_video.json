@@ -1,0 +1,288 @@
+{
+  "_meta": {
+    "researched_at": "2026-08-12",
+    "verification_policy": "Every param name, default, enum and range below was read from the live fal OpenAPI queue schema for that exact endpoint_id. Prompt-craft rules are attributed to their upstream source (Lightricks LTX-Video README, Wan-Video/Wan2.2 repo + HF model cards). Anything that could not be verified from a primary source is marked UNVERIFIED inline rather than guessed.",
+    "schema_urls": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.2-a14b/text-to-video/turbo",
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.2-a14b/image-to-video/turbo",
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/ltx-video-13b-distilled"
+    ],
+    "cross_family_rule": "Do NOT reuse one rewritten prompt across families. LTX wants a long chronological single paragraph (<=200 words). Wan turbo wants a compact cinematic block (~80-120 words) and has NO negative_prompt field, so anything you want excluded must be handled by positive phrasing or by enable_prompt_expansion."
+  },
+
+  "fal-ai/ltx-video-13b-distilled": {
+    "family": "ltx",
+    "modality": "text-to-video",
+    "strengths": [
+      "Fastest and cheapest of the three for concepting; distilled 13B runs at 8+8 inference steps by default",
+      "Only one of the three endpoints that exposes negative_prompt, num_frames and frame_rate, so duration and cadence are directly controllable (up to 1441 frames, 1-60 fps)",
+      "Responds well to long, literal, cinematographer-style descriptions that sequence actions in time",
+      "Supports LoRAs via the loras array, and a detail pass for a quality bump at 2x cost"
+    ],
+    "weaknesses": [
+      "Distilled model: fewer steps means less prompt adherence on complex multi-subject scenes than a full-step model",
+      "Max resolution on this endpoint is 720p (480p or 720p only); no 1080p",
+      "Long clips drift; upstream LTX-Video README recommends staying under 257 frames for best results",
+      "Abstract, metaphorical or emotional language degrades output. It needs literal physical description",
+      "Text rendering inside the frame is unreliable (UNVERIFIED from a primary doc, treat as a working assumption)"
+    ],
+    "prompt_style": "One flowing paragraph, no bullet lists, no line breaks. Lightricks' official README states: focus on detailed, CHRONOLOGICAL descriptions of actions and scenes; start directly with the action; include specific movements, appearances, camera angles, and environmental details; keep it literal and precise, like a cinematographer describing a shot; stay within roughly 200 words. Commas are fine as connective tissue, the point is that clauses appear in the order events happen, not that punctuation is avoided.",
+    "ideal_length_words": [50, 120],
+    "structure_template": "<primary action stated first in one clause>, <subject and precise visual appearance>, <what happens next, in strict chronological order, one clause per beat>, <setting and environment details>, <camera angle and camera movement>, <lighting condition and color palette>, <any transition or ending state>",
+    "motion_vocabulary": [
+      "the camera slowly dollies in",
+      "the camera pulls back",
+      "the camera orbits around the subject",
+      "the camera tracks alongside",
+      "slow pan to the right",
+      "tilt up / tilt down",
+      "handheld, slight shake",
+      "static locked-off shot",
+      "low angle looking up",
+      "high angle looking down",
+      "close-up / medium shot / wide establishing shot",
+      "shallow depth of field, background falls out of focus",
+      "rack focus from foreground to background"
+    ],
+    "do": [
+      "Open with the action, not with a preamble like 'a video of' or 'this scene shows'",
+      "Order clauses chronologically: first beat, then second beat, then third. The model reads order as time",
+      "Name exact appearance (garment color, material, hair, object finish) rather than adjectives like beautiful or amazing",
+      "State exactly one camera move for the shot, and place it after the action description",
+      "End with lighting and color palette, e.g. 'warm late-afternoon sunlight, amber and deep green palette'",
+      "Keep num_frames on the LTX cadence: divisible by 8 plus 1 (9, 17, 121, 257). The endpoint default 121 already satisfies this",
+      "Set the seed and keep it fixed when iterating on wording, so prompt deltas are readable",
+      "Use negative_prompt for artifacts only, and keep the endpoint default as the base string"
+    ],
+    "dont": [
+      "Do not write a shot list with numbered lines or bullets. One paragraph",
+      "Do not exceed ~200 words (upstream README limit); the sweet spot for concepting is 50-120",
+      "Do not use emotional or interpretive language ('a haunting sense of loss'), it is not groundable",
+      "Do not stack multiple conflicting camera moves in one prompt",
+      "Do not request on-screen text, logos or lettering",
+      "Do not push num_frames past 257 for quality work even though the schema allows 1441"
+    ],
+    "negative_prompt_supported": true,
+    "negative_prompt_default": "worst quality, inconsistent motion, blurry, jittery, distorted",
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [
+      "Not applicable: this endpoint id is text-to-video only and exposes no image_url. Use an LTX image-to-video endpoint if a start frame is required."
+    ],
+    "duration_and_fps": "num_frames default 121, range 9-1441. frame_rate default 24, range 1-60. Default output is therefore ~5.0s at 24fps. resolution: 480p or 720p. aspect_ratio: 16:9, 9:16, 1:1. Upstream LTX-Video README: resolutions divisible by 32, frame counts divisible by 8 plus 1, best results under 720x1280 and under 257 frames.",
+    "key_params": {
+      "prompt": "The chronological paragraph. Primary lever.",
+      "negative_prompt": "Artifact suppression. Default 'worst quality, inconsistent motion, blurry, jittery, distorted' is a good base; append subject-specific artifacts only.",
+      "num_frames": "Clip length in frames (9-1441, default 121). Keep to divisible-by-8-plus-1. For concepting use 121 or lower.",
+      "frame_rate": "Output fps (1-60, default 24). 24 for cinematic, 30 for product/UI feel.",
+      "resolution": "480p or 720p. 480p for cheap concepting, 720p for the pick.",
+      "aspect_ratio": "16:9, 9:16, 1:1.",
+      "expand_prompt": "LLM prompt rewrite, default false. Leave FALSE when your backend already rewrites the prompt, otherwise two rewriters fight.",
+      "enable_detail_pass": "Quality pass at 2.0x cost. Off for concepting, on for the final pick.",
+      "first_pass_num_inference_steps": "2-12, default 8. Lower = faster/cheaper.",
+      "second_pass_num_inference_steps": "2-12, default 8.",
+      "second_pass_skip_initial_steps": "1-11, default 5. Controls how much the second pass reworks vs refines.",
+      "temporal_adain_factor": "0-1, default 0.5. Color consistency across frames; raise if color flickers.",
+      "tone_map_compression_ratio": "0-1, default 0. Compresses dynamic range; raise slightly if highlights clip.",
+      "reverse_video": "Plays the generation backwards. Niche.",
+      "enable_safety_checker": "Default true on this endpoint.",
+      "seed": "Fix it while iterating on wording.",
+      "loras": "Array of LoRA weights, empty by default."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "num_frames": 97,
+      "frame_rate": 24,
+      "first_pass_num_inference_steps": 6,
+      "second_pass_num_inference_steps": 6,
+      "enable_detail_pass": false,
+      "expand_prompt": false,
+      "seed": 42
+    },
+    "worked_example": {
+      "user_idea": "a cool shot of my coffee brand's bag on a kitchen counter",
+      "optimized_prompt": "Steam rises from a white ceramic cup beside a matte black coffee bag standing upright on a pale oak kitchen counter, the bag's copper foil label catching the light as a hand enters frame from the right and slowly turns the bag to face the lens, then withdraws, leaving the packaging centered and still, scattered coffee beans and a folded linen cloth resting on the counter behind it, the camera slowly dollies in from a medium shot to a tight close-up on the label, soft morning window light from the left, warm amber and deep brown palette with a shallow depth of field that lets the background fall out of focus."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/ltx-video-13b-distilled",
+      "https://github.com/Lightricks/LTX-Video",
+      "https://raw.githubusercontent.com/Lightricks/LTX-Video/main/README.md"
+    ]
+  },
+
+  "fal-ai/wan/v2.2-a14b/text-to-video/turbo": {
+    "family": "wan",
+    "modality": "text-to-video",
+    "strengths": [
+      "Wan2.2 A14B is a Mixture-of-Experts video diffusion model trained with explicit cinematic aesthetic labels, so lighting, composition and color-grade language actually lands",
+      "Strong on large-scale complex motion and multi-object scenes relative to distilled models",
+      "Turbo variant is cheap and fast: $0.05 (480p) / $0.075 (580p) / $0.10 (720p) per video as listed on the fal model page",
+      "Built-in enable_prompt_expansion (LLM rewrite) is available when the user's idea is too thin"
+    ],
+    "weaknesses": [
+      "NO negative_prompt field on the turbo endpoint. Exclusions must be expressed positively in the prompt",
+      "NO num_frames, frames_per_second, guidance_scale, shift or num_inference_steps on turbo. Duration and cadence are fixed and not controllable (the non-turbo fal-ai/wan/v2.2-a14b/text-to-video endpoint exposes num_frames default 81 and frames_per_second default 16; use that endpoint when duration control matters)",
+      "Turbo trades quality for speed relative to the full A14B endpoint",
+      "Max resolution 720p on this endpoint",
+      "Upstream Wan-AI/Wan2.2-T2V-A14B model card states the model 'supports generating 5s videos at both 480P and 720P'; the exact clip length fal's turbo endpoint returns is not stated in its schema. UNVERIFIED, treat as approximately 5 seconds"
+    ],
+    "prompt_style": "A compact cinematic block, not a chronological run-on. Wan responds to the aesthetic-control vocabulary it was trained on: shot size, camera movement, lighting, color tone, and style, stated as distinct descriptors alongside subject and action. Order the description the way the camera reveals it: what is captured first, then how the shot develops. Aim for roughly 80-120 words. (The 80-120 figure comes from third-party Wan prompt guides, not from an Alibaba primary doc; Alibaba's API reference only documents a 1,500-character prompt ceiling for Wan2.6-and-earlier models. Treat 80-120 as a tuned default, not a hard spec.)",
+    "ideal_length_words": [60, 120],
+    "structure_template": "<shot size and subject with concrete appearance>, <the single action, with how it develops over the shot>, <setting and environment>, <camera movement>, <lighting setup>, <color tone and film style>",
+    "motion_vocabulary": [
+      "static shot",
+      "slow push in",
+      "dolly in / dolly out",
+      "tracking shot following the subject",
+      "orbit / arc around the subject",
+      "pan left, pan right",
+      "tilt up, tilt down",
+      "crane up",
+      "handheld documentary movement",
+      "close-up, medium shot, wide shot, extreme wide establishing shot",
+      "low angle, high angle, eye level, over-the-shoulder",
+      "shallow depth of field",
+      "slow motion"
+    ],
+    "do": [
+      "Lead with the shot size and the subject, because Wan reads the opening as what the camera captures first",
+      "Give exactly one action and let it develop; Wan handles a developing motion better than a list of separate events",
+      "Use explicit cinematography terms (lighting setup, color tone, film style) - this is the model's trained aesthetic-control surface",
+      "State the visual style plainly at the end: 'cinematic film look, soft warm color grade' or 'clean commercial product photography look'",
+      "Express exclusions positively, since there is no negative_prompt. 'Clean uncluttered counter, no people in frame' as part of the scene description",
+      "Set enable_prompt_expansion=true only when the incoming idea is under ~15 words; leave it false when your backend already produced a full prompt",
+      "Fix the seed while iterating on wording"
+    ],
+    "dont": [
+      "Do not append a negative-prompt-style tail ('blurry, low quality, watermark'). The field does not exist here and that text will be read as content to render",
+      "Do not write a multi-beat storyboard; a fixed ~5s turbo clip holds one shot, one move",
+      "Do not request on-screen text or logo lettering",
+      "Do not send an LTX-style 200-word chronological paragraph; it dilutes the aesthetic descriptors",
+      "Do not set enable_prompt_expansion on top of an already-optimized prompt (double rewriting drifts off the user's intent)"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": null,
+    "reference_image_prompt_rules": [],
+    "duration_and_fps": "Not exposed on the turbo endpoint: no num_frames, no frames_per_second. resolution: 480p, 580p, 720p (default 720p). aspect_ratio: 16:9, 9:16, 1:1 (default 16:9). Upstream Wan2.2-A14B is a 5s model at 480P/720P; the non-turbo fal endpoint defaults to 81 frames at 16fps (~5s) with an optional film/rife interpolator.",
+    "key_params": {
+      "prompt": "The cinematic block. Primary lever.",
+      "resolution": "480p / 580p / 720p. Drives price: $0.05 / $0.075 / $0.10 per video.",
+      "aspect_ratio": "16:9, 9:16, 1:1.",
+      "enable_prompt_expansion": "LLM expands the prompt. Default false. Use only for thin ideas.",
+      "acceleration": "'none' or 'regular' (default regular). 'regular' is faster with some quality loss; use 'none' for the final pick.",
+      "video_quality": "low / medium / high / maximum (default high). Encoder quality, not model quality.",
+      "video_write_mode": "fast / balanced / small (default balanced). File-size vs write-speed only.",
+      "enable_safety_checker": "Input safety check, default false.",
+      "enable_output_safety_checker": "Output safety check, default false.",
+      "seed": "Fix while iterating."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "acceleration": "regular",
+      "video_quality": "medium",
+      "video_write_mode": "fast",
+      "enable_prompt_expansion": false,
+      "seed": 42
+    },
+    "worked_example": {
+      "user_idea": "my coffee brand looking premium, cinematic",
+      "optimized_prompt": "Medium close-up of a matte black coffee bag standing on a pale oak counter, its copper foil label facing camera. Steam drifts steadily from a white ceramic cup beside it as loose beans rest on the wood. The camera pushes in slowly and steadily toward the label, holding the bag centered in frame. Soft directional morning light from a window on the left, gentle falloff into shadow on the right, clean uncluttered background with no people in frame. Warm amber and deep brown color tone, shallow depth of field, cinematic commercial product film look."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.2-a14b/text-to-video/turbo",
+      "https://fal.ai/models/fal-ai/wan/v2.2-a14b/text-to-video/turbo",
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.2-a14b/text-to-video",
+      "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B",
+      "https://github.com/Wan-Video/Wan2.2"
+    ]
+  },
+
+  "fal-ai/wan/v2.2-a14b/image-to-video/turbo": {
+    "family": "wan",
+    "modality": "image-to-video",
+    "strengths": [
+      "Start frame carries all appearance information, so a real product photo, screenshot or rendered thumbnail is preserved instead of re-hallucinated",
+      "aspect_ratio defaults to 'auto', deriving the ratio from the input image, which avoids unwanted crops",
+      "Supports an optional end_image_url, so a shot can be driven from a start frame to a target end frame",
+      "Same cheap turbo tier and same cinematic aesthetic vocabulary as the text-to-video sibling"
+    ],
+    "weaknesses": [
+      "NO negative_prompt, num_frames, frames_per_second, guidance_scale or shift on this endpoint",
+      "fal documents that if the input image does not match the chosen aspect_ratio, it is resized and CENTER CROPPED. A product shot with edge-of-frame detail can lose it unless aspect_ratio is left on 'auto'",
+      "Re-describing the subject's appearance in the prompt fights the start frame and causes drift in identity, color and packaging detail",
+      "Max resolution 720p; clip length not exposed (upstream A14B is a 5s model). UNVERIFIED exact turbo duration"
+    ],
+    "prompt_style": "A MOTION brief, not a scene description. The image already answers 'what does it look like'. The prompt answers 'what moves, and how does the camera move'. Keep it short, one or two sentences of subject motion plus one camera move plus, at most, an atmosphere note that does not contradict the frame.",
+    "ideal_length_words": [20, 60],
+    "structure_template": "<what in the frame starts moving, and how>, <how that motion develops over the shot>, <one camera movement>, <optional ambient motion: steam, dust, light shift, fabric>",
+    "motion_vocabulary": [
+      "the camera slowly pushes in",
+      "the camera pulls back to reveal",
+      "slow orbit around the subject",
+      "gentle handheld drift",
+      "static shot, subject moves only",
+      "slow pan across the scene",
+      "tilt up from the base to the top",
+      "parallax as the camera slides left",
+      "steam rises", "dust motes drift", "fabric sways", "light slowly shifts across the surface",
+      "subtle breathing motion", "slow motion"
+    ],
+    "do": [
+      "Describe ONLY motion and camera. Assume the model can already see everything in the frame",
+      "Name one subject motion and one camera motion, maximum",
+      "Prefer small, physically plausible motion for product and packaging shots (a slow push in, steam, a light shift). Large motion invites deformation of the product",
+      "Leave aspect_ratio on 'auto' when the attached image must be preserved intact; set it explicitly only when the output ratio is a hard requirement and center-cropping is acceptable",
+      "Use end_image_url when the shot has a defined destination frame",
+      "Keep enable_prompt_expansion=false for i2v: an LLM expansion tends to reintroduce appearance description that conflicts with the start frame"
+    ],
+    "dont": [
+      "Do not restate the subject's colors, materials, logo, packaging text or layout. That is the single biggest cause of the product changing mid-clip",
+      "Do not introduce new objects, new people or a new location that is not in the start frame",
+      "Do not describe a cut, a scene change or a second shot",
+      "Do not append negative-prompt keywords; the field does not exist and they will be read as content",
+      "Do not ask for text to appear or change on the packaging"
+    ],
+    "negative_prompt_supported": false,
+    "reference_image_behavior": "image_url is used as the FIRST frame of the generated video and supplies all appearance, composition and color information. fal's schema note: 'If the input image does not match the chosen aspect ratio, it is resized and center cropped.' With aspect_ratio='auto' (the default) the ratio is derived from the image instead. An optional end_image_url sets a target final frame. The prompt should therefore describe motion and camera only, and must not re-describe what the image already shows.",
+    "reference_image_prompt_rules": [
+      "Rewrite rule for the backend: strip every appearance noun-phrase from the user's idea and keep only verbs of motion plus camera language",
+      "If the user's idea contains no motion at all, supply a conservative default: 'slow push in, subtle ambient motion, everything else stays still'",
+      "Never emit brand names, packaging copy or color adjectives for the attached product; the frame owns those",
+      "Prefer 'the camera ...' phrasing for camera motion and 'the <object already in frame> ...' phrasing for subject motion, so nothing new is introduced",
+      "One sentence of subject motion, one sentence of camera motion. Stop there"
+    ],
+    "duration_and_fps": "Not exposed on the turbo endpoint. resolution: 480p, 580p, 720p (default 720p). aspect_ratio: auto (default), 16:9, 9:16, 1:1. Upstream Wan2.2-I2V-A14B is a 5s 480P/720P model; the non-turbo fal A14B video endpoints default to 81 frames at 16fps.",
+    "key_params": {
+      "image_url": "The start frame. Publicly reachable URL or a fal-uploaded file. Owns all appearance.",
+      "end_image_url": "Optional target final frame.",
+      "prompt": "Motion + camera only.",
+      "resolution": "480p / 580p / 720p.",
+      "aspect_ratio": "Leave 'auto' to inherit the image ratio and avoid a center crop.",
+      "enable_prompt_expansion": "Default false. Keep false for i2v to protect the start frame.",
+      "acceleration": "'regular' (default) for speed, 'none' for the final render.",
+      "video_quality": "low / medium / high / maximum (default high).",
+      "video_write_mode": "fast / balanced / small (default balanced).",
+      "enable_safety_checker": "Input check, default false.",
+      "enable_output_safety_checker": "Output check, default false.",
+      "seed": "Fix while iterating on motion wording."
+    },
+    "cheap_concepting_settings": {
+      "resolution": "480p",
+      "aspect_ratio": "auto",
+      "acceleration": "regular",
+      "video_quality": "medium",
+      "video_write_mode": "fast",
+      "enable_prompt_expansion": false,
+      "seed": 42
+    },
+    "worked_example": {
+      "user_idea": "make my product photo move, it's a matte black coffee bag with a copper label on a wooden counter, keep it looking premium",
+      "optimized_prompt": "The steam beside the bag rises and curls slowly while everything else stays still, and a soft highlight drifts across the foil label. The camera pushes in slowly and steadily, holding the bag centered, shallow depth of field."
+    },
+    "sources": [
+      "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/wan/v2.2-a14b/image-to-video/turbo",
+      "https://fal.ai/models/fal-ai/wan/v2.2-a14b/image-to-video/turbo",
+      "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B",
+      "https://github.com/Wan-Video/Wan2.2"
+    ]
+  }
+}
