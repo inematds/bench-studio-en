@@ -204,7 +204,7 @@
 
   <div class="step"><div class="b">2</div><div>
     <h3>Criar o arquivo de configuração</h3>
-    <p>O <code>.env.example</code> documenta as 16 variáveis: o que cada uma destrava, como cobra e onde criar a chave. Preencha só o que você tiver.</p>
+    <p>O <code>.env.example</code> documenta as 19 variáveis: o que cada uma destrava, como cobra e onde criar a chave. Preencha só o que você tiver.</p>
 <pre><span class="k">cp .env.example .env</span>  <span class="c"># .env é ignorado pelo git</span></pre>
   </div></div>
 
@@ -242,12 +242,23 @@ exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
   </div></div>
 
   <div class="step"><div class="b">8</div><div>
+    <h3>Acessar de outra máquina (opcional)</h3>
+    <p>De fábrica só a própria máquina enxerga o estúdio. Abrir para fora são três coisas — a interface escutando na rede, a regra de firewall e lembrar de desfazer as duas. Um comando faz tudo, e o <code>close</code> desfaz exatamente o que o <code>open</code> fez.</p>
+<pre><span class="k">./scripts/remote.sh open</span>     <span class="c"># publica no IP da máquina</span>
+<span class="k">./scripts/remote.sh status</span>   <span class="c"># aberto ou fechado, e com qual proteção</span>
+<span class="k">./scripts/remote.sh close</span>    <span class="c"># volta a só-local</span></pre>
+    <p><strong>Você entra sem senha — é o padrão.</strong> O <code>open</code> avisa disso na tela em vez de te barrar. Já dentro, defina a senha e reinicie. A porta da API (8787) <em>não</em> é publicada: quem gasta dinheiro e grava arquivo continua só em loopback.</p>
+<pre><span class="k">./scripts/remote.sh open --ip 203.0.113.7</span>  <span class="c"># só esse endereço</span>
+<span class="k">./scripts/remote.sh open --firewall</span>        <span class="c"># liga o ufw (SSH liberado antes)</span></pre>
+  </div></div>
+
+  <div class="step"><div class="b">9</div><div>
     <h3>Conectar um agente (opcional)</h3>
     <p>A aba <strong>Connect</strong> entrega a configuração MCP pronta para Claude, Codex e Cursor. O agente enxerga o mesmo elenco de modelos que você — não uma lista paralela.</p>
 <pre><span class="k">npm run mcp</span>  <span class="c"># servidor MCP em stdio</span></pre>
   </div></div>
 
-  <div class="step"><div class="b">9</div><div>
+  <div class="step"><div class="b">10</div><div>
     <h3>Conferir que está tudo de pé</h3>
     <p>Os contratos rodam em segundos. O e2e usa navegador de verdade e pede o Chromium do Playwright uma vez.</p>
 <pre><span class="k">npm run test:contracts</span>   <span class="c"># 30 testes</span>
@@ -280,13 +291,26 @@ exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
     <div class="card"><h3>🚧 Gravação só da máquina</h3><p>Mesmo com sessão válida, trocar chave ou senha pela rede é recusado. A checagem sobrevive ao proxy de desenvolvimento: uma origem encaminhada só é aceita quando o socket já é local.</p></div>
     <div class="card"><h3>🔒 Senha opcional</h3><p>Hash scrypt, cookie <code>httpOnly</code>, sessão de 12h. Ela protege a API e os arquivos gerados. Esconder também a casca da interface é trabalho de proxy reverso, não deste processo — e isso está dito na documentação, não escondido.</p></div>
   </div>
+
+  <h2 style="margin-top:44px;font-size:1.3rem">Deixando no ar com segurança</h2>
+  <p class="sub">Na ordem do que protege mais. O <code>open</code> é postura de teste: tráfego em HTTP puro, legível no caminho.</p>
+  <div class="tw"><table class="t">
+    <tr><th>#</th><th>O que fazer</th><th>Como</th></tr>
+    <tr><td><strong>1</strong></td><td>Pôr senha</td><td><code>npm run set-password</code> — sem ela, a porta é a única barreira</td></tr>
+    <tr><td><strong>2</strong></td><td>Manter a API em loopback</td><td>é o padrão; <code>BENCH_API_HOST=0.0.0.0</code> é opt-out consciente</td></tr>
+    <tr><td><strong>3</strong></td><td>Restringir quem alcança</td><td><code>remote.sh open --ip &lt;seu-ip&gt;</code>, ou Tailscale (nenhuma porta aberta)</td></tr>
+    <tr><td><strong>4</strong></td><td>Ligar o firewall</td><td><code>remote.sh open --firewall</code> — e confira também o painel da VPS</td></tr>
+    <tr><td><strong>5</strong></td><td>HTTPS na frente</td><td>nginx/Caddy + Let's Encrypt servindo o <code>dist/</code> e proxy para <code>127.0.0.1:8787</code>, com <code>X-Forwarded-For</code></td></tr>
+    <tr><td><strong>6</strong></td><td>Usuário próprio, não root</td><td>unidade systemd, <code>.env</code> em <code>600</code></td></tr>
+    <tr><td><strong>7</strong></td><td>Fechar ao terminar</td><td><code>./scripts/remote.sh close</code> — exposição esquecida é a que custa crédito</td></tr>
+  </table></div>
 </div></section>
 
 <section id="roadmap"><div class="wrap">
   <span class="chip">Roadmap</span>
   <h2>Onde está e para onde vai.</h2>
   <p class="sub">O que está pronto foi medido; o que está por fazer está listado sem promessa de data.</p>
-  <div class="phase"><div class="tag">v1.3.2</div><div class="d"><strong>No ar</strong><span>73 modelos em 5 provedores, curadoria e disponibilidade separadas, filtros de resultado, Redo, aba de modos, construtor com quatro motores, tela de configuração, senha opcional e error boundary por workspace.</span></div></div>
+  <div class="phase"><div class="tag">v1.4.2</div><div class="d"><strong>No ar</strong><span>73 modelos em 5 provedores, curadoria e disponibilidade separadas, filtros de resultado, Redo, aba de modos, construtor com quatro motores, tela de configuração, senha opcional e error boundary por workspace.</span></div></div>
   <div class="phase"><div class="tag">Próximo</div><div class="d"><strong>Publicar do estúdio</strong><span>Mandar um site gerado para o git direto da tela, sem levar os arquivos no braço.</span></div></div>
   <div class="phase"><div class="tag">Próximo</div><div class="d"><strong>Agrupar rotas repetidas</strong><span>Seis famílias existem em mais de um provedor; mostrá-las como um modelo com rotas alternativas, em vez de linhas soltas no catálogo.</span></div></div>
   <div class="phase"><div class="tag">Estudo</div><div class="d"><strong>Vídeo local</strong><span>Rodar geração de vídeo na própria GPU, ao lado dos modelos de imagem que já rodam.</span></div></div>

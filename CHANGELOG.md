@@ -4,6 +4,32 @@ Versionamento `X.XX.YY`: dentro do mesmo major, o `YY` nunca volta a zero —
 correção incrementa `YY`, mudança de comportamento incrementa `XX` carregando o
 `YY`, e só a virada de major zera o resto.
 
+## 1.4.2
+
+### Novo
+- **`scripts/remote.sh` — abrir e fechar o acesso remoto num comando.** Expor o
+  estúdio eram três passos manuais (`.env`, regra de firewall, lembrar de
+  desfazer os dois); agora é `open` / `close` / `status`. O `close` lê um arquivo
+  de estado escrito no `open` e desfaz exatamente aquilo, em vez de chutar. A
+  regra de SSH é liberada antes de qualquer `ufw enable` e nunca é removida — é
+  assim que as pessoas se trancam para fora do próprio servidor. Flags
+  `--ip <endereço>` (só aquele endereço) e `--firewall` (ligar o ufw).
+- **Continua entrando sem senha, e o script diz isso.** A postura de fábrica não
+  mudou: o `open` avisa na tela, e não bloqueia.
+
+### Mudança de comportamento
+- **A API passa a escutar só em loopback** (`BENCH_API_HOST`, padrão
+  `127.0.0.1`). Antes, `app.listen(PORT)` a punha em todas as interfaces: expor a
+  interface expunha junto o endereço que grava arquivo e gasta dinheiro, sem
+  ninguém ter pedido. O opt-out consciente é `BENCH_API_HOST=0.0.0.0`.
+
+### Documentação
+- README: seções **Reaching it from another machine** e **Leaving it up safely**;
+  URL de clone corrigida para `inematds/bench-studio-en`; referência ao
+  inexistente `./dev.sh --lan` substituída; bloco duplicado de SECURITY.md
+  removido.
+- Guia: passo de acesso remoto e tabela de endurecimento.
+
 ## 1.3.2
 
 ### Novo

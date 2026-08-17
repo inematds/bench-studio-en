@@ -89,8 +89,8 @@ anything:
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/promptadvisers/bench-studio-public.git
-cd bench-studio-public
+git clone https://github.com/inematds/bench-studio-en.git
+cd bench-studio-en
 npm install
 ```
 
@@ -100,7 +100,7 @@ npm install
 cp .env.example .env
 ```
 
-Fill in whatever you have. `.env.example` documents all 16 variables — what each
+Fill in whatever you have. `.env.example` documents all 19 variables — what each
 one unlocks, how it bills, and where to create the key. Keys stay server-side and
 are never sent to the browser; `.env` is gitignored and written with owner-only
 permissions.
@@ -135,6 +135,70 @@ If either port is occupied:
 ```bash
 PORT=8790 BENCH_API_PORT=8790 BENCH_WEB_PORT=5201 npm run dev
 ```
+
+## Reaching it from another machine
+
+Both ports bind to loopback, so a fresh install answers nobody but you. Opening
+that up means three things — the interface listening on every interface, a
+firewall rule, and remembering to undo both. One command does all three:
+
+```bash
+./scripts/remote.sh open      # publish the interface on this machine's IP
+./scripts/remote.sh status    # open or closed, and with what protection
+./scripts/remote.sh close     # back to local access only
+```
+
+`open` prints the address to hand out, then tells you to restart with
+`npm run dev`. `close` reverses exactly what `open` did — reading a state file
+written at open time, not guessing — and leaves the SSH rule alone, because
+deleting that is how people lock themselves out of their own server.
+
+Two flags worth knowing:
+
+```bash
+./scripts/remote.sh open --ip 203.0.113.7   # only that address, not the internet
+./scripts/remote.sh open --firewall         # also enable ufw (SSH allowed first)
+```
+
+**You will be let in without a password, and that is the default.** The studio
+ships with no password because talking to your own machine should not need one —
+`open` says so on screen rather than blocking you. Once you are in from the other
+machine, set one and restart:
+
+```bash
+npm run set-password
+```
+
+What `open` deliberately does **not** do: publish the API. Port 8787 stays on
+loopback (`BENCH_API_HOST`), so the endpoint that writes files and spends money
+is reachable only through the interface, on the machine itself.
+
+This is a test posture, not a deployment. The traffic is plain HTTP and readable
+in transit. For anything that stays up, read the next section.
+
+## Leaving it up safely
+
+In rough order of what actually protects you:
+
+1. **Set a password.** `npm run set-password`. Without it, the port is the only
+   thing between the internet and your generated files.
+2. **Keep the API on loopback.** The default. `BENCH_API_HOST=0.0.0.0` is an
+   opt-out you should have a reason for.
+3. **Narrow who can reach it.** `./scripts/remote.sh open --ip <your-ip>` beats
+   an open port. A Tailscale address beats both, and needs no port at all.
+4. **Turn the firewall on.** `./scripts/remote.sh open --firewall` allows SSH
+   first, then enables ufw. Also check your VPS provider's own firewall panel —
+   it sits in front of ufw and answers to nobody on the machine.
+5. **Terminate HTTPS in front.** Point a domain at the machine and put nginx or
+   Caddy in front with a Let's Encrypt certificate, proxying `/api`, `/media`,
+   `/previews`, `/inputs` and `/projects` to `127.0.0.1:8787` and serving
+   `npm run build`'s `dist/` as the site. Then close 5200 entirely. If you do
+   this, make the proxy send `X-Forwarded-For`: the machine-only rule below
+   depends on it.
+6. **Run it as its own user, not root,** under a systemd unit, with `.env` at
+   `600` — which is how the studio writes it.
+7. **Close it when the test ends.** `./scripts/remote.sh close`. An exposure you
+   forgot about is the one that costs you provider credits.
 
 ## Tips that save you time and money
 
@@ -395,7 +459,7 @@ bench-studio-public/
 | [`docs/COMO-FUNCIONA.md`](docs/COMO-FUNCIONA.md) | How the system works inside: the provider contract, the traps measured per provider, cost classes, availability vs curation, the refine chain, the builder, and the security model |
 | [`docs/HISTORICO.md`](docs/HISTORICO.md) | Everything built on top of the original kit, and every bug found — separating the ones that were already there from the ones introduced along the way |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version by version |
-| [`.env.example`](.env.example) | All 16 settings, what each unlocks, and where to get the key |
+| [`.env.example`](.env.example) | All 19 settings, what each unlocks, and where to get the key |
 | [`SECURITY.md`](SECURITY.md) | Threat model and reporting |
 
 ## Useful commands
@@ -409,6 +473,9 @@ bench-studio-public/
 | `npm run catalog:sync` | Refresh provider discovery and pricing evidence. |
 | `npm run mcp` | Start the stdio MCP server. |
 | `npm run set-password` | Set or change the studio password (`-- --remove` clears it). |
+| `./scripts/remote.sh open` | Publish the interface on this machine's IP, firewall rule included. |
+| `./scripts/remote.sh close` | Undo it — back to local access only. |
+| `./scripts/remote.sh status` | Open or closed, on which port, with or without a password. |
 | `npm run test:contracts` | Run API, persistence, and model-contract tests. |
 | `npm run test:mcp` | Smoke-test MCP discovery and media behavior. |
 | `npm run test:e2e` | Run browser journeys and accessibility checks (needs `npx playwright install chromium` once). |
@@ -446,14 +513,12 @@ the machine. This survives the dev proxy: the API only trusts a forwarded origin
 when the socket is already loopback, so a request from the network cannot forge
 one.
 
-**Exposing it.** `./dev.sh --lan` publishes the interface to your local network.
-Prefer reaching the studio over Tailscale or behind a password-protected reverse
-proxy rather than an open port. Generated media may still be retained by the
-provider under that provider's terms, and website builds can invoke a locally
-authenticated coding agent — review generated source before deploying it.
+**Exposing it.** `./scripts/remote.sh open` publishes the interface and opens the
+port; `close` undoes both. See [Reaching it from another
+machine](#reaching-it-from-another-machine) and [Leaving it up
+safely](#leaving-it-up-safely). Prefer Tailscale or a password-protected reverse
+proxy over an open port.
 
-Read [SECURITY.md](SECURITY.md) before exposing, modifying, or redistributing
-the service.
 - Generated media may still be retained by an external provider according to
   that provider's terms.
 - Website and document creation can invoke a locally authenticated coding

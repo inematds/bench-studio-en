@@ -2207,15 +2207,21 @@ function extractUrls(result) {
 }
 
 const PORT = process.env.PORT || 8787;
+// The API binds to loopback. The interface is what gets published (see
+// `scripts/remote.sh`); this process answers the interface, and the interface
+// runs on the same machine. Binding it to every NIC by default would put the
+// endpoint that writes files and spends money on the network without anyone
+// asking for it. BENCH_API_HOST=0.0.0.0 is the deliberate opt-out.
+const HOST = process.env.BENCH_API_HOST || "127.0.0.1";
 
 // Start serving immediately. Price discovery is useful, but it should never
 // make the whole studio look offline while fal is slow or rate-limiting us.
 LIVE_PRICES = readPriceCache();
 const cachedPriced = Object.keys(LIVE_PRICES).length;
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   const s = spendSummary();
-  console.log(`studio server on http://localhost:${PORT}`);
+  console.log(`studio server on http://localhost:${PORT} (bound to ${HOST})`);
   console.log(`  ${registry.models.length} models, ${Object.keys(PROFILES).length} prompt profiles`);
   console.log(`  API-derived image inputs: ${registry.models.filter((model) => imageInputForModel(model)).length}/${registry.models.length}`);
   console.log(`  cached prices: ${cachedPriced}/${falModels().length} fal models; refreshing in background`);
