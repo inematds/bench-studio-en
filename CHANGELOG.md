@@ -4,6 +4,35 @@ Versionamento `X.XX.YY`: dentro do mesmo major, o `YY` nunca volta a zero —
 correção incrementa `YY`, mudança de comportamento incrementa `XX` carregando o
 `YY`, e só a virada de major zera o resto.
 
+## 1.5.2
+
+### Novo
+- **A senha é oferecida no `remote.sh open`.** Ela só pode ser definida na
+  própria máquina — e o script está na máquina. Perguntar ali é o último momento
+  barato: depois que a porta abre, quem está do outro lado não consegue definir
+  senha nenhuma. Responder `n` (ou não ter terminal) abre sem senha, como antes;
+  quem aceita cai no `npm run set-password` de verdade, que pergunta duas vezes e
+  não ecoa. A ordem recomendada na VPS virou `npm install` →
+  `npm run set-password` → `remote.sh open`.
+
+### Corrigido
+- **O aviso de exposição mentia depois de definir a senha.** A tela de Config
+  olhava só `lan_exposed` e continuava dizendo "has no authentication" com senha
+  ativa — o jeito mais rápido de ensinar alguém a ignorar um aviso. Agora são
+  duas mensagens diferentes: porta aberta sem senha (vermelho) e porta aberta com
+  senha (informativo, lembrando que o tráfego é HTTP puro).
+
+### Mudado
+- **Modo leitura deixa de mostrar formulário morto.** Vindo da rede, o campo de
+  senha e os campos de chave davam a entender que dava para editar e não davam.
+  No lugar deles aparece o comando que resolve (`npm run set-password`, na
+  máquina) e a explicação de por que a trava existe: é ela que impede quem achou
+  a porta aberta de pôr uma senha própria e trancar o dono para fora.
+- **Modo leitura não expõe mais o caminho absoluto do `.env`** (denunciava, entre
+  outras coisas, que o processo roda como root) e **desabilita o `Test`** dos
+  provedores — testar é ação, não leitura. Os botões de salvar somem em vez de
+  aparecerem cinzentos.
+
 ## 1.4.2
 
 ### Novo

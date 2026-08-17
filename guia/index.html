@@ -247,7 +247,7 @@ exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
 <pre><span class="k">./scripts/remote.sh open</span>     <span class="c"># publica no IP da máquina</span>
 <span class="k">./scripts/remote.sh status</span>   <span class="c"># aberto ou fechado, e com qual proteção</span>
 <span class="k">./scripts/remote.sh close</span>    <span class="c"># volta a só-local</span></pre>
-    <p><strong>Você entra sem senha — é o padrão.</strong> O <code>open</code> avisa disso na tela em vez de te barrar. Já dentro, defina a senha e reinicie. A porta da API (8787) <em>não</em> é publicada: quem gasta dinheiro e grava arquivo continua só em loopback.</p>
+    <p><strong>O <code>open</code> oferece a senha antes de abrir.</strong> Diga sim e ele chama o <code>set-password</code>; responda <code>n</code> e o estúdio abre sem senha, que é o padrão. A oferta existe por um motivo duro: <strong>a senha só se define na própria máquina</strong> — pela rede é 403, mesmo já logado. É essa regra que impede quem achar a porta aberta de pôr uma senha própria e te trancar para fora. Numa VPS, a ordem certa é <code>npm install</code> → <code>npm run set-password</code> → <code>remote.sh open</code>. A porta da API (8787) <em>nunca</em> é publicada.</p>
 <pre><span class="k">./scripts/remote.sh open --ip 203.0.113.7</span>  <span class="c"># só esse endereço</span>
 <span class="k">./scripts/remote.sh open --firewall</span>        <span class="c"># liga o ufw (SSH liberado antes)</span></pre>
   </div></div>
@@ -296,7 +296,7 @@ exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
   <p class="sub">Na ordem do que protege mais. O <code>open</code> é postura de teste: tráfego em HTTP puro, legível no caminho.</p>
   <div class="tw"><table class="t">
     <tr><th>#</th><th>O que fazer</th><th>Como</th></tr>
-    <tr><td><strong>1</strong></td><td>Pôr senha</td><td><code>npm run set-password</code> — sem ela, a porta é a única barreira</td></tr>
+    <tr><td><strong>1</strong></td><td>Pôr senha na instalação</td><td><code>npm run set-password</code> <em>antes</em> do <code>open</code> — pela rede não dá, nem depois de logado</td></tr>
     <tr><td><strong>2</strong></td><td>Manter a API em loopback</td><td>é o padrão; <code>BENCH_API_HOST=0.0.0.0</code> é opt-out consciente</td></tr>
     <tr><td><strong>3</strong></td><td>Restringir quem alcança</td><td><code>remote.sh open --ip &lt;seu-ip&gt;</code>, ou Tailscale (nenhuma porta aberta)</td></tr>
     <tr><td><strong>4</strong></td><td>Ligar o firewall</td><td><code>remote.sh open --firewall</code> — e confira também o painel da VPS</td></tr>
@@ -310,7 +310,7 @@ exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
   <span class="chip">Roadmap</span>
   <h2>Onde está e para onde vai.</h2>
   <p class="sub">O que está pronto foi medido; o que está por fazer está listado sem promessa de data.</p>
-  <div class="phase"><div class="tag">v1.4.2</div><div class="d"><strong>No ar</strong><span>73 modelos em 5 provedores, curadoria e disponibilidade separadas, filtros de resultado, Redo, aba de modos, construtor com quatro motores, tela de configuração, senha opcional e error boundary por workspace.</span></div></div>
+  <div class="phase"><div class="tag">v1.5.2</div><div class="d"><strong>No ar</strong><span>73 modelos em 5 provedores, curadoria e disponibilidade separadas, filtros de resultado, Redo, aba de modos, construtor com quatro motores, tela de configuração, senha opcional e error boundary por workspace.</span></div></div>
   <div class="phase"><div class="tag">Próximo</div><div class="d"><strong>Publicar do estúdio</strong><span>Mandar um site gerado para o git direto da tela, sem levar os arquivos no braço.</span></div></div>
   <div class="phase"><div class="tag">Próximo</div><div class="d"><strong>Agrupar rotas repetidas</strong><span>Seis famílias existem em mais de um provedor; mostrá-las como um modelo com rotas alternativas, em vez de linhas soltas no catálogo.</span></div></div>
   <div class="phase"><div class="tag">Estudo</div><div class="d"><strong>Vídeo local</strong><span>Rodar geração de vídeo na própria GPU, ao lado dos modelos de imagem que já rodam.</span></div></div>

@@ -160,13 +160,20 @@ Two flags worth knowing:
 ./scripts/remote.sh open --firewall         # also enable ufw (SSH allowed first)
 ```
 
-**You will be let in without a password, and that is the default.** The studio
-ships with no password because talking to your own machine should not need one —
-`open` says so on screen rather than blocking you. Once you are in from the other
-machine, set one and restart:
+**`open` offers to set a password before it opens anything.** Say yes and it
+hands over to `npm run set-password`; press Enter — or answer `n` — and the
+studio opens without one, which is the documented default. The offer is there
+because of the asymmetry below: this is the last moment where setting a password
+is one keystroke away.
+
+**The password cannot be set or changed from the other machine — not even after
+you log in.** `POST /api/config/password` answers 403 to anything that did not
+come from loopback, session or no session, and the Config screen says so instead
+of showing you a dead field. That rule is what stops whoever finds an open port
+from setting a password of their own and locking you out of your own studio. So:
 
 ```bash
-npm run set-password
+npm run set-password    # on the machine running the studio, over SSH or at the keyboard
 ```
 
 What `open` deliberately does **not** do: publish the API. Port 8787 stays on
@@ -180,8 +187,11 @@ in transit. For anything that stays up, read the next section.
 
 In rough order of what actually protects you:
 
-1. **Set a password.** `npm run set-password`. Without it, the port is the only
-   thing between the internet and your generated files.
+1. **Set a password, at install time.** On a machine that will be reachable, make
+   it part of the setup — `npm install`, then `npm run set-password`, then
+   `./scripts/remote.sh open`. Doing it in that order means the studio is never
+   open without one, and you never need the password screen you cannot use from
+   the network anyway.
 2. **Keep the API on loopback.** The default. `BENCH_API_HOST=0.0.0.0` is an
    opt-out you should have a reason for.
 3. **Narrow who can reach it.** `./scripts/remote.sh open --ip <your-ip>` beats

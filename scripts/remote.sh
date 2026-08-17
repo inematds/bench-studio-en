@@ -86,6 +86,36 @@ listening_on() {
   fi
 }
 
+# Offers, does not impose: pressing Enter opens the studio without a password,
+# which is the documented default. The offer exists because afterwards the only
+# way in is back to this machine.
+offer_password() {
+  [ -z "$(env_get BENCH_PASSWORD)" ] || return 0
+  if [ ! -t 0 ]; then
+    warn "no password set, and no terminal to ask on. Run: npm run set-password"
+    return 0
+  fi
+
+  echo
+  warn "No password: whoever reaches the address gets in — that is the default."
+  echo "   Now is the cheap moment to set one: from the network it cannot be done at all."
+  local answer
+  printf '   Set a password now? [Y/n] '
+  read -r answer
+  case "$answer" in
+    [Nn]*) warn "skipped — set it later with: npm run set-password"; return 0 ;;
+  esac
+
+  # Delegates to the real command instead of reimplementing it here: it asks
+  # twice, echoes nothing, and never lets the password through an argument or
+  # the shell history.
+  if (cd "$ROOT" && npm run --silent set-password); then
+    ok "password set — it is in effect for the studio's next start"
+  else
+    warn "not set — run it yourself when you want: npm run set-password"
+  fi
+}
+
 # ------------------------------------------------------------------ open
 
 cmd_open() {
@@ -97,6 +127,11 @@ cmd_open() {
     if [ -f "$ROOT/.env.example" ]; then cp "$ROOT/.env.example" "$ENV_FILE"; else : > "$ENV_FILE"; fi
     warn "no .env found — created one. Add your provider keys later, from the Config screen."
   fi
+
+  # The password can only be set from this machine — and this script IS on the
+  # machine. Asking here is the one moment the answer is cheap: once the port is
+  # open, the person on the other end cannot set it themselves, by design.
+  offer_password
 
   env_set BENCH_WEB_HOST 0.0.0.0
   # Explicit, not implied: the API is the part that writes files and spends

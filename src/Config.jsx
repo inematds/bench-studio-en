@@ -70,6 +70,7 @@ export default function Config({ onClose }) {
   if (!state && !error) return <aside className="sheet"><div className="sheet-body"><p>Loading configuration…</p></div></aside>;
 
   const readOnly = state && !state.writable;
+  const passwordSet = !!state?.fields?.find((f) => f.key === "BENCH_PASSWORD")?.present;
 
   return (
     <aside className="sheet config-sheet">
@@ -86,25 +87,42 @@ export default function Config({ onClose }) {
         {error && <p className="config-alert danger" role="alert">{error}</p>}
         {notice && <p className="config-alert" role="status">{notice}</p>}
 
-        {state?.lan_exposed && (
+        {/* Two different situations wear the same badge if you only look at
+            `lan_exposed`: published with a password is a choice, published
+            without one is an open door. Saying "no authentication" to someone
+            who did set a password teaches them to ignore the banner. */}
+        {state?.lan_exposed && !passwordSet && (
           <p className="config-alert danger" role="alert">
-            <strong>This studio is published on your local network and has no authentication.</strong>{" "}
-            Anyone who reaches this port can generate with your keys and read your history. Reach it over
-            Tailscale or a password-protected proxy instead of an open port.
+            <strong>This studio is published on the network and has no authentication.</strong>{" "}
+            Anyone who reaches this port can generate with your keys and read your history. On the machine
+            running the studio: <code>npm run set-password</code>. To close the port again:{" "}
+            <code>./scripts/remote.sh close</code>.
+          </p>
+        )}
+        {state?.lan_exposed && passwordSet && (
+          <p className="config-alert" role="status">
+            <strong>This studio is published on the network, behind a password.</strong>{" "}
+            The traffic is plain HTTP unless something in front of it terminates TLS. Close the port when
+            you are done: <code>./scripts/remote.sh close</code>.
           </p>
         )}
 
         {readOnly && (
-          <p className="config-alert danger" role="alert">
-            <strong>Read-only from here.</strong> Settings can only be changed from the machine running the
-            studio. This request came from the network.
+          <p className="config-alert" role="status">
+            <strong>Read-only from here.</strong> Settings change only from the machine running the studio —
+            that is what stops whoever reaches an open port from taking the studio over. This request came
+            from the network.
           </p>
         )}
 
-        <p className="config-note">
-          Reading order: what the shell exported wins, then <code>.env</code> in the project, then <code>~/.env</code>.
-          Saving writes <code>{state?.project_env_path}</code> with owner-only permissions.
-        </p>
+        {/* The absolute path names the user the studio runs as. On the machine
+            that is useful; to the network it is reconnaissance. */}
+        {!readOnly && (
+          <p className="config-note">
+            Reading order: what the shell exported wins, then <code>.env</code> in the project, then <code>~/.env</code>.
+            Saving writes <code>{state?.project_env_path}</code> with owner-only permissions.
+          </p>
+        )}
 
         <PasswordCard state={state} readOnly={readOnly} onChanged={load} />
 
@@ -132,14 +150,16 @@ export default function Config({ onClose }) {
           );
         })}
 
-        <div className="config-actions">
-          <button type="button" onClick={save} disabled={busy || readOnly}>
-            {busy ? "Saving…" : "Save to .env"}
-          </button>
-          <button type="button" className="ghost-btn" onClick={() => { setDrafts({}); setNotice(null); setError(null); }} disabled={busy}>
-            Discard changes
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="config-actions">
+            <button type="button" onClick={save} disabled={busy}>
+              {busy ? "Saving…" : "Save to .env"}
+            </button>
+            <button type="button" className="ghost-btn" onClick={() => { setDrafts({}); setNotice(null); setError(null); }} disabled={busy}>
+              Discard changes
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
@@ -195,25 +215,36 @@ function PasswordCard({ state, readOnly, onChanged }) {
         {msg && <p className="config-alert" role="status">{msg}</p>}
         {err && <p className="config-alert danger" role="alert">{err}</p>}
 
-        <div className="config-field-edit">
-          <input
-            type="password"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={active ? "type a new password to replace it" : "at least 4 characters"}
-            disabled={readOnly || busy}
-            autoComplete="new-password"
-            aria-label="Studio password"
-          />
-          <button type="button" className="ghost-btn small" onClick={() => send(value)} disabled={readOnly || busy || value.length < 4}>
-            {active ? "Replace" : "Set password"}
-          </button>
-          {active && (
-            <button type="button" className="ghost-btn small" onClick={() => send("")} disabled={readOnly || busy}>
-              Remove
+        {/* A disabled box is a dead end: it says no, and not what to do instead.
+            From the network the honest answer is the command that works. */}
+        {readOnly ? (
+          <p className="config-alert" role="status">
+            The password changes only from the machine running the studio — a session is not enough, on
+            purpose. There, over SSH or at the keyboard:{" "}
+            <code>npm run set-password</code>{active ? " (or `-- --remove` to clear it)" : ""}. It takes
+            effect immediately, without a restart.
+          </p>
+        ) : (
+          <div className="config-field-edit">
+            <input
+              type="password"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder={active ? "type a new password to replace it" : "at least 4 characters"}
+              disabled={busy}
+              autoComplete="new-password"
+              aria-label="Studio password"
+            />
+            <button type="button" className="ghost-btn small" onClick={() => send(value)} disabled={busy || value.length < 4}>
+              {active ? "Replace" : "Set password"}
             </button>
-          )}
-        </div>
+            {active && (
+              <button type="button" className="ghost-btn small" onClick={() => send("")} disabled={busy}>
+                Remove
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -250,7 +281,9 @@ function ConfigField({ field, draft, readOnly, onDraft, onTest, test, live }) {
         ) : (
           <span className="config-badge off">not set</span>
         )}
-        {onTest && (
+        {/* Testing calls the provider. That is an action, not a reading, so it
+            belongs to whoever is at the machine. */}
+        {onTest && !readOnly && (
           <button type="button" className="ghost-btn small" onClick={onTest} disabled={!field.present && !field.using_fallback}>
             {test?.testing ? "Testing…" : "Test"}
           </button>
@@ -276,20 +309,27 @@ function ConfigField({ field, draft, readOnly, onDraft, onTest, test, live }) {
         <p className="config-alert danger">Currently unavailable: {live.reason}{live.hint ? ` — ${live.hint}` : ""}</p>
       )}
 
-      <div className="config-field-edit">
-        <input
-          type={field.secret ? "password" : "text"}
-          value={changed ? draft : (field.secret ? "" : (field.value ?? ""))}
-          placeholder={field.secret ? (field.present ? "leave empty to keep the current key" : "paste the key") : "not set"}
-          onChange={(e) => onDraft(e.target.value)}
-          disabled={readOnly}
-          autoComplete="off"
-          spellCheck={false}
-          aria-label={field.label}
-        />
-        {field.help && <a href={field.help} target="_blank" rel="noreferrer">where to get it</a>}
-        {changed && <span className="config-badge on">will be saved</span>}
-      </div>
+      {readOnly ? (
+        field.help && (
+          <p className="config-note">
+            Set it on the machine running the studio — <a href={field.help} target="_blank" rel="noreferrer">where to get it</a>.
+          </p>
+        )
+      ) : (
+        <div className="config-field-edit">
+          <input
+            type={field.secret ? "password" : "text"}
+            value={changed ? draft : (field.secret ? "" : (field.value ?? ""))}
+            placeholder={field.secret ? (field.present ? "leave empty to keep the current key" : "paste the key") : "not set"}
+            onChange={(e) => onDraft(e.target.value)}
+            autoComplete="off"
+            spellCheck={false}
+            aria-label={field.label}
+          />
+          {field.help && <a href={field.help} target="_blank" rel="noreferrer">where to get it</a>}
+          {changed && <span className="config-badge on">will be saved</span>}
+        </div>
+      )}
     </div>
   );
 }
