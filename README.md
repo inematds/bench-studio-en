@@ -32,6 +32,10 @@ units instead of disappearing into mystery credits.
 > history, uploads, private database, personal paths, credentials, or local
 > build artifacts. Your archive begins empty.
 
+## 📖 Guia de uso
+
+Guia completo (landing + passo a passo): **https://inematds.github.io/bench-studio-en/guia/**
+
 ## Why this exists
 
 Most creative AI products combine five useful pieces—model access, prompt
