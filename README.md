@@ -467,6 +467,7 @@ bench-studio-public/
 | Document | What it covers |
 |---|---|
 | [`docs/COMO-FUNCIONA.md`](docs/COMO-FUNCIONA.md) | How the system works inside: the provider contract, the traps measured per provider, cost classes, availability vs curation, the refine chain, the builder, and the security model |
+| [`docs/ACESSO-REMOTO.md`](docs/ACESSO-REMOTO.md) | Remote access and VPS setup: why the password comes before the port, what `remote.sh` touches, hardening order, and what is still open |
 | [`docs/HISTORICO.md`](docs/HISTORICO.md) | Everything built on top of the original kit, and every bug found — separating the ones that were already there from the ones introduced along the way |
 | [`CHANGELOG.md`](CHANGELOG.md) | Version by version |
 | [`.env.example`](.env.example) | All 19 settings, what each unlocks, and where to get the key |
