@@ -34,9 +34,9 @@ units instead of disappearing into mystery credits.
 > history, uploads, private database, personal paths, credentials, or local
 > build artifacts. Your archive begins empty.
 
-## 📖 Guia de uso
+## 📖 User guide
 
-Guia completo (landing + passo a passo): **https://inematds.github.io/bench-studio-en/guia/**
+Complete guide (landing page + walkthrough): **https://inematds.github.io/bench-studio-en/guia/en/**
 
 ## Why this exists
 

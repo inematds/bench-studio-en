@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Bench Studio — 73 image and video models, one contract</title>
+<meta content="Local creative studio: 73 image and video routes across 5 providers, with visible costs, files you own, and MCP access. The keys stay on your machine." name="description"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#0c0c10; --bg2:#14141b; --card:#16161e; --line:#272730;
+    --txt:#e9e9ee; --mut:#9a9aa6; --amb:#E2A23B; --amb2:#f0c070; --sky:#38bdf8; --pro:#cbd5e1;
+    color-scheme:dark;
+  }
+  body.light{
+    --bg:#f6f7f9; --bg2:#eceef2; --card:#ffffff; --line:#e1e3ea;
+    --txt:#1a1a22; --mut:#5b5b68; --amb:#b9791d; --amb2:#a16207; --sky:#0369a1; --pro:#b45309;
+    color-scheme:light;
+  }
+  body.light .hero .glow{opacity:.5}
+  body.light pre{background:#0e0e14;color:#d6d6e0}
+  body.light pre .c{color:#8a8a98}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Sora,sans-serif;line-height:1.15;margin:0}
+  a{color:var(--amb);text-decoration:none}
+  code,pre{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+  .mut{color:var(--mut)} .amb{color:var(--amb)}
+  .chip{display:inline-block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amb);font-weight:600;font-family:Sora}
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(12,12,16,.78);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:22px;height:60px}
+  nav .brand{display:flex;align-items:center;gap:8px;font-family:Sora;font-weight:800;letter-spacing:-.02em;color:var(--amb)}
+  nav .brand .emoji{font-size:1.25rem}
+  nav .sep{color:var(--mut);opacity:.45}
+  nav .inema{color:var(--sky);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .inema:hover{filter:brightness(1.15)}
+  nav .pro{color:var(--pro);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .pro:hover{filter:brightness(1.15)}
+  nav .clubpro{display:inline-flex;align-items:center;gap:6px}
+  nav .links{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:.92rem}
+  nav .links a.sec{color:var(--mut)} nav .links a.sec:hover{color:var(--txt)}
+  .tgl{background:var(--bg2);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .tgl:hover{border-color:var(--amb)}
+  .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  @media(max-width:760px){nav .links a.sec{display:none}}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(226,162,59,.22),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
+  .hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.025em}
+  .hero p.lead{font-size:1.18rem;color:var(--mut);margin:1.1em 0 1.6em;max-width:34ch}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000}
+  .hero figure img{width:100%;display:block}
+  @media(max-width:780px){.hero .wrap{grid-template-columns:1fr;padding:48px 22px}}
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+  section .sub{color:var(--mut);margin:.6em 0 2em;max-width:62ch}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:1.05rem;margin-bottom:.4em}
+  .card p{color:var(--mut);font-size:.92rem;margin:0}
+  .num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:rgba(226,162,59,.14);color:var(--amb);font-family:Sora;font-weight:800;font-size:.9rem;margin-bottom:.7em}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .flow span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:.45em .9em;font-size:.85rem;font-family:Sora;font-weight:600}
+  .flow .arr{color:var(--amb);border:none;background:none;padding:0 .1em}
+  pre{background:#0a0a0e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:.86rem;line-height:1.6;color:#d6d6e0}
+  pre .c{color:#6f6f7c} pre .k{color:var(--amb2)} pre .s{color:#9ece6a}
+  .step{display:grid;grid-template-columns:46px 1fr;gap:16px;margin-bottom:26px}
+  .step .b{width:46px;height:46px;border-radius:12px;background:var(--amb);color:#1a1206;font-family:Sora;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+  .step h3{font-size:1.12rem;margin-bottom:.3em}
+  .step p{color:var(--mut);margin:.2em 0 .7em}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.ex{grid-template-columns:1fr}}
+  .ex figure{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .ex figure img{width:100%;display:block}
+  .ex figcaption{padding:12px 14px;font-size:.88rem;color:var(--mut);background:var(--card)}
+  .phase{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .phase:last-child{border:none}
+  .phase .tag{flex:0 0 92px;font-family:Sora;font-weight:800;color:var(--amb)}
+  .phase .d strong{display:block;margin-bottom:.2em}
+  .phase .d span{color:var(--mut);font-size:.92rem}
+  footer{padding:46px 0;text-align:center;color:var(--mut);font-size:.9rem}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px}
+  table.t{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}
+  table.t th,table.t td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}
+  table.t th{font-family:Sora;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  table.t td strong{color:var(--txt)}
+  .tw{overflow-x:auto}
+</style>
+<link href="https://inematds.github.io/bench-studio-en/guia/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/bench-studio-en/guia/en/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/bench-studio-en/guia/es/" hreflang="es" rel="alternate"/></head>
+<body><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="./" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../es/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<nav><div class="wrap">
+<a class="brand" href="#top"><span class="emoji">🎛️</span> Bench Studio</a>
+<span class="sep">|</span>
+<span class="clubpro">
+<a class="inema" href="https://inema.club" rel="noopener" target="_blank">INEMA.CLUB</a>
+<span class="sep">-</span>
+<a class="pro" href="https://inema.pro" rel="noopener" target="_blank">PRO</a>
+</span>
+<div class="links">
+<a class="sec" href="#oque">What it is</a>
+<a class="sec" href="#fluxo">How it works</a>
+<a class="sec" href="#pre">Prerequisites</a>
+<a class="sec" href="#guia">User guide</a>
+<a class="sec" href="#dicas">Tips</a>
+<a class="sec" href="#roadmap">Roadmap</a>
+<button aria-label="Switch theme" class="tgl" id="themeToggle" title="Switch theme">🌙</button>
+<a class="btn" href="https://github.com/inematds/bench-studio-en" rel="noopener" target="_blank">GitHub</a>
+</div>
+</div></nav>
+<header class="hero" id="top">
+<div class="glow"></div>
+<div class="wrap">
+<div>
+<span class="chip">Local creative studio · 5 providers</span>
+<h1>73 image and video models, <span class="amb">one contract only</span>.</h1>
+<p class="lead">The keys stay on your machine, the prompt is editable before you spend anything, the files are yours, and every cent is shown.</p>
+<div class="cta">
+<a class="btn" href="#guia">Start the guide</a>
+<a class="btn ghost" href="https://github.com/inematds/bench-studio-en" rel="noopener" target="_blank">View on GitHub</a>
+</div>
+</div>
+<figure><img alt="Workstation in a dark room, with a monitor displaying a grid of generated images in amber-lit panels" src="../assets/hero.png"/></figure>
+</div>
+</header>
+<section id="oque"><div class="wrap">
+<span class="chip">What it is</span>
+<h2>An aggregator that runs on your machine.</h2>
+<p class="sub">It stores your keys, knows the format each model expects, rewrites the prompt in that model’s style, submits it, tracks it, downloads the file, and records the cost. None of this is difficult—and that’s the point: it’s exactly the layer wrapper services charge a subscription for.</p>
+<div class="grid g3">
+<div class="card"><h3>🔌 Five providers, one contract</h3><p>fal, Kling, Agnes, kie, and a local server on your GPU all run behind the same adapter. None is required: anything missing shows as unavailable with the reason, and the studio starts up anyway.</p></div>
+<div class="card"><h3>💵 Written cost, not estimated</h3><p>Three units that can’t be added together—dollars, plan credits, and zero. Actual usage is measured by the account balance change, and anything that can’t be known before running is marked as unknown instead of guessed.</p></div>
+<div class="card"><h3>🧠 No LLM is in charge here</h3><p>Routing, catalog, pricing, availability, and retries are deterministic code. The model is a tool hired for a specific task, never a manager—that’s why costs are predictable.</p></div>
+</div>
+</div></section>
+<section id="fluxo"><div class="wrap">
+<span class="chip">How it works</span>
+<h2>From idea to receipt.</h2>
+<p class="sub">The same workflow applies whether you use the screen or connect an agent through MCP.</p>
+<div class="flow">
+<span>Your idea</span><span class="arr">→</span>
+<span>Model-based refinement</span><span class="arr">→</span>
+<span>Budget</span><span class="arr">→</span>
+<span>Provider submission</span><span class="arr">→</span>
+<span>Monitoring</span><span class="arr">→</span>
+<span>Local copy</span><span class="arr">→</span>
+<span>Cost in the ledger</span>
+</div>
+<div class="grid g3" style="margin-top:28px">
+<div class="card"><span class="num">1</span><h3>Visible refinement</h3><p>The rewrite is displayed and editable <em>before</em> before you spend. It’s the cheapest place to catch a misunderstanding — after you submit, fixing it costs another round.</p></div>
+<div class="card"><span class="num">2</span><h3>Three-link chain</h3><p>Gemini, then OpenRouter, then local Codex. With a single refiner, its quota takes down the entire studio—that’s what happened in production, which is why it became a chain.</p></div>
+<div class="card"><span class="num">3</span><h3>Your file, right away</h3><p>All media is intentionally mirrored locally: provider URLs expire (24 hours on Kling, temporary on Agnes). What you generated won’t disappear when the link expires.</p></div>
+</div>
+<h2 style="margin-top:44px;font-size:1.3rem">The five providers</h2>
+<div class="tw"><table class="t">
+<tr><th>Provider</th><th>Models</th><th>How it charges</th><th>What you need</th></tr>
+<tr><td><strong>fal.ai</strong></td><td>37</td><td>dollars, live pricing</td><td><code>FAL_KEY</code></td></tr>
+<tr><td><strong>Kling</strong></td><td>26</td><td>plan credits</td><td>Official CLI with OAuth login</td></tr>
+<tr><td><strong>Agnes AI</strong></td><td>4</td><td>zero</td><td><code>AGNES_API_KEY</code></td></tr>
+<tr><td><strong>kie.ai</strong></td><td>4</td><td>credits</td><td><code>KIE_API_KEY</code></td></tr>
+<tr><td><strong>inemaimg</strong></td><td>2</td><td>zero (your GPU)</td><td>local server running</td></tr>
+</table></div>
+</div></section>
+<section id="pre"><div class="wrap">
+<span class="chip">Prerequisites</span>
+<h2>The list is short.</h2>
+<p class="sub">Node is the only real requirement. Every provider is optional and degrades gracefully on its own—a missing key makes those models unavailable, with the reason and how to fix it, and the studio keeps opening.</p>
+<div class="grid g3">
+<div class="card"><h3>Node 22.5+</h3><p>Node 24 is recommended because the studio uses <code>node:sqlite</code> native — no external database, no service to start.</p><pre><span class="k">node -v</span>  <span class="c"># v22.5 or later</span></pre></div>
+<div class="card"><h3>At least one provider</h3><p>To generate anything. Start with the free options if you want to experiment without spending.</p><pre><span class="c"># free, no card required</span>
+<span class="s">apihub.agnes-ai.com</span>  <span class="c"># Agnes</span></pre></div>
+<div class="card"><h3>Optional extras worth having</h3><p>A refiner (Google AI Studio or OpenRouter); Chrome to print PDFs; Codex or Claude Code for the agent-based website builder.</p><pre><span class="c"># without a refiner, the prompt goes through as-is</span>
+<span class="c"># — and Agnes rejects non-English</span></pre></div>
+</div>
+</div></section>
+<section id="guia"><div class="wrap">
+<span class="chip">User guide · step by step</span>
+<h2>From clone to first result.</h2>
+<p class="sub">Real commands, in order. From scratch to the first generated file takes a few minutes—most of that is the <code>npm install</code>.</p>
+<div class="step"><div class="b">1</div><div>
+<h3>Clone and install</h3>
+<p>No build step: the studio runs directly from the code.</p>
+<pre><span class="k">git clone https://github.com/inematds/bench-studio-en.git</span>
+<span class="k">cd bench-studio-en</span>
+<span class="k">npm install</span></pre>
+</div></div>
+<div class="step"><div class="b">2</div><div>
+<h3>Create the configuration file</h3>
+<p>O <code>.env.example</code> documents the 19 variables: what each one unlocks, how it’s billed, and where to create the key. Fill in only the ones you have.</p>
+<pre><span class="k">cp .env.example .env</span>  <span class="c"># .env is ignored by git</span></pre>
+</div></div>
+<div class="step"><div class="b">3</div><div>
+<h3>Start the studio</h3>
+<p>Starts the API and interface together. The interface is served from <code>localhost:5200</code> and the API at <code>localhost:8787</code>.</p>
+<pre><span class="k">npm run dev</span>  <span class="c"># opens at http://localhost:5200</span></pre>
+</div></div>
+<div class="step"><div class="b">4</div><div>
+<h3>Check the keys on screen</h3>
+<p>Button <strong>Config</strong>, at the top right. It shows each variable: whether it's present, where it came from, and the last 4 characters — <strong>never the value</strong>. You can test each provider there and save the <code>.env</code> without leaving the screen. For security, it only accepts saves from someone on the machine itself.</p>
+<pre><span class="c"># reading order, strongest to weakest</span>
+exportado no shell  &gt;  .env do projeto  &gt;  ~/.env</pre>
+</div></div>
+<div class="step"><div class="b">5</div><div>
+<h3>Curate the catalog once</h3>
+<p>73 models is a lot to scroll through. In <strong>Model catalog</strong>, filter by provider, and turn off what you won't use. It's a preference, not a block: the model disappears from the selectors, but a <em>Redo</em> from an old result still works.</p>
+<pre><span class="c"># restore factory settings: delete the file</span>
+<span class="k">rm data/catalog-prefs.json</span></pre>
+</div></div>
+<div class="step"><div class="b">6</div><div>
+<h3>Generate without spending</h3>
+<p>The button <strong>No cost</strong> enables exactly the zero-cost models. Use them to find a prompt that works; then spend on the model that renders best.</p>
+<pre><span class="c"># 6 zero-cost models: Agnes (4) + local server (2)</span></pre>
+</div></div>
+<div class="step"><div class="b">7</div><div>
+<h3>Optional: add a password</h3>
+<p>Comes <strong>without a password</strong>, intentionally — talking to your own machine shouldn't require one. If you expose it on the network, set one: it's stored as a scrypt hash, and changing the password kicks out anyone who's already signed in.</p>
+<pre><span class="k">npm run set-password</span>            <span class="c"># prompts without echoing</span>
+<span class="k">npm run set-password -- --remove</span>  <span class="c"># removes the password</span></pre>
+</div></div>
+<div class="step"><div class="b">8</div><div>
+<h3>Access from another machine (optional)</h3>
+<p>By default, only the machine itself can access the studio. Opening it to the outside takes three things—the interface listening on the network, the firewall rule, and remembering to undo both. One command does it all, and the <code>close</code> undoes exactly what the <code>open</code> did.</p>
+<pre><span class="k">./scripts/remote.sh open</span>     <span class="c"># publishes to the machine's IP</span>
+<span class="k">./scripts/remote.sh status</span>   <span class="c"># open or closed, and with what protection</span>
+<span class="k">./scripts/remote.sh close</span>    <span class="c"># switches back to local-only</span></pre>
+<p><strong>O <code>open</code> prompts you for the password before opening.</strong> Say yes and it calls the <code>set-password</code>; reply <code>n</code> and the studio opens without a password, which is the default. The offer exists for a hard reason: <strong>the password is set only on the machine itself</strong> — over the network it’s 403, even when already logged in. This rule prevents someone who finds the open port from setting their own password and locking you out. On a VPS, the right order is <code>npm install</code> → <code>npm run set-password</code> → <code>remote.sh open</code>. The API port (8787) <em>never</em> is published.</p>
+<pre><span class="k">./scripts/remote.sh open --ip 203.0.113.7</span>  <span class="c"># only this address</span>
+<span class="k">./scripts/remote.sh open --firewall</span>        <span class="c"># enables ufw (SSH allowed first)</span></pre>
+</div></div>
+<div class="step"><div class="b">9</div><div>
+<h3>Connect an agent (optional)</h3>
+<p>The tab <strong>Connect</strong> provides the ready-to-use MCP configuration for Claude, Codex, and Cursor. The agent sees the same lineup of models you do — not a parallel list.</p>
+<pre><span class="k">npm run mcp</span>  <span class="c"># MCP server over stdio</span></pre>
+</div></div>
+<div class="step"><div class="b">10</div><div>
+<h3>Check that everything is up</h3>
+<p>The contracts run in seconds. The end-to-end test uses a real browser and requires Playwright’s Chromium once.</p>
+<pre><span class="k">npm run test:contracts</span>   <span class="c"># 30 tests</span>
+<span class="k">npx playwright install chromium &amp;&amp; npm run test:e2e</span></pre>
+</div></div>
+</div></section>
+<section id="dicas"><div class="wrap">
+<span class="chip">Tips</span>
+<h2>What saves time and money.</h2>
+<p class="sub">Things learned by running the studio for real, not by reading provider documentation.</p>
+<div class="grid g2">
+<div class="card"><h3>📖 Read the refined prompt</h3><p>You can edit it before submitting. Fixing it there is free; fixing it afterward costs another generation.</p></div>
+<div class="card"><h3>🔗 Keep two refiners</h3><p>With just one, a quota getting exhausted takes everything down—and the symptom shows up far from the cause: Agnes starts rejecting requests because of Portuguese.</p></div>
+<div class="card"><h3>↩️ Redo instead of retyping</h3><p>Every result includes the model, controls, refined prompt, original idea, and attachments. Redo restores everything so you can change one thing without paying for another rewrite.</p></div>
+<div class="card"><h3>🔀 The same model on two routes</h3><p>Veo, Nano Banana, gpt-image, and gemini-image appear through more than one provider, with different accounts: dollars on fal, plan credits on Kling. The provider appears next to the name — it’s a real choice, not a duplicate.</p></div>
+<div class="card"><h3>⚠️ Kling never retries on its own</h3><p>Every Kling job is charged, including failed ones. Nothing is resubmitted unless you tell it to.</p></div>
+<div class="card"><h3>💾 Watch disk space, not CPU</h3><p>Each file is mirrored locally: ~1.3 MB per image, 0.7–5 MB per video. The idle studio uses 274 MB of RAM and almost no CPU.</p></div>
+<div class="card"><h3>🏗️ Building a site? Prefer an agent</h3><p>Codex and Claude Code write the files and fix their own errors. Pure model engines (local Qwen, OpenRouter) don't need a sandbox and cost nothing, but require more supervision.</p></div>
+<div class="card"><h3>🎨 Point the builder to something of your own</h3><p>A website or PDF you created calibrates the finish—tokens, fonts, palette, corner radii. Branding, text, structure, and files are never copied.</p></div>
+</div>
+</div></section>
+<section id="seguranca"><div class="wrap">
+<span class="chip">Security</span>
+<h2>What protects what.</h2>
+<p class="sub">The default stance is as locked down as possible without getting in the way: everything on loopback, no password, and nothing leaves your machine except calls to the providers you configured.</p>
+<div class="grid g3">
+<div class="card"><h3>🔑 Keys</h3><p>Read on the server, never returned to the interface. The screen shows presence, source, and the last 4 characters. The <code>.env</code> is saved with owner-only permissions.</p></div>
+<div class="card"><h3>🚧 Recording only on the machine</h3><p>Even with a valid session, changing a key or password over the network is rejected. The check survives the development proxy: a forwarded origin is only accepted when the socket is already local.</p></div>
+<div class="card"><h3>🔒 Optional password</h3><p>scrypt hash, cookie <code>httpOnly</code>, 12-hour session. It protects the API and generated files. Hiding the interface shell too is the job of a reverse proxy, not this process — and that's stated in the documentation, not hidden.</p></div>
+</div>
+<h2 style="margin-top:44px;font-size:1.3rem">Making it safely accessible</h2>
+<p class="sub">In order of what offers the most protection. The <code>open</code> is a testing posture: traffic over plain HTTP, readable along the way.</p>
+<div class="tw"><table class="t">
+<tr><th>#</th><th>What to do</th><th>How</th></tr>
+<tr><td><strong>1</strong></td><td>Password-protect the installation</td><td><code>npm run set-password</code> <em>before</em> of the <code>open</code> — over the network, you can’t, even after logging in</td></tr>
+<tr><td><strong>2</strong></td><td>Keep the API on loopback</td><td>is the default; <code>BENCH_API_HOST=0.0.0.0</code> is a conscious opt-out</td></tr>
+<tr><td><strong>3</strong></td><td>Restrict who can access it</td><td><code>remote.sh open --ip &lt;seu-ip&gt;</code>, or Tailscale (no open ports)</td></tr>
+<tr><td><strong>4</strong></td><td>Enable the firewall</td><td><code>remote.sh open --firewall</code> — and check the VPS dashboard too</td></tr>
+<tr><td><strong>5</strong></td><td>HTTPS in front</td><td>nginx/Caddy + Let's Encrypt serving the <code>dist/</code> and proxy for <code>127.0.0.1:8787</code>, with <code>X-Forwarded-For</code></td></tr>
+<tr><td><strong>6</strong></td><td>Your own user, not root</td><td>systemd unit, <code>.env</code> in <code>600</code></td></tr>
+<tr><td><strong>7</strong></td><td>Close when finished</td><td><code>./scripts/remote.sh close</code> — forgotten exposure is what costs credits</td></tr>
+</table></div>
+</div></section>
+<section id="roadmap"><div class="wrap">
+<span class="chip">Roadmap</span>
+<h2>Where it is and where it goes.</h2>
+<p class="sub">What’s ready has been measured; what remains to be done is listed without a promised date.</p>
+<div class="phase"><div class="tag">v1.5.2</div><div class="d"><strong>Available online</strong><span>73 models across 5 providers, separate curation and availability, result filters, Redo, a modes tab, a builder with four engines, a settings screen, optional password, and an error boundary per workspace.</span></div></div>
+<div class="phase"><div class="tag">Next</div><div class="d"><strong>Publish from the studio</strong><span>Send a generated site straight to git from the screen, without manually carrying the files over.</span></div></div>
+<div class="phase"><div class="tag">Next</div><div class="d"><strong>Group repeated routes</strong><span>Six model families are available from more than one provider; show them as one model with alternative routes instead of separate catalog entries.</span></div></div>
+<div class="phase"><div class="tag">Study</div><div class="d"><strong>Local video</strong><span>Run video generation on your own GPU, alongside the image models that already run there.</span></div></div>
+<div class="phase"><div class="tag">Study</div><div class="d"><strong>Chain video plans</strong><span>Use the last frame of one take as the reference for the next to maintain consistency across cuts.</span></div></div>
+</div></section>
+<footer>
+<div class="wrap">
+<div class="pill">Node 22.5+</div><div class="pill">Express</div><div class="pill">React + Vite</div><div class="pill">Native SQLite</div><div class="pill">MCP</div>
+<p style="margin-top:18px">Bench Studio · local creative studio, with the keys on your machine ·
+      <a href="https://github.com/inematds/bench-studio-en">inematds/bench-studio-en</a> ·
+      <a href="https://inema.club">INEMA.CLUB</a></p>
+</div>
+</footer>
+<script>
+  (function(){
+    var KEY='bench-studio-theme';
+    var b=document.body, t=document.getElementById('themeToggle');
+    if(localStorage.getItem(KEY)==='light'){ b.classList.add('light'); t.textContent='☀️'; }
+    t.addEventListener('click',function(){
+      var light=b.classList.toggle('light');
+      t.textContent=light?'☀️':'🌙';
+      localStorage.setItem(KEY, light?'light':'dark');
+    });
+  })();
+</script>
+</body>
+</html>
